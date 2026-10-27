@@ -3,7 +3,7 @@ import { render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import BrowserFrame from '../../../components/BrowserFrame.astro';
 import { projectsFor, slugOf } from '../../../lib/content';
-import { coverFor, canFrame } from '../../../lib/projects';
+import { coverFor, tabletFor, canFrame } from '../../../lib/projects';
 import { site } from '../../../lib/config';
 import { languages, t, href } from '../../../lib/i18n';
 
@@ -18,7 +18,7 @@ const i = all.findIndex((p) => slugOf(p.id) === slug);
 const p = all[i], next = all[(i + 1) % all.length];
 const { Content, headings } = await render(p);
 const d = p.data;
-const cover = coverFor(p);
+const cover = coverFor(p), tablet = tabletFor(p);
 // Embed whenever the real domain is allowed to frame the site. In dev the page runs on localhost, which the
 // other site may not allow; then a note says so instead of leaving an unexplained "refused to connect".
 const interactive = !!d.live && d.preview && (await canFrame(d.live, site.url));
@@ -49,7 +49,7 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
     </header>
 
     {/* The big window only for a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
-    {(cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
+    {(cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} tablet={tablet} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
 
     <div class="case-body">
       <aside class="facts">

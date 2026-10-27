@@ -22,7 +22,8 @@ const host = (() => { try { return new URL(data.url).host; } catch { return data
   .host { font-family: var(--font-mono); font-weight: 400; text-transform: none; letter-spacing: .04em; font-size: 12px; }
   .disc { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); flex: none; transition: transform .5s var(--ease); }
   :global(.photo-card) { transition: background .4s var(--ease), color .4s var(--ease); }
-  :global(.photo-card:hover), :global(.photo-card:focus-within) { background: var(--fg); color: var(--bg); }
-  :global(.photo-card:hover) .disc, :global(.photo-card:focus-within) .disc { background: var(--bg); color: var(--fg); transform: rotate(45deg); }
-  :global(.photo-card:hover) .muted { color: inherit; opacity: .7; }
+  /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
+  @media (hover: hover) { :global(.photo-card:hover), :global(.photo-card:focus-within) { background: var(--fg); color: var(--bg); } }
+  @media (hover: hover) { :global(.photo-card:hover) .disc, :global(.photo-card:focus-within) .disc { background: var(--bg); color: var(--fg); transform: rotate(45deg); } }
+  @media (hover: hover) { :global(.photo-card:hover) .muted { color: inherit; opacity: .7; } }
 </style>

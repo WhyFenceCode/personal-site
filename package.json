@@ -11,7 +11,6 @@
     "check": "astro check",
     "check:secrets": "node scripts/check-secrets.mjs",
     "shots": "node scripts/screenshots.mjs",
-    "shots:self": "node scripts/shot-self.mjs",
     "strava:import": "node scripts/strava-import.mjs"
   },
   "dependencies": {

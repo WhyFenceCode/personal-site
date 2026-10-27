@@ -51,9 +51,10 @@ const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []),
   .rc-title { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: clamp(36px, 6vw, 88px); line-height: .9; letter-spacing: -.02em; max-width: 14ch; }
   .rc-body { grid-column: 1; max-width: 46ch; }
   .rc-go { grid-column: 2; grid-row: 2 / 4; align-self: center; width: clamp(64px, 8vw, 96px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); transition: transform .5s var(--ease); }
-  .resume-cta:hover, .resume-cta:focus-visible { background: var(--fg); color: var(--bg); }
-  .resume-cta:hover .muted { color: inherit; opacity: .7; }
-  .resume-cta:hover .rc-go { background: var(--bg); color: var(--fg); transform: rotate(-45deg); }
+  /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
+  @media (hover: hover) { .resume-cta:hover, .resume-cta:focus-visible { background: var(--fg); color: var(--bg); } }
+  @media (hover: hover) { .resume-cta:hover .muted { color: inherit; opacity: .7; } }
+  @media (hover: hover) { .resume-cta:hover .rc-go { background: var(--bg); color: var(--fg); transform: rotate(-45deg); } }
   .foot-cols { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
   .foot-cols ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
   .foot-cols a { text-decoration: none; }

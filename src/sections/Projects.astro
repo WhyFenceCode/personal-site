@@ -27,10 +27,11 @@ const list = all.slice(0, limit);
 <style>
   .index { border-top: 1.5px solid var(--fg); }
   .index a { display: grid; grid-template-columns: 56px minmax(0, 1fr) minmax(0, 220px) 64px; grid-template-areas: "n t k y" ". s s s"; gap: 6px 16px; align-items: baseline; padding: 22px 0 18px; border-bottom: 1px solid var(--line); text-decoration: none; transition: padding .5s var(--ease); }
-  .index a:hover, .index a:focus-visible { padding-left: 20px; }
+  /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
+  @media (hover: hover) { .index a:hover, .index a:focus-visible { padding-left: 20px; } }
   .n { grid-area: n; font-size: 18px; } .t { grid-area: t; } .k { grid-area: k; } .y { grid-area: y; text-align: right; font-size: 20px; }
   .s { grid-area: s; max-width: 60ch; font-size: 15px; max-height: 0; overflow: hidden; opacity: 0; transition: max-height .5s var(--ease), opacity .4s; }
-  .index a:hover .s, .index a:focus-visible .s { max-height: 4em; opacity: 1; }
+  @media (hover: hover) { .index a:hover .s, .index a:focus-visible .s { max-height: 4em; opacity: 1; } }
   .t { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: -.02em; font-size: clamp(36px, 6vw, 92px); line-height: .88; }
   @media (max-width: 640px) {
     .index a { grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-areas: "n t y" ". s s"; }

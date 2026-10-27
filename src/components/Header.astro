@@ -62,8 +62,9 @@ const nav = [
   .menu ul { list-style: none; margin: 0; padding: 0; align-self: center; display: grid; }
   .menu li a { display: flex; align-items: baseline; gap: 14px; text-decoration: none; font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; text-transform: uppercase; letter-spacing: -.02em; line-height: .92; font-size: clamp(52px, 13vw, 150px); transition: opacity .3s, transform .5s var(--ease); }
   .menu li a sup { font-family: var(--font-mono); font-size: 13px; letter-spacing: .1em; }
-  .menu ul:hover a { opacity: .3; }
-  .menu ul a:hover, .menu ul a:focus-visible { opacity: 1; transform: translateX(12px); }
+  /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
+  @media (hover: hover) { .menu ul:hover a { opacity: .3; } }
+  @media (hover: hover) { .menu ul a:hover, .menu ul a:focus-visible { opacity: 1; transform: translateX(12px); } }
   .menu li a[aria-current="page"]::after { content: ""; width: .14em; height: .14em; background: currentColor; align-self: center; }
   .menu-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 </style>

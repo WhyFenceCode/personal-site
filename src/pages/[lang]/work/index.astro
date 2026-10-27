@@ -70,8 +70,9 @@ const years = projects.map((p) => p.data.year);
   .thumb canvas, .thumb :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; transition: opacity .7s var(--ease), transform 1.2s var(--ease); }
   .dith { image-rendering: pixelated; }
   .smooth { opacity: 0; }
-  .card:hover .smooth, .card:focus-visible .smooth { opacity: 1; }
-  .card:hover canvas, .card:hover :global(img), .card:focus-visible canvas { transform: scale(1.03); }
+  /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
+  @media (hover: hover) { .card:hover .smooth, .card:focus-visible .smooth { opacity: 1; } }
+  @media (hover: hover) { .card:hover canvas, .card:hover :global(img), .card:focus-visible canvas { transform: scale(1.03); } }
   .card-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .card-title { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: 34px; line-height: .9; }
   .card p { margin: 0; color: var(--muted); max-width: 46ch; }

@@ -72,10 +72,11 @@
   .cbtn .cbtn-label span { grid-area: 1 / 1; display: flex; align-items: center; gap: 10px; transition: transform .5s var(--ease); }
   .cbtn .cbtn-label span::before { content: ""; width: 7px; height: 7px; background: currentColor; }
   .cbtn .cbtn-label span + span { transform: translateY(110%); }
-  .cbtn:hover .cbtn-label span:first-child, .cbtn:focus-visible .cbtn-label span:first-child { transform: translateY(-110%); }
-  .cbtn:hover .cbtn-label span + span, .cbtn:focus-visible .cbtn-label span + span { transform: none; }
+  /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
+  @media (hover: hover) { .cbtn:hover .cbtn-label span:first-child, .cbtn:focus-visible .cbtn-label span:first-child { transform: translateY(-110%); } }
+  @media (hover: hover) { .cbtn:hover .cbtn-label span + span, .cbtn:focus-visible .cbtn-label span + span { transform: none; } }
   .cbtn .cbtn-disc { width: 52px; height: 52px; border-radius: 50%; background: var(--fg); display: grid; place-items: center; margin-left: -2px; transition: transform .5s var(--ease); }
-  .cbtn:hover .cbtn-disc, .cbtn:focus-visible .cbtn-disc { transform: rotate(-45deg); }
+  @media (hover: hover) { .cbtn:hover .cbtn-disc, .cbtn:focus-visible .cbtn-disc { transform: rotate(-45deg); } }
 
   /* Language toggle */
   .lang { display: inline-flex; align-items: center; gap: 8px; background: var(--fg); color: var(--bg); border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-decoration: none; }
