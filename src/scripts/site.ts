@@ -28,6 +28,22 @@ let fitTimer = 0;
 addEventListener('resize', () => { cancelAnimationFrame(fitTimer); fitTimer = requestAnimationFrame(fitAll); });
 document.fonts?.ready.then(fitAll);
 
+/* ---------- Banner height ----------
+   The hero fills the first screen minus the banner, via --banner-h on <html>. An inline script in Base.astro sets
+   it before first paint, but page transitions replace <html>'s attributes (wiping it) and don't re-run that
+   script, so it's set again here after every swap and kept in sync when the banner resizes or is closed. */
+let bannerRO: ResizeObserver | null = null;
+function syncBanner() {
+  const b = $('[data-banner]');
+  const set = () => document.documentElement.style.setProperty('--banner-h', `${b && b.offsetParent !== null ? b.offsetHeight : 0}px`);
+  set();
+  bannerRO?.disconnect();
+  bannerRO = b ? new ResizeObserver(set) : null;
+  if (b) bannerRO!.observe(b);
+}
+syncBanner();
+document.addEventListener('astro:after-swap', syncBanner);
+
 /* ---------- Cursor dot (persists across pages) ----------
    Sits exactly on the pointer (no lag, so pointing stays precise) and grows over anything clickable.
    The system cursor is only hidden once the dot is tracking a real mouse (class ring-live), and CSS keeps it
@@ -156,7 +172,7 @@ document.addEventListener('click', async (e) => {
   const pause = t.closest<HTMLButtonElement>('[data-marquee-pause]');
   if (pause) { const m = pause.closest('.marquee')!; const p = m.classList.toggle('paused'); pause.setAttribute('aria-pressed', String(p)); pause.textContent = p ? pause.dataset.play! : pause.dataset.pause!; return; }
   const bannerClose = t.closest('[data-banner-close]');
-  if (bannerClose) { (window as { __bannerClosed?: boolean }).__bannerClosed = true; document.documentElement.classList.add('banner-hidden'); return; }
+  if (bannerClose) { (window as { __bannerClosed?: boolean }).__bannerClosed = true; document.documentElement.classList.add('banner-hidden'); syncBanner(); return; }
   if (t.closest('[data-open-cookies]')) { const c = $('#cookies'); if (c) { c.hidden = false; c.querySelector('button')?.focus(); } return; }
   const ck = t.closest<HTMLElement>('[data-ck]');
   if (ck) { try { localStorage.setItem('site.consent', ck.dataset.ck!); } catch {} $('#cookies')!.hidden = true; if (ck.dataset.ck === 'accept') loadAnalytics(); }
