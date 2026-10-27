@@ -17,6 +17,8 @@ const fmt = (n: number) => n.toLocaleString(lang);
   <figure class="run" data-run data-unit={unit}>
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`${fmt(data.total)} ${unit} over ${weeks.length} weeks, best week ${max} ${unit}`}>
       {weeks.map((v, i) => <rect x={i * bw + 1.5} y={H - (v / max) * (H - 6)} width={bw - 3} height={Math.max(1, (v / max) * (H - 6))} data-v={v} data-w={weeks.length - i} />)}
+      {/* A short base under every week, so a week with nothing logged still shows where its bar would be. */}
+      {weeks.map((_, i) => <rect class="base" x={i * bw + 1.5} y={H - 2} width={bw - 3} height={2} aria-hidden="true" />)}
     </svg>
     <figcaption class="mono muted" aria-hidden="true" data-run-read>{t(lang, 'activities.training.hover')}</figcaption>
   </figure>
@@ -48,6 +50,7 @@ const fmt = (n: number) => n.toLocaleString(lang);
   svg { width: 100%; height: 120px; display: block; }
   rect { fill: var(--fg); opacity: .35; transition: opacity .2s; }
   rect:hover, rect:global(.on) { opacity: 1; }
+  rect.base { opacity: .9; pointer-events: none; }
   figcaption { margin-top: 8px; text-transform: none; letter-spacing: .04em; }
   .stats { display: flex; gap: 32px; flex-wrap: wrap; }
   .stats > div { display: grid; gap: 4px; }
