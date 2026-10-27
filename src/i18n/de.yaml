@@ -85,8 +85,12 @@ work:
     on: Live
     interactive: Live · interaktiv
     live: Live-Vorschau
-    click: Zum Bedienen klicken
-    use: "Die Live-Seite {host} bedienen"
+    title: Aktive Inhalte anzeigen
+    continue: Weiter
+    nestedTitle: Bereits in einer Vorschau
+    nested: "Du siehst diese Seite in ihrer eigenen Vorschau, deshalb endet sie hier statt sich endlos zu verschachteln. Öffne {host} in einem eigenen Tab."
+    outside: "Das ist {host}, eine externe Website, live in diese Seite geladen. Sie sieht deinen Besuch und kann eigene Cookies setzen; es gilt ihre eigene Datenschutzerklärung."
+    own: "Eine Live-Version dieser Seite, direkt hier eingebettet."
     alt: Screenshot von
 
 resume:

@@ -5,11 +5,14 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { t, type Lang } from '../lib/i18n';
+import { site } from '../lib/config';
 
 interface Props { lang: Lang; title: string; live?: string; cover?: ImageMetadata; art: string; interactive: boolean; devBlocked?: boolean }
 const { lang, title, live, cover, art, interactive, devBlocked = false } = Astro.props;
 const host = live ? new URL(live).host : '';
 const embed = !!live && interactive;
+// Another website, not this one: the button says so before anything from it can be used.
+const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
 ---
 <figure class="frame" data-frame>
   <div class="bar" aria-hidden={live ? undefined : 'true'}>
@@ -22,19 +25,29 @@ const embed = !!live && interactive;
   <div class="view" data-view>
     {embed ? (
       <>
-        <iframe class="live" src={live} title={`${title}: ${t(lang, 'work.preview.live')}`} loading="lazy"
+        {/* src is set by the script below, so this site never loads itself inside its own preview. */}
+        <iframe class="live" data-src={live} data-self={outside ? undefined : ''} title={`${title}: ${t(lang, 'work.preview.live')}`}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
           referrerpolicy="strict-origin-when-cross-origin" tabindex="-1" data-live></iframe>
         {devBlocked && (
           <p class="dev-note mono">Dev only: {host} doesn't allow <code>{Astro.url.origin}</code> to frame it, so your browser blocks it here.
             It will load on {new URL(Astro.site ?? 'https://example.com').host}. To see it locally, add {Astro.url.origin} to that site's <code>frame-ancestors</code>.</p>
         )}
-        <button type="button" class="shield" data-shield aria-label={t(lang, 'work.preview.use', { host })}>
-          <span class="pill">
-            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v10l2.6-2.4 1.7 3.6 1.6-.8-1.7-3.5H11z" fill="currentColor"/></svg>
-            {t(lang, 'work.preview.click')}
-          </span>
-        </button>
+        <div class="shield" data-shield>
+          <div class="card" role="group" aria-labelledby="frame-card-title" data-card>
+            <p class="card-title mono" id="frame-card-title">{t(lang, 'work.preview.title')}</p>
+            <p class="card-note">{outside ? t(lang, 'work.preview.outside', { host }) : t(lang, 'work.preview.own')}</p>
+            {/* The same split pill as the contact buttons (global .cbtn), in white on the dark card. */}
+            <button type="button" class="cbtn card-go" data-go>
+              <span class="cbtn-label"><span>{t(lang, 'work.preview.continue')}</span><span aria-hidden="true">{t(lang, 'work.preview.continue')}</span></span>
+              <span class="cbtn-disc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+            </button>
+          </div>
+          <div class="card" role="note" data-nested hidden>
+            <p class="card-title mono">{t(lang, 'work.preview.nestedTitle')}</p>
+            <p class="card-note">{t(lang, 'work.preview.nested', { host })}</p>
+          </div>
+        </div>
       </>
     ) : cover
       ? <Image src={cover} alt={live ? `${t(lang, 'work.preview.alt')} ${host}` : ''} widths={[800, 1440, 2000]} sizes="(max-width: 1600px) 100vw, 1600px" class="shot" loading="eager" />
@@ -46,8 +59,20 @@ const embed = !!live && interactive;
   document.addEventListener('astro:page-load', () => {
     document.querySelectorAll<HTMLElement>('[data-frame]').forEach((frame) => {
       const iframe = frame.querySelector<HTMLIFrameElement>('[data-live]'); if (!iframe) return;
-      const view = frame.querySelector<HTMLElement>('[data-view]')!, shield = frame.querySelector<HTMLButtonElement>('[data-shield]');
+      const view = frame.querySelector<HTMLElement>('[data-view]')!, shield = frame.querySelector<HTMLElement>('[data-shield]');
       const state = frame.querySelector<HTMLElement>('[data-state]');
+      // Already inside a preview of this site? Then this is the preview's own project page: loading the site again
+      // would nest it forever, so it stops here with a note instead.
+      let framed = true;
+      try { framed = window.self !== window.top; } catch {}
+      if (framed && iframe.hasAttribute('data-self')) {
+        frame.classList.add('is-nested');
+        frame.querySelector('[data-card]')?.setAttribute('hidden', '');
+        frame.querySelector('[data-nested]')?.removeAttribute('hidden');
+        return;
+      }
+      iframe.loading = 'lazy';
+      iframe.src = iframe.dataset.src!;
       // Render at desktop width and scale down, so the whole site shows in its real desktop layout.
       const W = 1440;
       const fit = () => {
@@ -55,8 +80,8 @@ const embed = !!live && interactive;
         iframe.style.width = `${W}px`; iframe.style.height = `${view.clientHeight / k}px`; iframe.style.transform = `scale(${k})`;
       };
       fit(); new ResizeObserver(fit).observe(view);
-      shield?.addEventListener('click', () => {
-        shield.remove();
+      frame.querySelector('[data-go]')?.addEventListener('click', () => {
+        shield?.remove();
         iframe.removeAttribute('tabindex');
         frame.classList.add('is-live');
         if (state) state.lastChild!.textContent = state.dataset.on ?? '';
@@ -85,17 +110,22 @@ const embed = !!live && interactive;
 
   .dev-note { position: absolute; left: 16px; right: 16px; top: 16px; z-index: 1; margin: 0; padding: 12px 14px; border-radius: 8px; background: #FFF6D6; color: #3A2E00;
     font-size: 11px; line-height: 1.5; text-transform: none; letter-spacing: .02em; }
-  /* Until clicked, the shield takes the pointer so wheel and touch scrolling move the page, not the embed. */
-  /* Hovering greys the site out behind the button, so the button is what you notice. */
-  .shield { position: absolute; inset: 0; display: grid; place-items: center; padding: 0; border: 0; background: rgb(11 11 11 / 0); cursor: pointer;
+  /* Until Continue is pressed, the shield takes the pointer so wheel and touch scrolling move the page, not the
+     embed. Hovering greys the site out behind the card, so the card is what you notice. */
+  .shield { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: rgb(11 11 11 / 0);
     transition: background .35s var(--ease), backdrop-filter .35s var(--ease); }
-  .shield:hover, .shield:focus-visible { background: rgb(11 11 11 / .38); backdrop-filter: grayscale(1); -webkit-backdrop-filter: grayscale(1); }
-  .pill { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px 10px 14px; border-radius: 999px; border: 1px solid rgb(255 255 255 / .18);
-    background: rgb(11 11 11 / .72); color: #fff; backdrop-filter: blur(10px) saturate(1.2); -webkit-backdrop-filter: blur(10px) saturate(1.2);
-    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-    box-shadow: 0 10px 30px -12px rgb(0 0 0 / .45); transition: transform .4s var(--ease), background .3s; }
-  .shield:hover .pill, .shield:focus-visible .pill { transform: translateY(-3px); background: rgb(11 11 11 / .9); }
-  .shield:focus-visible { outline: none; }
-  .shield:focus-visible .pill { outline: 2px solid #fff; outline-offset: 3px; }
+  .shield:hover, .shield:focus-within { background: rgb(11 11 11 / .26); backdrop-filter: grayscale(1); -webkit-backdrop-filter: grayscale(1); }
+  :global(.is-nested) .shield { background: rgb(11 11 11 / .42); backdrop-filter: grayscale(1) blur(2px); -webkit-backdrop-filter: grayscale(1) blur(2px); }
+  .card { display: grid; gap: 10px; justify-items: start; width: min(380px, 100%); padding: 20px 22px; border-radius: 14px; border: 1px solid rgb(255 255 255 / .16);
+    background: rgb(11 11 11 / .86); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 18px 44px -16px rgb(0 0 0 / .55); }
+  .card[hidden] { display: none; }
+  .card p { margin: 0; }
+  .card-title { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+  .card-note { font-size: 13px; line-height: 1.5; color: rgb(255 255 255 / .72); text-wrap: pretty; }
+  .card-go { --fg: #fff; --bg: #0B0B0B; margin-top: 6px; padding: 0; border: 0; background: none; cursor: pointer; }
+  .card-go :global(.cbtn-label) { height: 44px; padding: 0 20px; }
+  .card-go :global(.cbtn-disc) { width: 44px; height: 44px; }
+  .card-go:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 999px; }
+  @media (max-width: 520px) { .card { padding: 14px 16px; gap: 8px; } .card-note { font-size: 12px; } }
   @media (max-width: 640px) { .bar { grid-template-columns: auto 1fr; } .bar-end { display: none; } .url { justify-self: end; } }
 </style>
