@@ -10,7 +10,7 @@ art: tidal
 featured: true
 order: 1
 links:
-  - { label: Source, url: "https://github.com/WhyFenceCode/FoilBuilder" }
+  - { label: Source Code, url: "https://github.com/WhyFenceCode/FoilBuilder" }
 ---
 ## The problem
 Modeling of complex foil geometry from the NACA or DAT splines that define them is very difficult. On top of that making the foil account for all the variables, a turbulence reduction bulb, and mounting for a vertical support is even more difficult.
