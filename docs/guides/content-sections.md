@@ -33,7 +33,8 @@ resume page:
 title: Web Accessibility Specialist
 institution: IAAP
 kind: certificate
-end: 2026-05
+end: 2026-05            # when you attained it
+expires: 2029-05        # optional: shown as "Expires" (or "Expired" once past)
 url: https://www.credly.com/badges/…   # optional: a "Verify" link to the credential
 ---
 ```

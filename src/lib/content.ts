@@ -34,6 +34,23 @@ export function endValue(v?: string): number {
   const [y, m] = v.split('-').map(Number);
   return m ? y + m / 12 : y + 1;
 }
+/** "Feb 2024" for "2024-02", "2024" for "2024". */
+export function monthYear(v: string, lang: string): string {
+  const [y, m] = v.split('-').map(Number);
+  return m ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(Date.UTC(y, m - 1, 1)) : String(y);
+}
+/** Certificate dates: when it was attained, and when it expires (or expired). */
+export function certDates(d: { end: string; expires?: string }, lang: string) {
+  return {
+    attained: monthYear(d.end, lang),
+    expires: d.expires ? monthYear(d.expires, lang) : undefined,
+    expired: d.expires ? endValue(d.expires) <= yearValue() : false,
+  };
+}
+/** A credential link only when it's a real web address (not a leftover placeholder like "https://…"). */
+export function credentialUrl(u?: string): string | undefined {
+  try { const url = new URL(u ?? ''); return /^https?:$/.test(url.protocol) && /\.[a-z]{2,}$/i.test(url.hostname) ? url.href : undefined; } catch { return undefined; }
+}
 export const yearLabel = (v?: string, now = 'Now') => (v ? v.split('-')[0] : now);
 
 export async function projectsFor(lang: Lang) {

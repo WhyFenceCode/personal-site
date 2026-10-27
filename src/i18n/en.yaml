@@ -37,7 +37,7 @@ cta:
 
 sections:
   education: { eyebrow: Study, title: Education, courses: Relevant courses }
-  certifications: { eyebrow: Credentials, title: Certifications, verify: Verify }
+  certifications: { eyebrow: Credentials, title: Certifications, verify: Verify, attained: Attained, expires: Expires, expired: Expired }
   github: { eyebrow: Commit log, title: Shipping, total: contributions in the last year, streak: day streak, longest: longest streak, recent: Recent pushes, repos: Active repositories, sample: Sample data. Add your GitHub username in site.yaml. }
   projects: { eyebrow: Selected work, title: Projects }
   experience: { eyebrow: Career, title: Experience }

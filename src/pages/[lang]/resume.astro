@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import ExperienceRows from '../../components/ExperienceRows.astro';
 import Timeline from '../../components/resume/Timeline';
-import { experienceFor, educationFor, yearValue, endValue, yearLabel, isCertification } from '../../lib/content';
+import { experienceFor, educationFor, yearValue, endValue, yearLabel, isCertification, certDates, credentialUrl } from '../../lib/content';
 import { site, resume } from '../../lib/config';
 import { resumePdf } from '../../lib/resume';
 import { t, href, langStaticPaths } from '../../lib/i18n';
@@ -51,13 +51,18 @@ const range = {
     {certs.length > 0 && <>
       <h3 class="h3" id="certs-title">{t(lang, 'sections.certifications.title')}</h3>
       <ul class="edu-list" aria-labelledby="certs-title">
-        {certs.map((e) => (
-          <li>
-            <span class="num yr">{yearLabel(e.data.end)}</span>
-            <span><b>{e.data.title}</b><span class="muted"> · {e.data.institution}</span>{e.data.highlight && <span class="hl muted">{e.data.highlight}</span>}</span>
-            {e.data.url ? <a class="mono" href={e.data.url} rel="noopener">{t(lang, 'sections.certifications.verify')} ↗</a> : <span class="mono muted">{e.data.kind}</span>}
-          </li>
-        ))}
+        {certs.map((e) => {
+          const d = certDates(e.data, lang), url = credentialUrl(e.data.url);
+          return (
+            <li>
+              <span class="num yr">{yearLabel(e.data.end)}</span>
+              <span><b>{e.data.title}</b><span class="muted"> · {e.data.institution}</span>
+                <span class="hl mono muted">{t(lang, 'sections.certifications.attained')} {d.attained}{d.expires && ` · ${t(lang, d.expired ? 'sections.certifications.expired' : 'sections.certifications.expires')} ${d.expires}`}</span>
+                {e.data.highlight && <span class="hl muted">{e.data.highlight}</span>}</span>
+              {url ? <a class="mono" href={url} rel="noopener">{t(lang, 'sections.certifications.verify')} ↗</a> : <span class="mono muted">{e.data.kind}</span>}
+            </li>
+          );
+        })}
       </ul>
     </>}
   </section>

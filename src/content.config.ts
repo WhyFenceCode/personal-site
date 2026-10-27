@@ -56,6 +56,7 @@ const education = defineCollection({
     highlight: z.string().optional(),       // the one line that shows on the home page
     courses: z.array(z.string()).default([]), // relevant courses, shown as chips
     url: z.string().optional(),             // certificates: link to verify the credential
+    expires: z.coerce.string().optional(),  // certificates: when it runs out ("2027" or "2027-02"); end is when it was attained
     featured: z.boolean().default(false),   // featured entries are the ones on the home page
     order: z.number().default(100),
   }),

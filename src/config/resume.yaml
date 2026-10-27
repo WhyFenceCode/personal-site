@@ -7,21 +7,24 @@ timeline: {}
 
 # Skills, grouped. "rating" is a simple 1–5 score and fills that many of the five squares. SAMPLE DATA.
 skills:
-  - group: Design
-    items:
-      - { name: Interface design, rating: 5 }
-      - { name: Design systems, rating: 4 }
-      - { name: Prototyping, rating: 4 }
-      - { name: Typography, rating: 5 }
   - group: Engineering
     items:
-      - { name: TypeScript / React, rating: 4 }
-      - { name: Astro, rating: 2 }
-      - { name: Three.js / GLSL, rating: 3 }
-      - { name: Accessibility, rating: 4 }
-  - group: Tools
+      - { name: Fusion, rating: 3 }
+      - { name: Excel, rating: 3 }
+      - { name: OpenFOAM, rating: 1 }
+      - { name: Drafting, rating: 3 }
+      - { name: OnShape, rating: 4 }
+  - group: Programming
     items:
-      - { name: Figma, rating: 4 }
-      - { name: Blender, rating: 3 }
+      - { name: C, rating: 2 }
+      - { name: HTML, rating: 4 }
+      - { name: CSS, rating: 4 }
+      - { name: JavaScript, rating: 3 }
+      - { name: Rust, rating: 1 }
+  - group: Web Design
+    items:
+      - { name: Figma, rating: 3 }
+      - { name: Blender, rating: 2 }
       - { name: Git, rating: 5 }
-      - { name: Node.js, rating: 4 }
+      - { name: Astro.js, rating: 3 }
+      - { name: Tailwind CSS, rating: 4 }
