@@ -69,8 +69,11 @@ The file name becomes the URL: `orbit.md` → `/en/work/orbit/`.
 - Run `pnpm shots` after adding a project with `live:`. It opens the site in a headless browser and saves a
   1440×900 screenshot to `src/assets/screenshots/<slug>.jpg`, which becomes the cover. Commit the image.
   `pnpm shots --all` re-captures every project; `pnpm shots <slug>` re-captures one.
-- On the project page the screenshot sits in a browser frame. If the live site allows being framed, a
-  **Load live site** button swaps in the real, interactive site. Nothing from that site loads until the click.
+- On the project page a browser frame shows the project. If the live site allows being framed, the real site
+  loads straight into the frame (visitors click once to interact with it); otherwise the screenshot is shown.
+  Embedded sites are listed automatically in the privacy and cookie policies.
+- In `pnpm dev` the check runs against `localhost`, so a site that only allows your real domain shows the
+  screenshot locally. Add `http://localhost:4321` to its `frame-ancestors` if you want to see it live in dev.
 - Whether a site can be framed is checked at build time from its `X-Frame-Options` and `Content-Security-Policy`
   headers. To allow it for a site you control, have it send:
   `Content-Security-Policy: frame-ancestors 'self' https://torstenyoung.com` and remove `X-Frame-Options: DENY`.

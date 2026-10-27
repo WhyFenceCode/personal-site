@@ -23,6 +23,7 @@ Postal address: {{address}}
 | --- | --- | --- | --- |
 | Server logs: IP address, browser type, page requested, date and time | To deliver the site and keep it secure | Necessary to run the site (PIPEDA: implied consent; GDPR: legitimate interests, Art. 6(1)(f)) | Deleted by the host after a short period, normally within 30 days |
 | Preferences stored in your browser: language, motion setting, dismissed banner | To remember your choices | Strictly necessary | Until you clear your browser storage. Never sent anywhere |
+| Connection data sent to an embedded project website (IP address, browser type, referring page) when you open a project page that shows it live | To show the project as it really works | Legitimate interests (Art. 6(1)(f)); PIPEDA: implied consent, as you choose to open the page | Set by that website; see its own policy |
 | Emails you send | To reply to you | Your consent (Art. 6(1)(a)) | Deleted once the conversation is finished, and within 24 months at most |
 
 **Statistics.** {{analytics}}
@@ -30,13 +31,18 @@ Postal address: {{address}}
 ## 3. What this site does not do
 No accounts, no forms, no advertising, no tracking cookies, and no selling, renting or sharing of personal
 information. All fonts, scripts and 3D graphics are served from this website itself, so loading a page does not
-contact any other company.
+contact any other company. The one exception is a project page that shows another website live (see section 4).
 
 ## 4. Other parties
 - **Hosting.** The site is served by {{hosting}}, which processes server logs on the site's behalf. Its servers
   may be outside Canada, so this information may be subject to the laws of that country.
-- **Live project previews.** Some project pages can show the real website in a frame. It only loads after you
-  click "Load live site". That other website then receives your IP address and its own privacy policy applies.
+- **Live project previews.** Some project pages show the real website of that project inside a browser window
+  on the page. Opening such a page loads that website, so your browser connects to it directly: it receives your
+  IP address, browser type and the fact that you viewed it (with this site as the referring address), and it may
+  set its own cookies or storage. That website's own privacy and cookie policies apply. It only loads on that
+  project's page, never on the others. Websites currently shown this way: **{{embeds}}**.
+  If you would rather not connect to them, don't open those project pages; every project is also described in
+  text and a screenshot elsewhere on this site.
 - **Links.** Links to other websites open in a new tab. Their own privacy policies apply.
 - **Content shown on this site** (GitHub activity, map locations, exercise totals) is fetched by the build
   server when the site is published, not by your browser. No information about visitors is sent to those services.

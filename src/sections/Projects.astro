@@ -13,7 +13,7 @@ const list = all.slice(0, limit);
 <Section lang={lang} id="projects" tone={tone} eyebrow={t(lang, 'sections.projects.eyebrow')} title={t(lang, 'sections.projects.title')} count={String(all.length).padStart(2, '0')} cta={cta}>
   <div class="index">
     {list.map((p, i) => (
-      <a href={href(lang, `work/${slugOf(p.id)}`)} data-peek={p.data.art} data-peek-src={coverFor(p)?.src}>
+      <a href={href(lang, `work/${slugOf(p.id)}`)} data-peek={p.data.art} data-peek-src={coverFor(p)?.src} data-peek-ratio={coverFor(p) ? coverFor(p)!.width / coverFor(p)!.height : undefined}>
         <span class="n num">{String(i + 1).padStart(2, '0')}</span>
         <span class="t">{p.data.title}</span>
         <span class="k mono muted">{p.data.kind}</span>

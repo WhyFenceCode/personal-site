@@ -10,8 +10,12 @@ export type Repo = { name: string; url: string; description: string; language: s
 export type Push = { repo: string; message: string; date: string; url: string };
 export type GithubData = { weeks: Day[][]; total: number; streak: number; longest: number; repos: Repo[]; pushes: Push[]; sample: boolean; username: string };
 
-const TIMEOUT = 8000;
+const TIMEOUT = 15000;
+/** Fetch JSON, trying a second time if the first attempt times out or fails. */
 async function getJSON(url: string, init: RequestInit = {}) {
+  try { return await getOnce(url, init); } catch { return await getOnce(url, init); }
+}
+async function getOnce(url: string, init: RequestInit) {
   const ctrl = new AbortController(); const id = setTimeout(() => ctrl.abort(), TIMEOUT);
   try {
     const r = await fetch(url, { ...init, signal: ctrl.signal, headers: { 'User-Agent': 'personal-site-build', ...(init.headers || {}) } });
@@ -75,9 +79,10 @@ async function calendar(username: string): Promise<{ date: string; count: number
   return null;
 }
 
-let cache: Promise<GithubData> | null = null;
+// Kept on globalThis so the dev server's reloads reuse one fetch instead of hitting the APIs on every edit.
+const g = globalThis as { __github?: Promise<GithubData> };
 export function getGithub(username: string, weeks = 53): Promise<GithubData> {
-  return (cache ??= load(username, weeks));
+  return (g.__github ??= load(username, weeks));
 }
 
 async function load(username: string, weeks: number): Promise<GithubData> {

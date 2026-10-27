@@ -20,7 +20,7 @@ import { languages, t, switchPath, type Lang } from '../lib/i18n';
 
 interface Props { lang: Lang; title?: string; description?: string; page?: string }
 const { lang, title, description, page = '' } = Astro.props;
-const fullTitle = title ? `${title} · ${site.name}` : site.name;
+const fullTitle = `${site.name} | ${title ?? t(lang, 'nav.home')}`;
 const desc = description ?? t(lang, 'meta.description');
 const analytics = analyticsScript();
 const needsConsent = !!analytics && site.analytics.consent;
@@ -42,7 +42,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     <meta property="og:type" content="website" />
     {portraitOk && <meta property="og:image" content={new URL(site.portrait.src, Astro.site ?? site.url).href} />}
     <meta name="theme-color" content="#0B0B0B" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <script is:inline define:vars={{ BANNER: site.banner.url }}>
       // Decide before first paint: show the intro once per session, and honour reduced motion.
       try {
@@ -96,7 +98,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
   html.has-ring #ring.on { opacity: 1; }
   @media (forced-colors: active) { #ring, #flood { display: none; } }
   main { display: block; }
-  #peek { position: fixed; left: 0; top: 0; width: 300px; aspect-ratio: 4 / 3; z-index: 30; pointer-events: none; opacity: 0; transition: opacity .3s; overflow: hidden; border-radius: 4px; }
+  #peek { position: fixed; left: 0; top: 0; width: 300px; height: 225px; z-index: 30; pointer-events: none; opacity: 0; transition: opacity .3s; overflow: hidden; border-radius: 4px; }
   #peek.on { opacity: 1; }
   #peek canvas, #peek img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: top; }
 </style>

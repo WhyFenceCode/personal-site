@@ -5,23 +5,23 @@
 timeline: {}
   # timeline: { from: 2020, to: 2030 }
 
-# Skills, grouped. "years" fills the squares (out of 10). SAMPLE DATA.
+# Skills, grouped. "rating" is a simple 1–5 score and fills that many of the five squares. SAMPLE DATA.
 skills:
   - group: Design
     items:
-      - { name: Interface design, years: 9 }
-      - { name: Design systems, years: 6 }
-      - { name: Prototyping, years: 8 }
-      - { name: Typography, years: 9 }
+      - { name: Interface design, rating: 5 }
+      - { name: Design systems, rating: 4 }
+      - { name: Prototyping, rating: 4 }
+      - { name: Typography, rating: 5 }
   - group: Engineering
     items:
-      - { name: TypeScript / React, years: 7 }
-      - { name: Astro, years: 3 }
-      - { name: Three.js / GLSL, years: 5 }
-      - { name: Accessibility, years: 6 }
+      - { name: TypeScript / React, rating: 4 }
+      - { name: Astro, rating: 2 }
+      - { name: Three.js / GLSL, rating: 3 }
+      - { name: Accessibility, rating: 4 }
   - group: Tools
     items:
-      - { name: Figma, years: 7 }
-      - { name: Blender, years: 4 }
-      - { name: Git, years: 9 }
-      - { name: Node.js, years: 7 }
+      - { name: Figma, rating: 4 }
+      - { name: Blender, rating: 3 }
+      - { name: Git, rating: 5 }
+      - { name: Node.js, rating: 4 }

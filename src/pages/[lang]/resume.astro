@@ -75,7 +75,7 @@ const range = {
     <div class="skills">
       {resume.skills.map((g) => (
         <div><h3 class="mono muted">{g.group}</h3><ul>
-          {g.items.map((s) => <li><span>{s.name}</span><span class="meter" role="img" aria-label={`${s.years} years`}>{Array.from({ length: 10 }, (_, i) => <i class={i < s.years ? 'on' : ''}></i>)}</span></li>)}
+          {g.items.map((s) => <li><span>{s.name}</span><span class="meter" role="img" aria-label={t(lang, 'resume.skillRating', { n: String(s.rating) })}>{Array.from({ length: 5 }, (_, i) => <i class={i < s.rating ? 'on' : ''}></i>)}</span></li>)}
         </ul></div>
       ))}
     </div>

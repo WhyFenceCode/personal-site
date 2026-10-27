@@ -103,7 +103,7 @@ const homeSchema = z.object({ sections: z.array(sectionSchema) });
 
 const resumeSchema = z.object({
   timeline: z.object({ from: z.number().optional(), to: z.number().optional() }).default({}),
-  skills: z.array(z.object({ group: z.string(), items: z.array(z.object({ name: z.string(), years: z.number() })) })),
+  skills: z.array(z.object({ group: z.string(), items: z.array(z.object({ name: z.string(), rating: z.number().int().min(1).max(5) })) })),
 });
 
 function load<T extends z.ZodType>(name: string, raw: string, schema: T): z.infer<T> {

@@ -181,8 +181,9 @@ function initPeek() {
   let x = tx, y = ty;
   $$('[data-peek]').forEach((a) => {
     a.addEventListener('pointerenter', () => {
-      if (a.dataset.peekSrc) { img.src = a.dataset.peekSrc; img.hidden = false; cv.hidden = true; }
-      else { paintArt(cv, a.dataset.peek!); img.hidden = true; cv.hidden = false; }
+      // Screenshots keep their own proportions at the fixed preview height; placeholder art stays 4:3.
+      if (a.dataset.peekSrc) { img.src = a.dataset.peekSrc; img.hidden = false; cv.hidden = true; peek.style.width = `${Math.round(225 * (Number(a.dataset.peekRatio) || 4 / 3))}px`; }
+      else { paintArt(cv, a.dataset.peek!); img.hidden = true; cv.hidden = false; peek.style.width = ''; }
       peek.classList.add('on');
     });
     a.addEventListener('pointerleave', () => peek.classList.remove('on'));

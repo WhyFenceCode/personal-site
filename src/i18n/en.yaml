@@ -83,11 +83,11 @@ work:
   technology: Technology
   visit: Visit the site
   preview:
-    screenshot: Screenshot
     on: Live
+    interactive: Live · interactive
     live: live preview
-    load: Load live site
-    note: "Loads {host} here, interactive"
+    click: Click to interact
+    use: "Interact with the live {host} site"
     alt: Screenshot of
 
 resume:
@@ -95,7 +95,8 @@ resume:
   roles: Roles
   education: Education
   skills: Skills
-  skillsNote: Squares show years of use
+  skillsNote: Rated out of 5
+  skillRating: "{n} out of 5"
   year: Year
 
 about:

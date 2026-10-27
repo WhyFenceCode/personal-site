@@ -70,4 +70,4 @@ legal:
   imprint: false            # an imprint (German "Impressum") is only required for sites run from Germany/Austria
   address: []               # optional mailing address, e.g. [Street 1, City, Province, Postal code]. Empty = email is the contact.
   hosting: ""               # your host's name once chosen, e.g. Cloudflare. Named in the privacy policy.
-  updated: 2026-10-26
+  updated: 2026-10-27

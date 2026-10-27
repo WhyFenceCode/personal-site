@@ -13,3 +13,10 @@ This site sets no cookies. A few preferences are kept in your browser's local st
 | `site.seen` | That you've seen the intro (session storage) | Until you close the tab |
 
 None of these are sent anywhere.
+
+## Embedded project websites
+Some project pages show the project's real website inside a frame on the page ({{embeds}}). When you open
+one of those pages, that website loads in your browser as if you had visited it, and it may set its own
+cookies or local storage under its own address. This site can't read or control them. They're covered by
+that website's own cookie and privacy policy, and you can clear them in your browser's settings for that
+website. See the [privacy policy](../privacy/) for what is shared when this happens.

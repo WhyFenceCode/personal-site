@@ -83,11 +83,11 @@ work:
   technology: Technologie
   visit: Seite besuchen
   preview:
-    screenshot: Screenshot
     on: Live
+    interactive: Live · interaktiv
     live: Live-Vorschau
-    load: Live-Seite laden
-    note: "Lädt {host} hier, interaktiv"
+    click: Zum Bedienen klicken
+    use: "Die Live-Seite {host} bedienen"
     alt: Screenshot von
 
 resume:
@@ -95,7 +95,8 @@ resume:
   roles: Stationen
   education: Ausbildung
   skills: Skills
-  skillsNote: Quadrate zeigen Jahre Erfahrung
+  skillsNote: Bewertet von 1 bis 5
+  skillRating: "{n} von 5"
   year: Jahr
 
 about:

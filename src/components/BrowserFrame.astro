@@ -1,7 +1,7 @@
 ---
-/* A browser window around a project's screenshot. When the live site allows framing, "Load live site" swaps in
-   the real site (rendered at desktop width and scaled to fit), so it's interactive right on the page.
-   Nothing from the other site loads until that click. */
+/* A browser window around a project. When the live site allows framing, the real site fills the window
+   (rendered at desktop width and scaled to fit). A shield on top keeps page scrolling working until the
+   visitor clicks to interact. Otherwise the screenshot, or placeholder art, is shown instead. */
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { t, type Lang } from '../lib/i18n';
@@ -9,51 +9,53 @@ import { t, type Lang } from '../lib/i18n';
 interface Props { lang: Lang; title: string; live?: string; cover?: ImageMetadata; art: string; interactive: boolean }
 const { lang, title, live, cover, art, interactive } = Astro.props;
 const host = live ? new URL(live).host : '';
+const embed = !!live && interactive;
 ---
 <figure class="frame" data-frame>
   <div class="bar" aria-hidden={live ? undefined : 'true'}>
     <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
     {live && <span class="url mono"><i aria-hidden="true"></i>{host}</span>}
     <span class="bar-end">
-      {live && interactive && <span class="mono muted state" data-state data-live={t(lang, 'work.preview.on')}>{t(lang, 'work.preview.screenshot')}</span>}
+      {embed && <span class="mono muted state" data-state data-on={t(lang, 'work.preview.interactive')}><i aria-hidden="true"></i>{t(lang, 'work.preview.on')}</span>}
     </span>
   </div>
   <div class="view" data-view>
-    {cover
+    {embed ? (
+      <>
+        <iframe class="live" src={live} title={`${title}: ${t(lang, 'work.preview.live')}`} loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+          referrerpolicy="strict-origin-when-cross-origin" tabindex="-1" data-live></iframe>
+        <button type="button" class="shield" data-shield aria-label={t(lang, 'work.preview.use', { host })}>
+          <span class="pill">
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v10l2.6-2.4 1.7 3.6 1.6-.8-1.7-3.5H11z" fill="currentColor"/></svg>
+            {t(lang, 'work.preview.click')}
+          </span>
+        </button>
+      </>
+    ) : cover
       ? <Image src={cover} alt={live ? `${t(lang, 'work.preview.alt')} ${host}` : ''} widths={[800, 1440, 2000]} sizes="(max-width: 1600px) 100vw, 1600px" class="shot" loading="eager" />
       : <canvas width="1280" height="800" data-art={art} aria-hidden="true"></canvas>}
-    {live && interactive && (
-      <button type="button" class="load" data-load={live} data-title={`${title}: ${t(lang, 'work.preview.live')}`}>
-        <span class="sq" aria-hidden="true"></span>{t(lang, 'work.preview.load')}
-        <span class="sub">{t(lang, 'work.preview.note', { host })}</span>
-      </button>
-    )}
   </div>
 </figure>
 
 <script>
   document.addEventListener('astro:page-load', () => {
     document.querySelectorAll<HTMLElement>('[data-frame]').forEach((frame) => {
-      const btn = frame.querySelector<HTMLButtonElement>('[data-load]'); if (!btn) return;
-      const view = frame.querySelector<HTMLElement>('[data-view]')!, state = frame.querySelector<HTMLElement>('[data-state]');
-      btn.addEventListener('click', () => {
-        const W = 1440;
-        const iframe = document.createElement('iframe');
-        iframe.src = btn.dataset.load!;
-        iframe.title = btn.dataset.title!;
-        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox');
-        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-        iframe.className = 'live';
-        // Render at desktop width and scale down, so the site shows its real desktop layout.
-        const fit = () => {
-          const k = view.clientWidth / W;
-          iframe.style.width = `${W}px`; iframe.style.height = `${view.clientHeight / k}px`; iframe.style.transform = `scale(${k})`;
-        };
-        view.appendChild(iframe); fit();
-        new ResizeObserver(fit).observe(view);
+      const iframe = frame.querySelector<HTMLIFrameElement>('[data-live]'); if (!iframe) return;
+      const view = frame.querySelector<HTMLElement>('[data-view]')!, shield = frame.querySelector<HTMLButtonElement>('[data-shield]');
+      const state = frame.querySelector<HTMLElement>('[data-state]');
+      // Render at desktop width and scale down, so the whole site shows in its real desktop layout.
+      const W = 1440;
+      const fit = () => {
+        const k = view.clientWidth / W;
+        iframe.style.width = `${W}px`; iframe.style.height = `${view.clientHeight / k}px`; iframe.style.transform = `scale(${k})`;
+      };
+      fit(); new ResizeObserver(fit).observe(view);
+      shield?.addEventListener('click', () => {
+        shield.remove();
+        iframe.removeAttribute('tabindex');
         frame.classList.add('is-live');
-        if (state) state.textContent = state.dataset.live ?? 'Live';
-        btn.remove();
+        if (state) state.lastChild!.textContent = state.dataset.on ?? '';
         iframe.focus();
       });
     });
@@ -61,21 +63,30 @@ const host = live ? new URL(live).host : '';
 </script>
 
 <style>
-  .frame { margin: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg); }
+  .frame { margin: 0 auto; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg);
+    /* Never taller than the screen: the width shrinks so the whole 16:10 window (bar included) fits below the header. */
+    width: min(100%, calc((100svh - var(--header-h, 64px) - var(--banner-h, 0px) - 48px - 48px) * 1.6)); scroll-margin-top: calc(var(--header-h, 64px) + 24px); }
   .bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
   .dots { display: inline-flex; gap: 6px; }
   .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
   .url { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; text-transform: none; letter-spacing: .04em; font-size: 12px; }
   .url i { width: 6px; height: 6px; border-radius: 50%; background: var(--fg); }
   .bar-end { justify-self: end; }
-  .state { font-size: 11px; }
+  .state { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; }
+  .state i { width: 6px; height: 6px; border-radius: 50%; background: var(--fg); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
   .view { position: relative; aspect-ratio: 16 / 10; max-width: 100%; overflow: hidden; background: #EDEDED; }
   .view :global(.shot), .view canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
-  .view :global(.live) { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; background: #fff; }
-  .load { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; padding: 14px 22px; border: 0; border-radius: 12px; background: var(--fg); color: var(--bg); cursor: pointer;
-    font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; box-shadow: 0 16px 40px -16px rgb(0 0 0 / .5); }
-  .load .sq { display: none; }
-  .load .sub { text-transform: none; letter-spacing: .02em; font-size: 11px; opacity: .7; }
-  .load:hover { transform: translateX(-50%) translateY(-2px); }
-  @media (max-width: 640px) { .bar { grid-template-columns: auto 1fr; } .bar-end { display: none; } .url { justify-self: end; } .load { bottom: 12px; padding: 10px 14px; } }
+  .live { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; background: #fff; }
+
+  /* Until clicked, the shield takes the pointer so wheel and touch scrolling move the page, not the embed. */
+  .shield { position: absolute; inset: 0; display: grid; place-items: end center; padding: 0 0 22px; border: 0; background: transparent; cursor: pointer; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px 10px 14px; border-radius: 999px; border: 1px solid rgb(255 255 255 / .18);
+    background: rgb(11 11 11 / .72); color: #fff; backdrop-filter: blur(10px) saturate(1.2); -webkit-backdrop-filter: blur(10px) saturate(1.2);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / .45); transition: transform .4s var(--ease), background .3s; }
+  .shield:hover .pill, .shield:focus-visible .pill { transform: translateY(-3px); background: rgb(11 11 11 / .9); }
+  .shield:focus-visible { outline: none; }
+  .shield:focus-visible .pill { outline: 2px solid #fff; outline-offset: 3px; }
+  @media (max-width: 640px) { .bar { grid-template-columns: auto 1fr; } .bar-end { display: none; } .url { justify-self: end; } .shield { padding-bottom: 12px; } }
 </style>

@@ -19,7 +19,10 @@ const p = all[i], next = all[(i + 1) % all.length];
 const { Content, headings } = await render(p);
 const d = p.data;
 const cover = coverFor(p);
-const interactive = !!d.live && d.preview && (await canFrame(d.live, site.url));
+// In dev the page runs on localhost, so check framing against that origin: a site that only allows
+// the real domain then falls back to the screenshot here instead of showing "refused to connect".
+const host = import.meta.env.DEV ? Astro.url.origin : site.url;
+const interactive = !!d.live && d.preview && new URL(d.live).origin !== new URL(site.url).origin && (await canFrame(d.live, host));
 const facts: [string, string][] = [
   [t(lang, 'work.client'), d.client ?? ''],
   [t(lang, 'work.year'), String(d.year)],
