@@ -19,8 +19,9 @@ export function coverFor(p: CollectionEntry<'projects'>): ImageMetadata | undefi
 const frameCache = new Map<string, Promise<boolean>>();
 /** True when `url` can be embedded in an <iframe> on another site. */
 export function canFrame(url: string, siteUrl: string): Promise<boolean> {
-  if (!frameCache.has(url)) frameCache.set(url, check(url, siteUrl));
-  return frameCache.get(url)!;
+  const key = `${url} ${siteUrl}`;
+  if (!frameCache.has(key)) frameCache.set(key, check(url, siteUrl));
+  return frameCache.get(key)!;
 }
 
 async function check(url: string, siteUrl: string): Promise<boolean> {

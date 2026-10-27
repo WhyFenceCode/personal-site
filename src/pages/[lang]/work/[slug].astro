@@ -19,10 +19,10 @@ const p = all[i], next = all[(i + 1) % all.length];
 const { Content, headings } = await render(p);
 const d = p.data;
 const cover = coverFor(p);
-// In dev the page runs on localhost, so check framing against that origin: a site that only allows
-// the real domain then falls back to the screenshot here instead of showing "refused to connect".
-const host = import.meta.env.DEV ? Astro.url.origin : site.url;
-const interactive = !!d.live && d.preview && new URL(d.live).origin !== new URL(site.url).origin && (await canFrame(d.live, host));
+// Embed whenever the real domain is allowed to frame the site. In dev the page runs on localhost, which the
+// other site may not allow; then a note says so instead of leaving an unexplained "refused to connect".
+const interactive = !!d.live && d.preview && new URL(d.live).origin !== new URL(site.url).origin && (await canFrame(d.live, site.url));
+const devBlocked = import.meta.env.DEV && interactive && !(await canFrame(d.live!, Astro.url.origin));
 const facts: [string, string][] = [
   [t(lang, 'work.client'), d.client ?? ''],
   [t(lang, 'work.year'), String(d.year)],
@@ -48,7 +48,7 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
       </div>
     </header>
 
-    <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} art={d.art} interactive={interactive} />
+    <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} art={d.art} interactive={interactive} devBlocked={devBlocked} />
 
     <div class="case-body">
       <aside class="facts">

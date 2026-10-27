@@ -6,8 +6,8 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { t, type Lang } from '../lib/i18n';
 
-interface Props { lang: Lang; title: string; live?: string; cover?: ImageMetadata; art: string; interactive: boolean }
-const { lang, title, live, cover, art, interactive } = Astro.props;
+interface Props { lang: Lang; title: string; live?: string; cover?: ImageMetadata; art: string; interactive: boolean; devBlocked?: boolean }
+const { lang, title, live, cover, art, interactive, devBlocked = false } = Astro.props;
 const host = live ? new URL(live).host : '';
 const embed = !!live && interactive;
 ---
@@ -25,6 +25,10 @@ const embed = !!live && interactive;
         <iframe class="live" src={live} title={`${title}: ${t(lang, 'work.preview.live')}`} loading="lazy"
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
           referrerpolicy="strict-origin-when-cross-origin" tabindex="-1" data-live></iframe>
+        {devBlocked && (
+          <p class="dev-note mono">Dev only: {host} doesn't allow <code>{Astro.url.origin}</code> to frame it, so your browser blocks it here.
+            It will load on {new URL(Astro.site ?? 'https://example.com').host}. To see it locally, add {Astro.url.origin} to that site's <code>frame-ancestors</code>.</p>
+        )}
         <button type="button" class="shield" data-shield aria-label={t(lang, 'work.preview.use', { host })}>
           <span class="pill">
             <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v10l2.6-2.4 1.7 3.6 1.6-.8-1.7-3.5H11z" fill="currentColor"/></svg>
@@ -79,6 +83,8 @@ const embed = !!live && interactive;
   .view :global(.shot), .view canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
   .live { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; background: #fff; }
 
+  .dev-note { position: absolute; left: 16px; right: 16px; top: 16px; z-index: 1; margin: 0; padding: 12px 14px; border-radius: 8px; background: #FFF6D6; color: #3A2E00;
+    font-size: 11px; line-height: 1.5; text-transform: none; letter-spacing: .02em; }
   /* Until clicked, the shield takes the pointer so wheel and touch scrolling move the page, not the embed. */
   .shield { position: absolute; inset: 0; display: grid; place-items: end center; padding: 0 0 22px; border: 0; background: transparent; cursor: pointer; }
   .pill { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px 10px 14px; border-radius: 999px; border: 1px solid rgb(255 255 255 / .18);
