@@ -1,8 +1,9 @@
 # Settings for the resume page. Roles and education come from src/content (Markdown).
 
-timeline:
-  from: 2013                # first year shown on the scrubbable timeline
-  to: 2026                  # last year shown
+# The timeline spans your roles and degrees automatically: from the earliest start to this year
+# (or your latest end date). Uncomment to force a wider or narrower range.
+timeline: {}
+  # timeline: { from: 2020, to: 2030 }
 
 # Skills, grouped. "years" fills the squares (out of 10). SAMPLE DATA.
 skills:

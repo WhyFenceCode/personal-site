@@ -1,35 +1,42 @@
 ---
-/* Physical books from src/data/reading.txt. Spines show a short title; hover or tap one for the full card. */
+/* Physical books from src/data/reading.txt: the current book and this year's finished books on the shelf
+   (hover or tap a spine for the full card), then the "want" pile in the order it's written in the file. */
 import Tile from './Tile.astro';
 import { t, type Lang } from '../../lib/i18n';
 import type { Book } from '../../lib/lists';
-interface Props { lang: Lang; size: 1 | 2 | 4; data: { goal?: number; current?: Book; thisYear: Book[]; finished: Book[] } }
+interface Props { lang: Lang; size: 1 | 2 | 4; data: { goal?: number; current?: Book; thisYear: Book[]; finished: Book[]; want: Book[] } }
 const { lang, size, data } = Astro.props;
-const shelf = (data.thisYear.length ? data.thisYear : data.finished).slice(0, 8);
+const finished = (data.thisYear.length ? data.thisYear : data.finished).slice(0, data.current ? 7 : 8);
 const pct = data.current?.page && data.current.pages ? Math.round((data.current.page / data.current.pages) * 100) : null;
 const finishedOn = (b: Book) => {
   if (!b.finished) return '';
   const [y, m] = b.finished.split('-').map(Number);
-  return m ? new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1)) : String(y);
+  return m ? new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 1))) : String(y);
 };
+const reading = t(lang, 'activities.reading.current');
+const shelf = [
+  ...(data.current ? [{ book: data.current, current: true, meta: pct !== null ? `${reading} · p. ${data.current.page}/${data.current.pages}` : reading }] : []),
+  ...finished.map((b) => ({ book: b, current: false, meta: finishedOn(b) })),
+];
 ---
 <Tile title={t(lang, 'activities.reading.title')} meta={t(lang, 'activities.reading.goal', { n: data.thisYear.length, goal: data.goal ?? '—' })} size={size}>
   <div class="shelf" data-cards>
     <ul class="books" aria-label={t(lang, 'activities.reading.finished')}>
-      {shelf.map((b, i) => (
-        <li style={`height:${68 + ((i * 37) % 32)}%`}>
-          <button type="button" class="spine" data-card-title={b.title} data-card-sub={b.author} data-card-meta={finishedOn(b)}
-            aria-label={`${b.title}, ${b.author}${b.finished ? `, ${finishedOn(b)}` : ''}`}>
-            <span>{b.title}</span>
+      {shelf.map(({ book, current, meta }, i) => (
+        <li style={`height:${current ? 100 : 74 + ((i * 37) % 24)}%`} class:list={{ current }}>
+          <button type="button" class="spine" data-card-title={book.title} data-card-sub={book.author} data-card-meta={meta}
+            aria-label={`${book.title}, ${book.author}${meta ? `, ${meta}` : ''}`}>
+            <span>{book.title}</span>
           </button>
         </li>
       ))}
     </ul>
     <div class="card-pop" aria-hidden="true" hidden><b data-card-t></b><span data-card-s></span><span class="mono" data-card-m></span></div>
   </div>
+
   {data.current && (
     <div class="now">
-      <span class="mono muted">{t(lang, 'activities.reading.current')}</span>
+      <span class="mono muted">{reading}</span>
       <p class="title">{data.current.title} <span class="muted">· {data.current.author}</span></p>
       {pct !== null && <>
         <div class="bar" role="progressbar" aria-valuenow={pct} aria-valuemin="0" aria-valuemax="100" aria-label={`Page ${data.current.page} of ${data.current.pages}`}><i style={`width:${pct}%`}></i></div>
@@ -37,21 +44,36 @@ const finishedOn = (b: Book) => {
       </>}
     </div>
   )}
+
+  {data.want.length > 0 && (
+    <div class="next">
+      <span class="mono muted">{t(lang, 'activities.reading.next')}</span>
+      <ol>{data.want.slice(0, 5).map((b) => <li><span>{b.title}</span><span class="muted"> · {b.author}</span></li>)}</ol>
+    </div>
+  )}
 </Tile>
 
 <style>
   .shelf { position: relative; }
-  .books { list-style: none; margin: 0; padding: 0; display: flex; align-items: end; gap: 6px; height: 140px; }
-  .books li { width: 30px; display: flex; }
-  .spine { width: 100%; height: 100%; padding: 8px 0; border: 1.5px solid var(--fg); border-radius: 2px; background: none; color: inherit; cursor: pointer;
-    writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; text-align: start; transition: translate .4s var(--ease); }
+  .books { list-style: none; margin: 0; padding: 0; display: flex; align-items: end; gap: 6px; height: 200px; border-bottom: 2px solid var(--fg); }
+  .books li { width: 32px; display: flex; position: relative; }
+  .spine { width: 100%; height: 100%; padding: 10px 0; border: 1.5px solid var(--fg); border-bottom: 0; border-radius: 2px 2px 0 0; background: none; color: inherit; cursor: pointer;
+    writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; text-align: start; transition: translate .4s var(--ease); }
   /* Long titles end in an ellipsis instead of running past the spine. */
   .spine span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-block-size: 100%; }
   .books li:nth-child(2n) .spine { background: var(--fg); color: var(--bg); }
   .spine:hover, .spine:focus-visible, .spine[aria-pressed="true"] { translate: 0 12px; }
+  /* The book being read: wider, with a bookmark ribbon hanging from the top. */
+  .books li.current { width: 40px; }
+  .books li.current .spine { background: var(--bg); color: var(--fg); border-width: 2px; font-weight: 500; }
+  .books li.current::after { content: ""; position: absolute; top: -2px; right: 8px; width: 7px; height: 26px; background: var(--fg); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%); pointer-events: none; }
   .now { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; }
   .now .mono, .now .title { grid-column: 1 / -1; }
   .title { margin: 0; font-size: 18px; line-height: 1.3; }
   .bar { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
   .bar i { display: block; height: 100%; background: var(--fg); }
+  .next { display: grid; gap: 8px; }
+  .next ol { margin: 0; padding: 0; list-style: none; counter-reset: n; display: grid; gap: 4px; }
+  .next li { counter-increment: n; display: flex; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 4px; font-size: 15px; }
+  .next li::before { content: counter(n, decimal-leading-zero); font-family: var(--font-display); font-weight: 700; font-stretch: 85%; }
 </style>

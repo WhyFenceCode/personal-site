@@ -2,31 +2,61 @@
 title: Privacy policy
 order: 1
 ---
-> Template written for a personal site run from Canada. Fill in your details and have it checked before going live.
+This policy explains what personal information this website handles, why, and what you can do about it.
+It is written to meet Canada's *Personal Information Protection and Electronic Documents Act* (PIPEDA) and,
+for visitors in the European Union or the United Kingdom, the GDPR.
+
+<!-- Contact details and facts in {{double braces}} are filled in from src/config/site.yaml when the site builds. -->
+
 
 ## 1. Who is responsible
-This is a personal website run by the person named in the footer. Questions about privacy go to the email address
-in the footer.
+This website, {{url}}, is run by {{owner}} ({{city}}, {{region}}, {{country}}), who is accountable for the
+personal information handled through it.
 
-## 2. What is collected when you visit
-The host receives the technical data every website needs to deliver a page: your IP address, browser type, the page
-you asked for and the time. It is used only to deliver the site and keep it secure, and the host deletes it
-after a short period.
+For anything about privacy, including the requests in section 6, write to **{{email}}**.
+
+Postal address: {{address}}
+
+## 2. What is collected, why, and for how long
+
+| Information | Why | Legal basis | Kept for |
+| --- | --- | --- | --- |
+| Server logs: IP address, browser type, page requested, date and time | To deliver the site and keep it secure | Necessary to run the site (PIPEDA: implied consent; GDPR: legitimate interests, Art. 6(1)(f)) | Deleted by the host after a short period, normally within 30 days |
+| Preferences stored in your browser: language, motion setting, dismissed banner | To remember your choices | Strictly necessary | Until you clear your browser storage. Never sent anywhere |
+| Emails you send | To reply to you | Your consent (Art. 6(1)(a)) | Deleted once the conversation is finished, and within 24 months at most |
+
+**Statistics.** {{analytics}}
 
 ## 3. What this site does not do
-No accounts, no forms, no advertising, no tracking cookies, no third-party embeds. All fonts and scripts, including
-the 3D graphics, are served from this website itself. Apart from the optional statistics described below, loading a page doesn't contact any other company.
+No accounts, no forms, no advertising, no tracking cookies, and no selling, renting or sharing of personal
+information. All fonts, scripts and 3D graphics are served from this website itself, so loading a page does not
+contact any other company.
 
-## 4. Storage on your device
-Your language, whether you've dismissed the banner, and whether you've turned motion off are saved in your
-browser's local storage. They never leave your device, and you can clear them in your browser settings.
+## 4. Other parties
+- **Hosting.** The site is served by {{hosting}}, which processes server logs on the site's behalf. Its servers
+  may be outside Canada, so this information may be subject to the laws of that country.
+- **Live project previews.** Some project pages can show the real website in a frame. It only loads after you
+  click "Load live site". That other website then receives your IP address and its own privacy policy applies.
+- **Links.** Links to other websites open in a new tab. Their own privacy policies apply.
+- **Content shown on this site** (GitHub activity, map locations, exercise totals) is fetched by the build
+  server when the site is published, not by your browser. No information about visitors is sent to those services.
 
-## 5. Statistics
-Statistics are anonymous and cookieless: they count visits without identifying you or
-following you to other sites. Where consent is asked for, nothing loads until you allow it, and you can change your
-mind under "Cookie settings" in the footer.
+## 5. How it is protected
+The site is served only over an encrypted connection (HTTPS), and it collects as little as possible: there is
+almost nothing to protect.
 
 ## 6. Your rights
-Under Canada's Personal Information Protection and Electronic Documents Act (PIPEDA), and similar laws in other
-places (such as the GDPR if you are in the EU), you can ask what personal information is held about you, ask for
-it to be corrected or deleted, and complain to the Office of the Privacy Commissioner of Canada.
+You can ask to see the personal information held about you, have it corrected or deleted, and withdraw consent
+you have given. If you are in the EU or UK you can also ask to restrict or object to its use and to receive a copy
+in a portable format. Write to **{{email}}**. You will get a reply within 30 days.
+
+## 7. Complaints
+Please get in touch first so the problem can be fixed. You can also complain to the
+[Office of the Privacy Commissioner of Canada](https://www.priv.gc.ca/), or, in the EU or UK, to your local data
+protection authority.
+
+## 8. Children
+This site is not directed at children under 13 and does not knowingly collect their information.
+
+## 9. Changes
+If this policy changes, the date at the top of the page changes with it.

@@ -55,6 +55,7 @@ const siteSchema = z.object({
     owner: z.string(),
     jurisdiction: z.string().default(''),
     imprint: z.boolean().default(false),
+    hosting: z.string().default(''),
     address: z.array(z.string()).default([]),
     updated: z.coerce.string(),
   }),
@@ -91,6 +92,7 @@ const sectionBase = { tone: z.enum(['light', 'dark']).optional(), cta: cta.optio
 const sectionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('marquee'), items: z.array(z.string()).optional(), ...sectionBase }),
   z.object({ type: z.literal('education'), show: z.number().default(2), ...sectionBase }),
+  z.object({ type: z.literal('certifications'), limit: z.number().default(6), ...sectionBase }),
   z.object({ type: z.literal('github'), weeks: z.number().default(53), ...sectionBase }),
   z.object({ type: z.literal('projects'), limit: z.number().default(4), ...sectionBase }),
   z.object({ type: z.literal('experience'), ...sectionBase }),
@@ -100,7 +102,7 @@ const sectionSchema = z.discriminatedUnion('type', [
 const homeSchema = z.object({ sections: z.array(sectionSchema) });
 
 const resumeSchema = z.object({
-  timeline: z.object({ from: z.number(), to: z.number() }),
+  timeline: z.object({ from: z.number().optional(), to: z.number().optional() }).default({}),
   skills: z.array(z.object({ group: z.string(), items: z.array(z.object({ name: z.string(), years: z.number() })) })),
 });
 

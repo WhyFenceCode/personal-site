@@ -89,5 +89,10 @@
     "lat": 46.8137431,
     "lng": -71.2084061,
     "country": "Canada"
+  },
+  "amsterdam, netherlands": {
+    "lat": 52.3730796,
+    "lng": 4.8924534,
+    "country": "Netherlands"
   }
 }

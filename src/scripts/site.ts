@@ -192,6 +192,21 @@ function initPeek() {
   loop();
 }
 
+/* ---------- Links to other sites open in a new tab (and say so to screen readers) ---------- */
+function initExternalLinks() {
+  $$<HTMLAnchorElement>('a[href^="http"]').forEach((a) => {
+    let url: URL;
+    try { url = new URL(a.href); } catch { return; }
+    if (url.origin === location.origin || a.dataset.ext) return;
+    a.dataset.ext = '1';
+    a.target = '_blank';
+    a.rel = [...new Set([...(a.rel || '').split(/\s+/).filter(Boolean), 'noopener', 'noreferrer'])].join(' ');
+    const note = document.createElement('span');
+    note.className = 'sr-only'; note.textContent = ' (opens in a new tab)';
+    a.appendChild(note);
+  });
+}
+
 /* ---------- Per-page setup ---------- */
 let stopFooterInk: () => void = () => {};
 document.addEventListener('astro:page-load', () => {
@@ -202,6 +217,7 @@ document.addEventListener('astro:page-load', () => {
   initConsent();
   initPeek();
   initCards();
+  initExternalLinks();
   $$<HTMLCanvasElement>('canvas[data-art]').forEach((cv) => paintArt(cv, cv.dataset.art!, cv.hasAttribute('data-dither')));
   stopFooterInk();
   // Ink only over the big footer name: never over the legal, contact or navigation links.

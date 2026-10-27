@@ -10,7 +10,7 @@ const { lang, tone, weeks = 53, cta } = Astro.props;
 const gh = await getGithub(site.github.username, weeks);
 const fmt = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' });
 const rel = (iso: string) => { const d = Math.round((Date.now() - +new Date(iso)) / 864e5); return d <= 0 ? 'today' : d === 1 ? '1 day ago' : `${d} days ago`; };
-const months = gh.weeks.map((w, i) => { const d = w.find((x) => x.date); if (!d) return ''; const m = new Date(d.date).getUTCMonth(); const prev = gh.weeks[i - 1]?.find((x) => x.date); return !prev || new Date(prev.date).getUTCMonth() !== m ? new Intl.DateTimeFormat(lang, { month: 'short' }).format(new Date(d.date)) : ''; });
+const months = gh.weeks.map((w, i) => { const d = w.find((x) => x.date); if (!d) return ''; const m = new Date(d.date).getUTCMonth(); const prev = gh.weeks[i - 1]?.find((x) => x.date); return !prev || new Date(prev.date).getUTCMonth() !== m ? new Intl.DateTimeFormat(lang, { month: 'short', timeZone: 'UTC' }).format(new Date(d.date)) : ''; });
 const profile = site.github.username ? `https://github.com/${site.github.username}` : undefined;
 ---
 <Section lang={lang} id="github" tone={tone} eyebrow={t(lang, 'sections.github.eyebrow')} title={t(lang, 'sections.github.title')} cta={cta}
@@ -87,7 +87,8 @@ const profile = site.github.username ? `https://github.com/${site.github.usernam
   @media (max-width: 760px) { .gh-scroll { overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; } }
   .gh-months, .gh-grid { display: grid; column-gap: var(--gap); width: 100%; }
   .gh-months span { font-size: 10px; letter-spacing: .08em; white-space: nowrap; height: 18px; }
-  .gh-week { display: grid; gap: var(--gap); }
+  /* align-content: start stops a partial week (the current one) from stretching its rows, which would widen its square cells. */
+  .gh-week { display: grid; gap: var(--gap); align-content: start; min-width: 0; }
   .gh-grid i { display: block; width: 100%; aspect-ratio: 1; border-radius: 2px; }
   .gh-legend i { display: block; width: 10px; height: 10px; border-radius: 2px; }
   .l0 { background: var(--line); }

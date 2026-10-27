@@ -75,6 +75,35 @@ Keep the manual numbers in place: they're the fallback if Strava is down during 
 ### 5. Rebuild daily
 [scheduled-rebuilds.md](scheduled-rebuilds.md). Totals update once per build.
 
+### Step by step on Cloudflare Pages
+1. **Workers & Pages → your project → Settings → Variables and Secrets → Add.**
+2. Add the three names from step 3, each with **Type: Secret** (encrypted, never shown again), for **Production**.
+   Add them to **Preview** too only if you want preview deployments to show live numbers.
+3. **Deployments → Retry deployment** (or push a commit) so a build runs with the new secrets.
+4. Open the build log and look for `[strava]`. No line means it worked; a `[strava] falling back…` line says why not.
+5. Set up the daily rebuild from [scheduled-rebuilds.md](scheduled-rebuilds.md) so the totals stay current.
+
+### Testing on your own computer first
+1. Create a file named `.env` in the project root (it's git-ignored, so it can't be committed):
+   ```
+   STRAVA_CLIENT_ID=12345
+   STRAVA_CLIENT_SECRET=your-client-secret
+   STRAVA_REFRESH_TOKEN=your-refresh-token
+   ```
+2. Set `training.source: strava` in `src/config/activities.yaml`.
+3. Run `pnpm build`. If there's no `[strava]` warning, open `dist/en/index.html` in a browser and check the
+   running block. The build also ends with the secret scan, which fails if any of these values leaked into the site.
+4. Delete `.env` when you're done if you don't want the secrets on this machine.
+
+### Troubleshooting
+| Build log says | Meaning | Fix |
+| --- | --- | --- |
+| `token 400` or `token 401` | Client ID/secret wrong, or the refresh token was revoked or replaced | Re-check the values; repeat step 2 for a new token |
+| `activities 401` | The token doesn't have `activity:read` | Repeat step 2 and make sure the URL says `scope=activity:read` |
+| `activities 429` | Strava rate limit (100 requests per 15 min, 1,000 per day) | Wait; a daily rebuild uses 2–3 requests |
+| No warning, but the block is missing | Nothing logged in the last `activeWithinDays` days | Expected; it reappears with your next activity |
+| No warning, numbers look old | The site hasn't rebuilt since | Trigger a rebuild, or set up the daily one |
+
 ### Revoking access
 Strava → **Settings → My Apps → Revoke Access**. Do this, and create a new token, if you think a secret
 leaked. If Strava ever returns a different refresh token, builds will fall back to the manual numbers and log

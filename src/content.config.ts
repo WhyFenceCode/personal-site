@@ -19,7 +19,12 @@ const projects = defineCollection({
     role: z.string(),
     stack: z.array(z.string()).default([]),
     summary: z.string(),
-    cover: image().optional(),              // falls back to generated placeholder art
+    cover: image().optional(),              // falls back to a `pnpm shots` screenshot, then to placeholder art
+    live: z.url().optional(),      // the live site: "Visit the site" button, screenshot cover, live preview
+    preview: z.boolean().default(true),     // false = never offer the interactive live preview
+    client: z.string().optional(),
+    services: z.array(z.string()).default([]),
+    metrics: z.array(z.object({ value: z.union([z.string(), z.number()]), label: z.string() })).default([]),
     art: z.string().default('orbit'),       // placeholder art when there is no cover
     featured: z.boolean().default(false),   // featured projects show on the home page first
     order: z.number().default(100),
@@ -49,6 +54,8 @@ const education = defineCollection({
     end: z.coerce.string(),
     grade: z.string().optional(),
     highlight: z.string().optional(),       // the one line that shows on the home page
+    courses: z.array(z.string()).default([]), // relevant courses, shown as chips
+    url: z.string().optional(),             // certificates: link to verify the credential
     featured: z.boolean().default(false),   // featured entries are the ones on the home page
     order: z.number().default(100),
   }),

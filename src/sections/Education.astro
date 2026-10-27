@@ -1,13 +1,13 @@
 ---
 /* Only the featured entries (featured: true), up to `show`. Everything else lives on the resume page. */
 import Section from '../components/ui/Section.astro';
-import { educationFor, yearLabel } from '../lib/content';
+import { educationFor, yearLabel, isCertification } from '../lib/content';
 import { t, type Lang } from '../lib/i18n';
 import type { Cta } from '../lib/config';
 
 interface Props { lang: Lang; tone: 'light' | 'dark'; show?: number; cta?: Cta }
 const { lang, tone, show = 2, cta } = Astro.props;
-const all = await educationFor(lang);
+const all = (await educationFor(lang)).filter((e) => !isCertification(e.data.kind));
 const featured = all.filter((e) => e.data.featured).slice(0, show);
 const rest = all.length - featured.length;
 ---
@@ -21,6 +21,12 @@ const rest = all.length - featured.length;
           <h3>{e.data.title}</h3>
           <p class="mono muted">{e.data.institution}{e.data.grade && <> · {e.data.grade}</>}</p>
           {e.data.highlight && <p class="edu-highlight">{e.data.highlight}</p>}
+          {e.data.courses.length > 0 && (
+            <div class="courses">
+              <span class="mono muted">{t(lang, 'sections.education.courses')}</span>
+              <ul>{e.data.courses.map((c) => <li>{c}</li>)}</ul>
+            </div>
+          )}
         </div>
       </article>
     ))}
@@ -35,6 +41,9 @@ const rest = all.length - featured.length;
   .edu-card h3 { margin: 0 0 8px; font-family: var(--font-display); font-weight: 700; font-stretch: 90%; font-size: clamp(26px, 2.8vw, 42px); letter-spacing: -.02em; line-height: 1; }
   .edu-card .mono { margin: 0; text-transform: none; letter-spacing: .04em; font-size: 13px; }
   .edu-highlight { margin: 14px 0 0; font-size: clamp(18px, 1.6vw, 22px); line-height: 1.35; max-width: 40ch; }
+  .courses { margin-top: 18px; display: grid; gap: 10px; }
+  .courses ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .courses li { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 14px; }
   .edu-card.lead .edu-years { font-size: clamp(64px, 9vw, 150px); }
   @media (max-width: 760px) { .edu { grid-template-columns: minmax(0, 1fr); } }
 </style>

@@ -6,6 +6,6 @@
 #
 # SAMPLE DATA. Replace with your own.
 
-now Thinking Fast and Slow | Daniel Kahneman
-2026-06 The Handmaids Tale | Margaret Atwood
+now Thinking, Fast and Slow | Daniel Kahneman
+2026-06 The Handmaid's Tale | Margaret Atwood
 want The Testaments | Margaret Atwood

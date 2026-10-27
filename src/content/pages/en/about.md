@@ -1,9 +1,5 @@
 ---
 title: About
-lead: "I care about the last five percent: the spacing, the timing of a transition, the error message nobody reads until it matters."
+lead: "Bachelor of Applied Sciences student at Queen's University"
 ---
-Sample bio. Replace it with your own. I'm a designer who writes code, based in Your City.
-I've spent the last ten years between product design and front-end engineering, mostly
-on tools that people use every day.
-
-When I'm not at a desk I'm developing film, running before breakfast, or reading.
+I am a student at Queen's, studying Engineering in hopes of attaining my PEng certificate. I am currently based at my studies in Kingston, Ontario, but come from Vancouver, BC. In my free time I like to design web systems, such as this website. When I am not at my desk you might find me taking photos, going on long runs, or reading.

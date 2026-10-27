@@ -1,0 +1,41 @@
+---
+/* Certificates and courses (education entries with kind: certificate or course). Hidden when there are none. */
+import Section from '../components/ui/Section.astro';
+import { educationFor, yearLabel, isCertification, yearValue } from '../lib/content';
+import { t, type Lang } from '../lib/i18n';
+import type { Cta } from '../lib/config';
+
+interface Props { lang: Lang; tone: 'light' | 'dark'; limit?: number; cta?: Cta }
+const { lang, tone, limit = 6, cta } = Astro.props;
+const certs = (await educationFor(lang))
+  .filter((e) => isCertification(e.data.kind))
+  .sort((a, b) => yearValue(b.data.end) - yearValue(a.data.end))
+  .slice(0, limit);
+---
+{certs.length > 0 && (
+  <Section lang={lang} id="certifications" tone={tone} eyebrow={t(lang, 'sections.certifications.eyebrow')} title={t(lang, 'sections.certifications.title')} cta={cta}>
+    <ul class="certs">
+      {certs.map((c) => (
+        <li>
+          <span class="stat yr">{yearLabel(c.data.end)}</span>
+          <span class="body">
+            <b>{c.data.title}</b>
+            <span class="mono muted">{c.data.institution}</span>
+            {c.data.highlight && <span class="muted">{c.data.highlight}</span>}
+          </span>
+          {c.data.url && <a class="link" href={c.data.url} rel="noopener">{t(lang, 'sections.certifications.verify')} ↗</a>}
+        </li>
+      ))}
+    </ul>
+  </Section>
+)}
+
+<style>
+  .certs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  li { border-top: 1.5px solid var(--fg); padding-top: 18px; display: grid; gap: 14px; align-content: start; }
+  .yr { font-size: clamp(40px, 4.5vw, 64px); }
+  .body { display: grid; gap: 6px; }
+  b { font-family: var(--font-display); font-weight: 700; font-stretch: 90%; font-size: 24px; line-height: 1.1; letter-spacing: -.01em; }
+  .body .mono { text-transform: none; letter-spacing: .04em; font-size: 13px; }
+  .link { justify-self: start; }
+</style>

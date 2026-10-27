@@ -35,6 +35,9 @@ export async function projectsFor(lang: Lang) {
 export async function experienceFor(lang: Lang) {
   return (await localized('experience', lang)).sort((a, b) => yearValue(b.data.start) - yearValue(a.data.start));
 }
+/** Degrees and exchanges count as education; certificates and courses are listed as certifications. */
+export const isCertification = (kind: string) => kind === 'certificate' || kind === 'course';
+
 export async function educationFor(lang: Lang) {
   return (await localized('education', lang)).sort((a, b) => a.data.order - b.data.order || yearValue(b.data.end) - yearValue(a.data.end));
 }

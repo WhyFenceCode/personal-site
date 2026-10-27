@@ -2,7 +2,7 @@
 meta:
   label: English
   short: EN
-  description: Engineeirng student at Queen's University. Portfolio of Torsten Young, working towards a career in engineering and design. Based in Kingston, Ontario, Canada.
+  description: Engineering student at Queen's University. Portfolio of Torsten Young, working towards a career in engineering and design. Based in Kingston, Ontario, Canada.
 
 nav:
   home: Home
@@ -35,7 +35,8 @@ cta:
   viewResume: View the resume
 
 sections:
-  education: { eyebrow: Study, title: Education }
+  education: { eyebrow: Study, title: Education, courses: Relevant courses }
+  certifications: { eyebrow: Credentials, title: Certifications, verify: Verify }
   github: { eyebrow: Commit log, title: Shipping, total: contributions in the last year, streak: day streak, longest: longest streak, recent: Recent pushes, repos: Active repositories, sample: Sample data. Add your GitHub username in site.yaml. }
   projects: { eyebrow: Selected work, title: Projects }
   experience: { eyebrow: Career, title: Experience }
@@ -43,7 +44,7 @@ sections:
   contact: { eyebrow: Contact, title: "Let's talk." }
 
 activities:
-  reading: { title: Reading, current: Currently reading, finished: Finished this year, goal: "{n} of {goal} books this year" }
+  reading: { title: Reading, current: Currently reading, next: Up next, finished: Finished this year, goal: "{n} of {goal} books this year" }
   listening: { title: Listening, now: On repeat, top: Most played }
   running: { title: Running }
   cycling: { title: Cycling }
@@ -77,6 +78,17 @@ work:
   type: Type
   stack: Stack
   links: Links
+  client: Client
+  services: Services
+  technology: Technology
+  visit: Visit the site
+  preview:
+    screenshot: Screenshot
+    on: Live
+    live: live preview
+    load: Load live site
+    note: "Loads {host} here, interactive"
+    alt: Screenshot of
 
 resume:
   lead: Drag the timeline, or use the arrow keys, to see what I was doing each year.

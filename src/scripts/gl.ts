@@ -39,7 +39,7 @@ export function inkField(host: HTMLElement, opts: { wander?: boolean } = {}): In
   const field = document.createElement('canvas');
   const fx = field.getContext('2d')!;
   const S = 0.25;
-  let mvx = 0, mvy = 0;
+  let mvx = 0, mvy = 0, touching = false;
   const drops: { x: number; y: number; vx: number; vy: number; r: number }[] = [];
   const f: InkField = {
     field, W: 1, H: 1, R: 100, ax: 0, ay: 0, tx: 0, ty: 0, t: 0, inside: false, lastMove: -1e9, driver: null,
@@ -59,7 +59,9 @@ export function inkField(host: HTMLElement, opts: { wander?: boolean } = {}): In
         f.tx = f.W * (0.5 + 0.36 * Math.sin(f.t * 0.33)); f.ty = f.H * (0.55 + 0.16 * Math.sin(f.t * 0.61 + 1.3));
       }
       const px = f.ax, py = f.ay;
-      f.ax += (f.tx - f.ax) * 0.09; f.ay += (f.ty - f.ay) * 0.09;
+      // A finger drags the ink almost directly; a mouse leaves a slower, smoother trail.
+      const follow = touching ? 0.4 : 0.09;
+      f.ax += (f.tx - f.ax) * follow; f.ay += (f.ty - f.ay) * follow;
       fx.globalCompositeOperation = 'destination-out'; fx.fillStyle = 'rgba(0,0,0,0.045)'; fx.fillRect(0, 0, field.width, field.height);
       fx.globalCompositeOperation = 'lighter';
       // Without a pointer, a driver or wandering, stop painting so the ink fades away.
@@ -76,7 +78,7 @@ export function inkField(host: HTMLElement, opts: { wander?: boolean } = {}): In
         if (p.r < 6) drops.splice(i, 1);
       }
     },
-    destroy() { host.removeEventListener('pointermove', move); host.removeEventListener('pointerleave', leave); },
+    destroy() { host.removeEventListener('pointermove', move); host.removeEventListener('pointerleave', leave); host.removeEventListener('pointerdown', down); host.removeEventListener('pointerup', leave); host.removeEventListener('pointercancel', leave); },
   };
   function stamp(x: number, y: number, r: number) {
     const g = fx.createRadialGradient(x * S, y * S, 0, x * S, y * S, r * S);
@@ -85,11 +87,22 @@ export function inkField(host: HTMLElement, opts: { wander?: boolean } = {}): In
   }
   function move(e: PointerEvent) {
     const r = host.getBoundingClientRect(), nx = e.clientX - r.left, ny = e.clientY - r.top;
+    touching = e.pointerType !== 'mouse';
     mvx = nx - f.tx; mvy = ny - f.ty; f.tx = nx; f.ty = ny; f.inside = true; f.lastMove = performance.now();
   }
-  const leave = () => { f.inside = false; };
+  // On touch, the ink jumps to where the finger lands instead of sliding over from wherever it was.
+  function down(e: PointerEvent) {
+    if (e.pointerType === 'mouse') return;
+    const r = host.getBoundingClientRect();
+    f.tx = f.ax = e.clientX - r.left; f.ty = f.ay = e.clientY - r.top;
+    touching = true; f.inside = true; f.lastMove = performance.now(); mvx = mvy = 0;
+  }
+  const leave = () => { f.inside = false; touching = false; };
   host.addEventListener('pointermove', move);
+  host.addEventListener('pointerdown', down);
   host.addEventListener('pointerleave', leave);
+  host.addEventListener('pointerup', leave);
+  host.addEventListener('pointercancel', leave);
   f.resize(); f.ax = f.tx = f.W * 0.62; f.ay = f.ty = f.H * 0.55;
   return f;
 }

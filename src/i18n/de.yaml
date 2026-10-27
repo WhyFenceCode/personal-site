@@ -35,7 +35,8 @@ cta:
   viewResume: Lebenslauf ansehen
 
 sections:
-  education: { eyebrow: Studium, title: Ausbildung }
+  education: { eyebrow: Studium, title: Ausbildung, courses: Relevante Kurse }
+  certifications: { eyebrow: Nachweise, title: Zertifikate, verify: Prüfen }
   github: { eyebrow: Commit-Log, title: Shipping, total: Beiträge im letzten Jahr, streak: Tage in Folge, longest: längste Serie, recent: Letzte Pushes, repos: Aktive Repositories, sample: Beispieldaten. Trag deinen GitHub-Namen in site.yaml ein. }
   projects: { eyebrow: Ausgewählte Arbeiten, title: Projekte }
   experience: { eyebrow: Laufbahn, title: Erfahrung }
@@ -43,7 +44,7 @@ sections:
   contact: { eyebrow: Kontakt, title: Schreib mir. }
 
 activities:
-  reading: { title: Lesen, current: Lese gerade, finished: Dieses Jahr gelesen, goal: "{n} von {goal} Büchern dieses Jahr" }
+  reading: { title: Lesen, current: Lese gerade, next: Als Nächstes, finished: Dieses Jahr gelesen, goal: "{n} von {goal} Büchern dieses Jahr" }
   listening: { title: Hören, now: In Dauerschleife, top: Meistgehört }
   running: { title: Laufen }
   cycling: { title: Radfahren }
@@ -77,6 +78,17 @@ work:
   type: Art
   stack: Stack
   links: Links
+  client: Kunde
+  services: Leistungen
+  technology: Technologie
+  visit: Seite besuchen
+  preview:
+    screenshot: Screenshot
+    on: Live
+    live: Live-Vorschau
+    load: Live-Seite laden
+    note: "Lädt {host} hier, interaktiv"
+    alt: Screenshot von
 
 resume:
   lead: Zieh an der Zeitleiste oder nutze die Pfeiltasten, um zu sehen, was ich in jedem Jahr gemacht habe.

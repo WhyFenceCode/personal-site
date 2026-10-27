@@ -4,6 +4,7 @@ import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import { readFileSync } from 'node:fs';
 import { parse } from 'yaml';
+import { remarkSiteTokens } from './src/lib/remark-site-tokens.mjs';
 
 const site = parse(readFileSync(new URL('./src/config/site.yaml', import.meta.url), 'utf8'));
 
@@ -12,5 +13,7 @@ export default defineConfig({
   integrations: [react()],
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   devToolbar: { enabled: false },
+  // {{email}}, {{owner}}, {{address}}… in Markdown are filled from site.yaml at build time.
+  markdown: { remarkPlugins: [remarkSiteTokens(site)] },
   vite: { plugins: [tailwindcss()] },
 });

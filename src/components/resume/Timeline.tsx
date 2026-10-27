@@ -12,6 +12,7 @@ export default function Timeline({ items, range, labels }: Props) {
   const tracks = useRef<HTMLDivElement>(null);
   const span = range.to + 1 - range.from;
   const pct = (v: number) => ((v - range.from) / span) * 100;
+  const clamp = (p: number) => Math.max(0, Math.min(100, p)); // entries running past the range end at its edge
   const v = year + 0.5;
   const active = useMemo(() => items.map((it) => v >= it.from && v < it.to + 0.5), [items, v]);
   const lead = items.find((it, i) => active[i] && !it.edu) ?? items.find((_, i) => active[i]);
@@ -38,19 +39,21 @@ export default function Timeline({ items, range, labels }: Props) {
           {lead ? <><b>{lead.sub}, {lead.label}</b><span className="muted">{lead.detail}</span></> : <b>—</b>}
         </div>
       </div>
+      {/* Each label and its bar share one grid row, so a label that wraps makes its row taller instead of
+          pushing the rows below out of line. One layer over the bar column handles dragging and the year line. */}
       <div className="tl-chart">
-        <div className="tl-labels">
-          {items.map((it, i) => <div key={i} className={`tl-label${active[i] ? ' on' : ''}`}>{it.label}<small>{it.sub}</small></div>)}
-        </div>
-        <div className="tl-tracks" ref={tracks} onPointerDown={onDown} data-ring>
-          {items.map((it, i) => (
-            <div key={i} className="tl-track">
-              <span className={`tl-bar${it.edu ? ' edu' : ''}${active[i] ? ' on' : ''}`} style={{ left: `${pct(it.from)}%`, width: `${pct(it.to) - pct(it.from)}%` }} />
-            </div>
-          ))}
+        {items.map((it, i) => (
+          <div key={`l${i}`} className={`tl-label${active[i] ? ' on' : ''}`} style={{ gridRow: i + 1 }}>{it.label}<small>{it.sub}</small></div>
+        ))}
+        {items.map((it, i) => (
+          <div key={`t${i}`} className="tl-track" style={{ gridRow: i + 1 }}>
+            <span className={`tl-bar${it.edu ? ' edu' : ''}${active[i] ? ' on' : ''}`} style={{ left: `${clamp(pct(it.from))}%`, width: `${clamp(pct(it.to)) - clamp(pct(it.from))}%` }} />
+          </div>
+        ))}
+        <div className="tl-tracks" ref={tracks} onPointerDown={onDown} data-ring style={{ gridRow: `1 / ${items.length + 1}` }}>
           <span className="tl-cursor" style={{ left: `${pct(v)}%` }} />
         </div>
-        <div className="tl-scrub">
+        <div className="tl-scrub" style={{ gridRow: items.length + 1 }}>
           <label className="sr-only" htmlFor="tl-range">{labels.year}</label>
           <input id="tl-range" type="range" min={range.from} max={range.to} step={1} value={year}
             aria-valuetext={lead ? `${year}: ${lead.sub}, ${lead.label}` : String(year)}

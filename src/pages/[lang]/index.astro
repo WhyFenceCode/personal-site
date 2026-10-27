@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/hero/Hero.astro';
-import { SECTIONS } from '../../sections';
+import { SECTIONS, IS_EMPTY } from '../../sections';
 import { home } from '../../lib/config';
 import { langStaticPaths } from '../../lib/i18n';
 
@@ -9,7 +9,15 @@ export const getStaticPaths = langStaticPaths;
 const { lang } = Astro.params as { lang: string };
 
 // Sections alternate dark/light (starting dark, under the white name block) unless a tone is set.
-const sections = home.sections.filter((s) => !s.hidden).map((s, i) => ({ ...s, tone: s.tone ?? (i % 2 === 0 ? 'dark' : 'light') }));
+// Hidden sections and sections with nothing to show are dropped first, so the rhythm never skips.
+const visible = [];
+for (const s of home.sections) {
+  if (s.hidden) continue;
+  const empty = IS_EMPTY[s.type as keyof typeof IS_EMPTY];
+  if (empty && (await empty(lang))) continue;
+  visible.push(s);
+}
+const sections = visible.map((s, i) => ({ ...s, tone: s.tone ?? (i % 2 === 0 ? 'dark' : 'light') }));
 ---
 <Base lang={lang} page="home">
   <Hero lang={lang} />

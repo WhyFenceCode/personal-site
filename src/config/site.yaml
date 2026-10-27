@@ -68,5 +68,6 @@ legal:
   owner: Torsten Young
   jurisdiction: Canada
   imprint: false            # an imprint (German "Impressum") is only required for sites run from Germany/Austria
-  address: [Not required as site is based in Canada]               # Street 1, City, Province, Postal code, Canada
+  address: []               # optional mailing address, e.g. [Street 1, City, Province, Postal code]. Empty = email is the contact.
+  hosting: ""               # your host's name once chosen, e.g. Cloudflare. Named in the privacy policy.
   updated: 2026-10-26

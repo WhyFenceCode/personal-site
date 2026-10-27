@@ -9,9 +9,11 @@
     "build": "astro build && node scripts/check-secrets.mjs",
     "preview": "astro preview",
     "check": "astro check",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "shots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.4",
     "@astrojs/react": "^7.1.1",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "@fontsource-variable/instrument-sans": "^5.3.0",
@@ -39,6 +41,7 @@
     "@types/three": "^0.186.0",
     "@types/topojson-client": "^3.1.5",
     "@types/tz-lookup": "^6.1.2",
+    "playwright": "^1.64.1",
     "typescript": "^6.0.3"
   },
   "engines": {
