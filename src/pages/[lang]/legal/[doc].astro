@@ -1,0 +1,51 @@
+---
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import PageHead from '../../../components/PageHead.astro';
+import { localized, slugOf } from '../../../lib/content';
+import { site } from '../../../lib/config';
+import { languages, t, href } from '../../../lib/i18n';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const lang of languages) for (const d of await localized('legal', lang)) if (slugOf(d.id) !== 'imprint' || site.legal.imprint) paths.push({ params: { lang, doc: slugOf(d.id) } });
+  return paths;
+}
+const { lang, doc } = Astro.params as { lang: string; doc: string };
+const docs = (await localized('legal', lang)).filter((d) => slugOf(d.id) !== 'imprint' || site.legal.imprint).sort((a, b) => a.data.order - b.data.order);
+const entry = docs.find((d) => slugOf(d.id) === doc)!;
+const { Content } = await render(entry);
+const updated = new Intl.DateTimeFormat(lang, { dateStyle: 'long' }).format(new Date(site.legal.updated));
+---
+<Base lang={lang} page="legal" title={entry.data.title}>
+  <div class="wrap">
+    <PageHead title={t(lang, 'legal.title')} metaLeft={`${t(lang, 'legal.updated')} ${updated}`} />
+    <div class="legal">
+      <nav aria-label={t(lang, 'legal.title')}>
+        <ul>{docs.map((d) => <li><a href={href(lang, `legal/${slugOf(d.id)}`)} aria-current={d === entry ? 'page' : undefined}>{t(lang, `legal.${slugOf(d.id)}`)}</a></li>)}</ul>
+      </nav>
+      <article class="prose-site">
+        <h2>{entry.data.title}</h2>
+        <Content />
+        {doc === 'imprint' && (
+          <address>
+            {site.legal.owner}<br />
+            {site.legal.address.map((l) => <>{l}<br /></>)}
+            {site.email}
+          </address>
+        )}
+      </article>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .legal { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 48px; padding-block: 48px 112px; }
+  nav ul { list-style: none; margin: 0; padding: 0; position: sticky; top: calc(var(--header-h) + 24px); }
+  nav a { display: block; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  nav a[aria-current="page"] { color: var(--fg); }
+  nav a[aria-current="page"]::before { content: "■ "; }
+  .prose-site h2:first-child { margin-top: 0; font-size: 44px; }
+  address { font-style: normal; margin-top: 16px; line-height: 1.7; }
+  @media (max-width: 760px) { .legal { grid-template-columns: minmax(0, 1fr); } nav ul { position: static; display: flex; gap: 16px; overflow-x: auto; } nav a { white-space: nowrap; } }
+</style>

@@ -1,0 +1,25 @@
+---
+/* One language: nothing. Two: a toggle (like a switch). Three or more: a dropdown. */
+import { languages, t, switchPath, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; class?: string }
+const { lang, class: cls } = Astro.props;
+const path = Astro.url.pathname;
+const other = languages.find((l) => l !== lang);
+---
+{languages.length === 2 && other && (
+  <a class:list={['lang', cls]} href={switchPath(path, other)} hreflang={other} lang={other} data-lang-link={other}
+     data-pos={languages.indexOf(lang)} aria-label={`${t(lang, 'meta.label')} → ${t(other, 'meta.label')}`}>
+    <span class="opt" aria-current={lang === languages[0] ? 'true' : 'false'}>{t(languages[0], 'meta.short')}</span>
+    <span class="sw" aria-hidden="true"><i></i></span>
+    <span class="opt" aria-current={lang === languages[1] ? 'true' : 'false'}>{t(languages[1], 'meta.short')}</span>
+  </a>
+)}
+{languages.length > 2 && (
+  <label class:list={['inline-flex', cls]}>
+    <span class="sr-only">Language</span>
+    <select class="lang-select" data-lang-select>
+      {languages.map((l) => <option value={switchPath(path, l)} selected={l === lang} lang={l}>{t(l, 'meta.label')}</option>)}
+    </select>
+  </label>
+)}

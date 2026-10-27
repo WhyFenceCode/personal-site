@@ -1,0 +1,26 @@
+# Settings for the resume page. Roles and education come from src/content (Markdown).
+
+timeline:
+  from: 2013                # first year shown on the scrubbable timeline
+  to: 2026                  # last year shown
+
+# Skills, grouped. "years" fills the squares (out of 10). SAMPLE DATA.
+skills:
+  - group: Design
+    items:
+      - { name: Interface design, years: 9 }
+      - { name: Design systems, years: 6 }
+      - { name: Prototyping, years: 8 }
+      - { name: Typography, years: 9 }
+  - group: Engineering
+    items:
+      - { name: TypeScript / React, years: 7 }
+      - { name: Astro, years: 3 }
+      - { name: Three.js / GLSL, years: 5 }
+      - { name: Accessibility, years: 6 }
+  - group: Tools
+    items:
+      - { name: Figma, years: 7 }
+      - { name: Blender, years: 4 }
+      - { name: Git, years: 9 }
+      - { name: Node.js, years: 7 }

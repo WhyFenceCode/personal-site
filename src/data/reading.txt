@@ -1,0 +1,16 @@
+# Books. One per line. Lines starting with # are ignored.
+#
+#   now      Title | Author | 120/220      what you're reading (page progress is optional)
+#   2026-09  Title | Author                finished, with year-month
+#   want     Title | Author                on the pile (optional, not shown yet)
+#
+# SAMPLE DATA. Replace with your own.
+
+now      The Shape of Design | Frank Chimero | 120/220
+2026-09  Piranesi | Susanna Clarke
+2026-07  Thinking with Type | Ellen Lupton
+2026-05  The Design of Everyday Things | Don Norman
+2026-03  Grid Systems in Graphic Design | Josef Müller-Brockmann
+2026-01  Steal Like an Artist | Austin Kleon
+2025-11  Klara and the Sun | Kazuo Ishiguro
+want     The Timeless Way of Building | Christopher Alexander

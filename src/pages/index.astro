@@ -1,0 +1,29 @@
+---
+/* Root: send visitors to their language (saved choice, then browser language, then the default). */
+import { languages, defaultLang } from '../lib/i18n';
+---
+<!doctype html>
+<html lang={defaultLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting…</title>
+    <meta http-equiv="refresh" content={`1; url=/${defaultLang}/`} />
+    <link rel="canonical" href={`/${defaultLang}/`} />
+    <script is:inline define:vars={{ languages, defaultLang }}>
+      var pick = defaultLang;
+      try {
+        var saved = localStorage.getItem('site.lang');
+        if (saved && languages.indexOf(saved) > -1) pick = saved;
+        else {
+          var prefs = navigator.languages || [navigator.language];
+          for (var i = 0; i < prefs.length; i++) { var c = (prefs[i] || '').slice(0, 2).toLowerCase(); if (languages.indexOf(c) > -1) { pick = c; break; } }
+        }
+      } catch (e) {}
+      location.replace('/' + pick + '/');
+    </script>
+  </head>
+  <body style="font-family: system-ui, sans-serif; padding: 24px;">
+    <p>{languages.map((l) => <a href={`/${l}/`} style="margin-right: 12px">{l.toUpperCase()}</a>)}</p>
+  </body>
+</html>

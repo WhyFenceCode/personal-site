@@ -1,0 +1,69 @@
+---
+import LangSwitch from './LangSwitch.astro';
+import { site } from '../lib/config';
+import { t, href, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; page: string }
+const { lang, page } = Astro.props;
+const nav = [
+  { key: 'work', label: t(lang, 'nav.work') },
+  { key: 'resume', label: t(lang, 'nav.resume') },
+  { key: 'about', label: t(lang, 'nav.about') },
+];
+---
+<header class="site-header wrap">
+  <a class="brand" href={href(lang, 'home')}>{site.name}</a>
+  <nav class="hnav" aria-label="Main">
+    {nav.map((n) => (
+      <a href={href(lang, n.key)} class:list={['hnav-link', { 'is-resume': n.key === 'resume' }]} aria-current={page === n.key ? 'page' : undefined}>
+        {n.key === 'resume' && <span class="sq" aria-hidden="true"></span>}{n.label}
+      </a>
+    ))}
+    <a href={href(lang, 'contact')} class="hnav-link is-contact">{t(lang, 'nav.contact')}<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 10L10 2M4 2h6v6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></a>
+  </nav>
+  <button class="menu-btn" type="button" id="menu-btn" aria-expanded="false" aria-controls="menu">
+    <span>{t(lang, 'nav.menu')}</span><span class="grip" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  </button>
+</header>
+
+<div class="menu tone-dark wrap" id="menu" role="dialog" aria-modal="true" aria-label={t(lang, 'nav.menu')} hidden>
+  <div class="menu-top">
+    <span class="brand">{site.name}</span>
+    <button class="menu-btn" type="button" id="menu-close"><span>{t(lang, 'nav.close')}</span><span class="grip" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+  </div>
+  <nav aria-label="Menu"><ul>
+    {[{ key: 'home', label: t(lang, 'nav.home') }, ...nav, { key: 'contact', label: t(lang, 'nav.contact') }].map((n, i) => (
+      <li><a href={href(lang, n.key)} aria-current={page === n.key ? 'page' : undefined}><span>{n.label}</span><sup>{String(i + 1).padStart(2, '0')}</sup></a></li>
+    ))}
+  </ul></nav>
+  <div class="menu-foot mono"><span>{site.email}</span><LangSwitch lang={lang} /></div>
+</div>
+
+<style>
+  .site-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #fff; mix-blend-mode: difference; pointer-events: none; }
+  .site-header > * { pointer-events: auto; }
+  .brand { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; font-size: 20px; letter-spacing: -.01em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
+  .hnav { display: flex; align-items: center; gap: 6px; }
+  .hnav-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; padding: 9px 14px; border-radius: 999px; transition: background .3s, color .3s; }
+  .hnav-link:hover, .hnav-link[aria-current="page"] { background: #fff; color: #000; }
+  .hnav-link.is-resume { box-shadow: inset 0 0 0 1.5px #fff; }
+  .hnav-link .sq { width: 7px; height: 7px; background: currentColor; }
+  .hnav-link.is-contact { background: #fff; color: #000; margin-left: 6px; }
+  .hnav-link.is-contact:hover { background: none; color: #fff; box-shadow: inset 0 0 0 1.5px #fff; }
+  .menu-btn { display: none; align-items: center; gap: 10px; background: none; border: 0; padding: 10px 0; cursor: pointer; font-family: var(--font-mono); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: inherit; }
+  .menu-btn .grip { display: grid; grid-template-columns: 3px 3px; gap: 3px; }
+  .menu-btn .grip i { width: 3px; height: 3px; background: currentColor; }
+  @media (max-width: 860px) { .hnav { display: none; } .site-header .menu-btn { display: inline-flex; } }
+
+  .menu { position: fixed; inset: 0; z-index: 70; display: grid; grid-template-rows: var(--header-h) 1fr auto; padding-top: env(safe-area-inset-top, 0px); padding-bottom: max(24px, env(safe-area-inset-bottom, 0px)); clip-path: circle(0 at var(--mx, 95%) var(--my, 32px)); transition: clip-path .8s var(--ease); }
+  .menu:global(.open) { clip-path: circle(150% at var(--mx, 95%) var(--my, 32px)); }
+  .menu-top { display: flex; justify-content: space-between; align-items: center; }
+  .menu .menu-btn { display: inline-flex; }
+  .menu ul { list-style: none; margin: 0; padding: 0; align-self: center; display: grid; }
+  .menu li a { display: flex; align-items: baseline; gap: 14px; text-decoration: none; font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; text-transform: uppercase; letter-spacing: -.02em; line-height: .92; font-size: clamp(52px, 13vw, 150px); transition: opacity .3s, transform .5s var(--ease); }
+  .menu li a sup { font-family: var(--font-mono); font-size: 13px; letter-spacing: .1em; }
+  .menu ul:hover a { opacity: .3; }
+  .menu ul a:hover, .menu ul a:focus-visible { opacity: 1; transform: translateX(12px); }
+  .menu li a[aria-current="page"]::after { content: ""; width: .14em; height: .14em; background: currentColor; align-self: center; }
+  .menu-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+</style>

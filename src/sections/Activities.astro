@@ -1,0 +1,52 @@
+---
+/* Hobby blocks. Which blocks show, in what order and how wide, comes from home.yaml.
+   Data comes from activities.yaml, the text files in src/data, or Strava at build time. */
+import Section from '../components/ui/Section.astro';
+import Reading from '../components/activities/Reading.astro';
+import Listening from '../components/activities/Listening.astro';
+import Training from '../components/activities/Training.astro';
+import Photography from '../components/activities/Photography.astro';
+import Places from '../components/activities/Places.astro';
+import Languages from '../components/activities/Languages.astro';
+import Uses from '../components/activities/Uses.astro';
+import { activities, type Cta } from '../lib/config';
+import { reading, places } from '../lib/lists';
+import { training, isRecent } from '../lib/strava';
+import { t, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; tone: 'light' | 'dark'; blocks: { id: string; size: 1 | 2 | 4 }[]; cta?: Cta }
+const { lang, tone, blocks, cta } = Astro.props;
+
+/** Each block: its component, and a loader that returns its props (or null to hide the block). */
+const BLOCKS: Record<string, { C: any; load: () => Promise<Record<string, unknown> | null> }> = {
+  reading: { C: Reading, load: async () => ({ data: { goal: activities.reading?.goal, ...reading() } }) },
+  listening: { C: Listening, load: async () => (activities.listening ? { data: activities.listening } : null) },
+  running: { C: Training, load: async () => { const s = (await training()).running; return isRecent(s) ? { sport: 'running', data: s } : null; } },
+  cycling: { C: Training, load: async () => { const s = (await training()).cycling; return isRecent(s) ? { sport: 'cycling', data: s } : null; } },
+  photography: { C: Photography, load: async () => (activities.photography?.url ? { data: activities.photography } : null) },
+  places: { C: Places, load: async () => { const p = await places(); return p.length ? { data: { ...activities.places, places: p } } : null; } },
+  languages: { C: Languages, load: async () => (activities.languages ? { data: activities.languages } : null) },
+  uses: { C: Uses, load: async () => (activities.uses ? { data: activities.uses } : null) },
+};
+
+const list = [];
+for (const b of blocks) {
+  const def = BLOCKS[b.id];
+  if (!def) { console.warn(`[activities] unknown block "${b.id}" in home.yaml (known: ${Object.keys(BLOCKS).join(', ')})`); continue; }
+  const props = await def.load();
+  if (props) list.push({ ...b, C: def.C, props });
+}
+---
+{list.length > 0 && (
+  <Section lang={lang} id="activities" tone={tone} eyebrow={t(lang, 'sections.activities.eyebrow')} title={t(lang, 'sections.activities.title')} cta={cta}>
+    <div class="bento">
+      {list.map(({ C, size, props }) => <C lang={lang} size={size} {...props} />)}
+    </div>
+  </Section>
+)}
+
+<style>
+  .bento { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; grid-auto-flow: dense; }
+  @media (max-width: 1000px) { .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .bento { grid-template-columns: minmax(0, 1fr); } }
+</style>

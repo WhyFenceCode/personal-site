@@ -1,0 +1,71 @@
+---
+/* Map of places from src/data/places.txt, drawn as a static SVG at build time (no map library or tiles in the browser).
+   Pins open an info card (hover, click to pin, tap on phones); hovering a name in the list highlights its pin. */
+import { geoEqualEarth, geoPath, geoContains } from 'd3-geo';
+import { feature } from 'topojson-client';
+import world from 'world-atlas/countries-110m.json';
+import Tile from './Tile.astro';
+import { t, type Lang } from '../../lib/i18n';
+import type { Place } from '../../lib/lists';
+
+interface Props { lang: Lang; size: 1 | 2 | 4; data: { title?: string; places: Place[] } }
+const { lang, size, data } = Astro.props;
+const W = 960, H = 440;
+const countries = (feature(world as any, (world as any).objects.countries) as any).features.filter((f: any) => f.id !== '010');
+const projection = geoEqualEarth().fitExtent([[4, 4], [W - 4, H - 4]], { type: 'FeatureCollection', features: countries } as any);
+const path = geoPath(projection).digits(1);
+const visited = new Set<string>();
+const countryOf = new Map<Place, string>();
+for (const p of data.places) {
+  const c = countries.find((f: any) => geoContains(f, [p.lng, p.lat]));
+  if (c) { visited.add(c.properties.name); countryOf.set(p, c.properties.name); }
+}
+const pins = data.places.map((p, i) => { const [x, y] = projection([p.lng, p.lat]) ?? [0, 0]; return { p, i, x, y }; });
+const aria = (p: Place) => [p.name, p.year, p.note].filter(Boolean).join(', ');
+---
+<Tile title={data.title ?? t(lang, 'activities.places.title')} meta={t(lang, 'activities.places.count', { n: data.places.length, c: visited.size })} size={size}>
+  <figure class="map" data-cards data-map>
+    <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-label={`Map of ${data.places.length} places in ${visited.size} countries`}>
+      <g class="land" aria-hidden="true">{countries.map((f: any) => <path d={path(f) ?? ''} class:list={{ visited: visited.has(f.properties.name) }} />)}</g>
+      <g class="pins">{pins.map(({ p, i, x, y }) => (
+        <g class="pin" transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`} tabindex="0" role="button" aria-label={aria(p)} data-pin={i}
+          data-card-title={p.city} data-card-sub={countryOf.get(p) ?? p.name.split(',').slice(1).join(',').trim()} data-card-meta={[p.year, p.note].filter(Boolean).join(' · ')}>
+          <circle r="16" class="hit" /><circle r="7" class="halo" /><circle r="4.5" class="core" />
+        </g>
+      ))}</g>
+    </svg>
+    <div class="card-pop" aria-hidden="true" hidden><b data-card-t></b><span data-card-s></span><span class="mono" data-card-m></span></div>
+  </figure>
+  <ul class="list" aria-label={t(lang, 'activities.places.title')}>
+    {pins.map(({ p, i }) => <li data-pin-for={i}><span>{p.city}</span>{p.year && <span class="num muted">{p.year}</span>}</li>)}
+  </ul>
+</Tile>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-map]').forEach((fig) => {
+      const list = fig.parentElement!.querySelector('.list');
+      const mark = (i: string | undefined, on: boolean) => fig.querySelector(`[data-pin="${i}"]`)?.classList.toggle('lit', on);
+      list?.addEventListener('pointerover', (e) => mark((e.target as Element).closest<HTMLElement>('[data-pin-for]')?.dataset.pinFor, true));
+      list?.addEventListener('pointerout', (e) => mark((e.target as Element).closest<HTMLElement>('[data-pin-for]')?.dataset.pinFor, false));
+      fig.addEventListener('keydown', (e) => { const p = (e.target as Element).closest('.pin'); if (p && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); (p as HTMLElement).dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
+    });
+  });
+</script>
+
+<style>
+  .map { margin: 0; position: relative; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .land path { fill: color-mix(in srgb, var(--fg) 9%, var(--bg)); stroke: var(--bg); stroke-width: .6; }
+  .land path.visited { fill: color-mix(in srgb, var(--fg) 34%, var(--bg)); }
+  .pin { cursor: pointer; outline: none; }
+  .pin .hit { fill: transparent; }
+  .pin .halo { fill: var(--bg); transition: r .25s var(--ease); }
+  .pin .core { fill: var(--fg); transition: r .25s var(--ease); }
+  .pin:hover .halo, .pin:focus-visible .halo, .pin:global(.lit) .halo, .pin[aria-pressed="true"] .halo { r: 11px; }
+  .pin:hover .core, .pin:focus-visible .core, .pin:global(.lit) .core, .pin[aria-pressed="true"] .core { r: 7px; }
+  .pin:focus-visible .halo { stroke: var(--fg); stroke-width: 2; }
+  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .list li { display: inline-flex; gap: 8px; align-items: baseline; cursor: default; }
+  .list li:hover span:first-child { text-decoration: underline; text-underline-offset: 3px; }
+</style>

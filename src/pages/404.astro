@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import { defaultLang, t, href } from '../lib/i18n';
+const lang = defaultLang;
+---
+<Base lang={lang} title="404">
+  <div class="wrap nf">
+    <p class="stat code">404</p>
+    <h1 class="display"><span class="fit">{t(lang, 'notFound.title')}</span></h1>
+    <p class="lead">{t(lang, 'notFound.body')}</p>
+    <a class="btn" href={href(lang, 'home')}>{t(lang, 'notFound.back')}</a>
+  </div>
+</Base>
+
+<style>
+  .nf { padding-block: 64px 120px; display: grid; gap: 24px; justify-items: start; }
+  .code { font-size: 32px; margin: 0; }
+  h1 { margin: 0; width: 100%; }
+  .lead { font-size: 22px; margin: 0; }
+</style>

@@ -1,0 +1,110 @@
+---
+/* Commit tracker: contribution calendar, streaks, active repos and recent pushes (fetched at build time). */
+import Section from '../components/ui/Section.astro';
+import { getGithub } from '../lib/github';
+import { site, type Cta } from '../lib/config';
+import { t, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; tone: 'light' | 'dark'; weeks?: number; cta?: Cta }
+const { lang, tone, weeks = 53, cta } = Astro.props;
+const gh = await getGithub(site.github.username, weeks);
+const fmt = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' });
+const rel = (iso: string) => { const d = Math.round((Date.now() - +new Date(iso)) / 864e5); return d <= 0 ? 'today' : d === 1 ? '1 day ago' : `${d} days ago`; };
+const months = gh.weeks.map((w, i) => { const d = w.find((x) => x.date); if (!d) return ''; const m = new Date(d.date).getUTCMonth(); const prev = gh.weeks[i - 1]?.find((x) => x.date); return !prev || new Date(prev.date).getUTCMonth() !== m ? new Intl.DateTimeFormat(lang, { month: 'short' }).format(new Date(d.date)) : ''; });
+const profile = site.github.username ? `https://github.com/${site.github.username}` : undefined;
+---
+<Section lang={lang} id="github" tone={tone} eyebrow={t(lang, 'sections.github.eyebrow')} title={t(lang, 'sections.github.title')} cta={cta}
+  note={gh.sample ? t(lang, 'sections.github.sample') : undefined}>
+  <div class="gh-stats">
+    <div><span class="stat gh-num">{gh.total.toLocaleString(lang)}</span><span class="mono muted">{t(lang, 'sections.github.total')}</span></div>
+    <div><span class="stat gh-num">{gh.streak}</span><span class="mono muted">{t(lang, 'sections.github.streak')}</span></div>
+    <div><span class="stat gh-num">{gh.longest}</span><span class="mono muted">{t(lang, 'sections.github.longest')}</span></div>
+  </div>
+
+  <figure class="gh-cal" data-gh-cal>
+    <div class="gh-scroll">
+      <div class="gh-months mono" aria-hidden="true" style={`grid-template-columns: repeat(${gh.weeks.length}, minmax(var(--cell-min), 1fr))`}>{months.map((m) => <span>{m}</span>)}</div>
+      <div class="gh-grid" role="img" aria-label={`${gh.total} contributions in the last year. Current streak ${gh.streak} days, longest ${gh.longest} days.`} style={`grid-template-columns: repeat(${gh.weeks.length}, minmax(var(--cell-min), 1fr))`}>
+        {gh.weeks.map((w) => (
+          <div class="gh-week">{w.map((d) => d.level < 0 ? <i class="gh-empty"></i> : <i class={`l${d.level}`} data-d={d.date} data-c={d.count}></i>)}</div>
+        ))}
+      </div>
+    </div>
+    <figcaption class="gh-read mono muted" aria-hidden="true"><span data-gh-read>Hover a day</span><span class="gh-legend">Less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> More</span></figcaption>
+  </figure>
+
+  <div class="gh-cols">
+    <div>
+      <h3 class="mono muted">{t(lang, 'sections.github.recent')}</h3>
+      <ol class="gh-pushes">
+        {gh.pushes.map((p) => (
+          <li><a href={p.url} rel="noopener"><span class="gh-msg">{p.message}</span><span class="mono muted">{p.repo} · {rel(p.date)}</span></a></li>
+        ))}
+      </ol>
+    </div>
+    <div>
+      <h3 class="mono muted">{t(lang, 'sections.github.repos')}</h3>
+      <ul class="gh-repos">
+        {gh.repos.map((r) => (
+          <li><a href={r.url} rel="noopener">
+            <span class="gh-repo">{r.name}</span>
+            <span class="muted">{r.description}</span>
+            <span class="mono muted">{r.language ?? '—'} · ★ {r.stars} · {fmt.format(new Date(r.pushedAt))}</span>
+          </a></li>
+        ))}
+      </ul>
+      {profile && <a class="link" href={profile} rel="noopener me">GitHub profile ↗</a>}
+    </div>
+  </div>
+</Section>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-gh-cal]').forEach((cal) => {
+      const read = cal.querySelector<HTMLElement>('[data-gh-read]')!;
+      const fmt = new Intl.DateTimeFormat(document.documentElement.lang, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+      cal.addEventListener('pointerover', (e) => {
+        const c = (e.target as HTMLElement).closest<HTMLElement>('[data-d]'); if (!c) return;
+        const n = Number(c.dataset.c);
+        read.textContent = `${n} contribution${n === 1 ? '' : 's'} · ${fmt.format(new Date(c.dataset.d + 'T12:00:00Z'))}`;
+      });
+      // On phones the calendar scrolls; start at the most recent weeks. On wider screens it fits and stays put.
+      const scroll = cal.querySelector<HTMLElement>('.gh-scroll');
+      const narrow = matchMedia('(max-width: 760px)');
+      const place = () => { if (scroll) scroll.scrollLeft = narrow.matches ? scroll.scrollWidth : 0; };
+      place(); narrow.addEventListener('change', place);
+    });
+  });
+</script>
+
+<style>
+  .gh-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-bottom: 40px; }
+  .gh-stats > div { border-top: 1.5px solid var(--fg); padding-top: 14px; display: grid; gap: 6px; }
+  .gh-num { font-size: clamp(44px, 6vw, 88px); line-height: .9; }
+  /* Columns share the full width, so the calendar is balanced edge to edge; phones scroll at a minimum cell size. */
+  .gh-cal { margin: 0; --cell-min: 9px; --gap: clamp(2px, .25vw, 4px); }
+  .gh-scroll { overflow: visible; }
+  @media (max-width: 760px) { .gh-scroll { overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; } }
+  .gh-months, .gh-grid { display: grid; column-gap: var(--gap); width: 100%; }
+  .gh-months span { font-size: 10px; letter-spacing: .08em; white-space: nowrap; height: 18px; }
+  .gh-week { display: grid; gap: var(--gap); }
+  .gh-grid i { display: block; width: 100%; aspect-ratio: 1; border-radius: 2px; }
+  .gh-legend i { display: block; width: 10px; height: 10px; border-radius: 2px; }
+  .l0 { background: var(--line); }
+  .l1 { background: color-mix(in srgb, var(--fg) 30%, var(--bg)); }
+  .l2 { background: color-mix(in srgb, var(--fg) 55%, var(--bg)); }
+  .l3 { background: color-mix(in srgb, var(--fg) 78%, var(--bg)); }
+  .l4 { background: var(--fg); }
+  .gh-grid i[data-d]:hover { outline: 1.5px solid var(--fg); outline-offset: 1px; }
+  .gh-read { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+  .gh-legend { display: inline-flex; align-items: center; gap: 4px; }
+  .gh-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; margin-top: 56px; }
+  .gh-cols h3 { margin: 0 0 12px; font-weight: 400; }
+  .gh-pushes, .gh-repos { list-style: none; margin: 0 0 20px; padding: 0; border-top: 1px solid var(--line); }
+  .gh-pushes a, .gh-repos a { display: grid; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--line); text-decoration: none; transition: padding .4s var(--ease); }
+  .gh-pushes a:hover, .gh-repos a:hover { padding-left: 10px; }
+  .gh-msg { font-size: 18px; letter-spacing: -.01em; }
+  .gh-repo { font-family: var(--font-display); font-weight: 700; font-stretch: 85%; font-size: 24px; text-transform: uppercase; }
+  .gh-pushes .mono, .gh-repos .mono { text-transform: none; letter-spacing: .04em; font-size: 12px; }
+  @media (max-width: 760px) { .gh-cols { grid-template-columns: minmax(0, 1fr); gap: 32px; } .gh-stats { gap: 12px; } .gh-stats .mono { font-size: 10px; } }
+</style>

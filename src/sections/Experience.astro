@@ -1,0 +1,12 @@
+---
+import Section from '../components/ui/Section.astro';
+import ExperienceRows from '../components/ExperienceRows.astro';
+import { t, type Lang } from '../lib/i18n';
+import type { Cta } from '../lib/config';
+
+interface Props { lang: Lang; tone: 'light' | 'dark'; cta?: Cta }
+const { lang, tone, cta } = Astro.props;
+---
+<Section lang={lang} id="experience" tone={tone} eyebrow={t(lang, 'sections.experience.eyebrow')} title={t(lang, 'sections.experience.title')} cta={cta}>
+  <ExperienceRows lang={lang} prefix="home" />
+</Section>

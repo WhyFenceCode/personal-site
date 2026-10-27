@@ -1,0 +1,20 @@
+---
+/* Header for inner pages: meta line, fitted wordmark title, optional lead. */
+interface Props { title: string; metaLeft?: string; metaRight?: string; lead?: string; id?: string }
+const { title, metaLeft, metaRight, lead, id = 'page-title' } = Astro.props;
+---
+<div class="page-head">
+  {(metaLeft || metaRight || Astro.slots.has('meta')) && (
+    <div class="meta mono muted"><span>{metaLeft}</span><span><slot name="meta">{metaRight}</slot></span></div>
+  )}
+  <h1 class="page-title display" id={id} tabindex="-1"><span class="fit">{title}</span></h1>
+  {lead && <p class="lead">{lead}</p>}
+  <slot />
+</div>
+
+<style>
+  .page-head { padding-top: clamp(16px, 4vw, 48px); padding-bottom: 32px; display: grid; gap: 20px; border-bottom: 1.5px solid var(--fg); }
+  .meta { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .page-title { margin: 0; }
+  .lead { font-size: clamp(20px, 2.2vw, 30px); letter-spacing: -.02em; line-height: 1.25; max-width: 34ch; margin: 0; font-weight: 500; }
+</style>

@@ -1,0 +1,72 @@
+# Site-wide settings. Every page reads from here.
+# Text that changes per language (tagline, labels, CTAs) lives in src/i18n/<lang>.yaml.
+
+name: Your Name
+email: hello@yourdomain.com
+url: https://yourdomain.com
+
+location:
+  city: Your City
+  region: ""                # province or state, e.g. Ontario. Helps the city lookup.
+  country: Canada
+  timezone: auto            # auto = worked out from the city when the site builds. Or set one, e.g. America/Toronto
+
+# Languages are detected from this list. The first one is the default.
+# One language hides the switch, two shows a toggle, three or more shows a dropdown.
+# Each language needs src/i18n/<code>.yaml. Content falls back to the default language
+# when a translated Markdown file is missing.
+languages: [en, de]
+
+socials:
+  - { label: GitHub, url: "https://github.com/yourname" }
+  - { label: LinkedIn, url: "https://www.linkedin.com/in/yourname" }
+
+github:
+  username: ""              # your GitHub handle. Public contributions only. Empty = sample data.
+
+resume:
+  pdf: /resume.pdf          # put the file in /public
+
+# Your photo. Used on the About page and as the image when the site is shared (link previews).
+portrait:
+  enabled: true             # false hides it everywhere; the About page goes text-only
+  src: /portrait.jpg        # put the file in /public. A placeholder shows until it exists.
+  alt: Portrait of Your Name
+
+# Slim bar at the very top of the page, e.g. pointing to your photography site.
+banner:
+  enabled: true
+  pages: home               # home | all
+  text: I also take photographs.
+  label: Visit the photo site
+  url: "https://photos.example.com"
+  dismissible: true
+
+# Type choices.
+#   numbers:  serif | outline           big numbers: education years, stats, loader
+#   headings: display | serif | outline section and page titles
+typography:
+  numbers: outline
+  headings: display
+
+features:
+  loader: true              # intro animation, once per browser session
+  pageTransitions: true     # ink flood between pages
+  cursorRing: true          # small circle over links and buttons (system cursor always stays)
+
+# Analytics. See README "Analytics" for the trade-offs.
+#   provider: none | cloudflare | plausible | umami | goatcounter
+#   consent:  the banner only appears when this is true. Cookieless providers usually don't need it.
+analytics:
+  provider: none
+  consent: false
+  token: ""                 # cloudflare: beacon token · umami: website id · goatcounter: site code
+  domain: yourdomain.com    # plausible: your domain
+  src: ""                   # optional: custom script URL (e.g. a self-hosted Umami or Plausible)
+
+legal:
+  owner: Your Name
+  jurisdiction: Canada
+  imprint: false            # an imprint (German "Impressum") is only required for sites run from Germany/Austria
+  address: [Street 1, City, Province, Postal code, Canada]
+  updated: 2026-10-26

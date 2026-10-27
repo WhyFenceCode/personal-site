@@ -1,0 +1,28 @@
+---
+/* Expandable rows. The Markdown body of each role becomes the bullet list. */
+import { experienceFor, yearLabel, slugOf } from '../lib/content';
+import { render } from 'astro:content';
+import type { Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; prefix: string }
+const { lang, prefix } = Astro.props;
+const roles = await Promise.all((await experienceFor(lang)).map(async (r) => ({ r, Content: (await render(r)).Content })));
+---
+<div class="rows">
+  {roles.map(({ r, Content }) => {
+    const id = `${prefix}-${slugOf(r.id)}`;
+    return (
+      <div class="row">
+        <button class="row-btn" type="button" aria-expanded="false" aria-controls={`${id}-p`} id={`${id}-b`}>
+          <span class="co">{r.data.company}</span>
+          <span class="role muted">{r.data.role}</span>
+          <span class="num">{yearLabel(r.data.start)}–{yearLabel(r.data.end)}</span>
+          <span class="pm" aria-hidden="true">+</span>
+        </button>
+        <div class="row-panel" id={`${id}-p`} role="region" aria-labelledby={`${id}-b`}>
+          <div><Content /></div>
+        </div>
+      </div>
+    );
+  })}
+</div>

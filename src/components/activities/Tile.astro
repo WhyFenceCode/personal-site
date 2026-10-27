@@ -1,0 +1,18 @@
+---
+/* Frame shared by every activity block. */
+interface Props { title: string; meta?: string; size?: 1 | 2 | 4; class?: string }
+const { title, meta, size = 1, class: cls } = Astro.props;
+---
+<article class:list={['tile', `w${size}`, cls]}>
+  <header class="tile-top"><h3>{title}</h3>{meta && <span class="mono muted">{meta}</span>}</header>
+  <slot />
+</article>
+
+<style>
+  .tile { border: 1px solid var(--line); border-radius: 8px; padding: 22px; display: grid; gap: 18px; align-content: space-between; min-height: 300px; position: relative; overflow: hidden; min-width: 0; }
+  .w2 { grid-column: span 2; }
+  .w4 { grid-column: 1 / -1; }
+  .tile-top { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+  h3 { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: 34px; line-height: .9; }
+  @media (max-width: 600px) { .w2, .w4 { grid-column: auto; } .tile { min-height: 0; } }
+</style>

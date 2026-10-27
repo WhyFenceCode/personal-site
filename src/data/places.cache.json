@@ -1,0 +1,52 @@
+{
+  "your city, canada": {
+    "lat": 43.5473528,
+    "lng": -80.2480136,
+    "country": "Canada"
+  },
+  "toronto, canada": {
+    "lat": 43.6534817,
+    "lng": -79.3839347,
+    "country": "Canada"
+  },
+  "montreal, canada": {
+    "lat": 45.5031824,
+    "lng": -73.5698065,
+    "country": "Canada"
+  },
+  "vancouver, canada": {
+    "lat": 49.2608724,
+    "lng": -123.113952,
+    "country": "Canada"
+  },
+  "new york, united states": {
+    "lat": 40.7127281,
+    "lng": -74.0060152,
+    "country": "United States"
+  },
+  "lisbon, portugal": {
+    "lat": 38.7077507,
+    "lng": -9.1365919,
+    "country": "Portugal"
+  },
+  "berlin, germany": {
+    "lat": 52.5173885,
+    "lng": 13.3951309,
+    "country": "Germany"
+  },
+  "tokyo, japan": {
+    "lat": 35.6768601,
+    "lng": 139.7638947,
+    "country": "Japan"
+  },
+  "reykjavik, iceland": {
+    "lat": 64.145981,
+    "lng": -21.9422367,
+    "country": "Iceland"
+  },
+  "mexico city, mexico": {
+    "lat": 19.3207722,
+    "lng": -99.1514677,
+    "country": "Mexico"
+  }
+}

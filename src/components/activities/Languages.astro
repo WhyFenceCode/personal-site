@@ -1,0 +1,21 @@
+---
+import Tile from './Tile.astro';
+import { t, type Lang } from '../../lib/i18n';
+interface Props { lang: Lang; size: 1 | 2 | 4; data: any }
+const { lang, size, data } = Astro.props;
+---
+<Tile title={t(lang, 'activities.languages.title')} size={size}>
+  <ul class="langs">
+    {(data.items ?? []).map((l: any) => (
+      <li><span class="name">{l.name}</span><span class="mono muted">{l.note}</span>
+        <span class="meter" role="img" aria-label={`${l.note}, ${l.level} of 5`}>{[0, 1, 2, 3, 4].map((i) => <i class={i < l.level ? 'on' : ''}></i>)}</span></li>
+    ))}
+  </ul>
+</Tile>
+
+<style>
+  .langs { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 16px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+  .name { font-family: var(--font-display); font-weight: 700; font-stretch: 85%; font-size: 26px; text-transform: uppercase; line-height: 1; }
+  @media (max-width: 480px) { li { grid-template-columns: minmax(0, 1fr) auto; } li .mono { display: none; } }
+</style>

@@ -1,0 +1,114 @@
+# Interface text for English. Keys are referenced from components and from home.yaml CTAs.
+meta:
+  label: English
+  short: EN
+  description: Designer and developer building calm, precise interfaces for the web.
+
+nav:
+  home: Home
+  work: Work
+  resume: Resume
+  about: About
+  contact: Contact
+  menu: Menu
+  close: Close
+  skip: Skip to content
+
+hero:
+  tagline: "Interfaces with nothing extra.<br>Designed and built by one person."
+  role: Designer & developer
+  hint: Drag across the name to go deeper
+  hintTouch: Swipe across the name to go deeper
+  layer: Layer
+  next: Next layer
+
+cta:
+  talk: Start a project
+  resume: Resume
+  fullResume: See the full resume
+  allProjects: See all projects
+  aboutMe: More about me
+  copy: Copy email
+  email: Send an email
+  copied: Copied
+  download: Download PDF
+  viewResume: View the resume
+
+sections:
+  education: { eyebrow: Study, title: Education }
+  github: { eyebrow: Commit log, title: Shipping, total: contributions in the last year, streak: day streak, longest: longest streak, recent: Recent pushes, repos: Active repositories, sample: Sample data. Add your GitHub username in site.yaml. }
+  projects: { eyebrow: Selected work, title: Projects }
+  experience: { eyebrow: Career, title: Experience }
+  activities: { eyebrow: Off the clock, title: Hobbies }
+  contact: { eyebrow: Contact, title: "Let's talk." }
+
+activities:
+  reading: { title: Reading, current: Currently reading, finished: Finished this year, goal: "{n} of {goal} books this year" }
+  listening: { title: Listening, now: On repeat, top: Most played }
+  running: { title: Running }
+  cycling: { title: Cycling }
+  training: { total: "{unit} in the last 26 weeks", longest: Longest, goal: "Yearly goal {goal} {unit}", hover: Hover a week }
+  photography: { title: Photography, visit: Visit the photo site }
+  places: { title: Places, count: "{n} places · {c} countries", hover: Hover a pin }
+  languages: { title: Languages }
+  uses: { title: Uses }
+
+banner:
+  close: Hide this message
+
+footer:
+  resumeTitle: The whole story, on one page.
+  resumeBody: Experience, education, skills and a timeline you can scrub through.
+  say: Say hello
+  site: Site
+  elsewhere: Elsewhere
+  legal: Legal
+  cookies: Cookie settings
+  built: Built with Astro, React and Three.js
+
+work:
+  meta: Projects
+  hint: Hover a project to see its image in full
+  all: All
+  next: Next project
+  overview: Overview
+  role: Role
+  year: Year
+  type: Type
+  stack: Stack
+  links: Links
+
+resume:
+  lead: Drag the timeline, or use the arrow keys, to see what I was doing each year.
+  roles: Roles
+  education: Education
+  skills: Skills
+  skillsNote: Squares show years of use
+  year: Year
+
+about:
+  eyebrow: About
+
+legal:
+  title: Legal
+  privacy: Privacy
+  cookies: Cookies
+  imprint: Imprint
+  accessibility: Accessibility
+  updated: Last updated
+
+cookie:
+  title: Your privacy
+  body: This site only stores your language. Anonymous statistics run only if you allow them.
+  reject: Reject
+  accept: Allow
+  policy: Read the cookie policy
+
+loader:
+  skip: Skip
+  steps: [Mixing ink, Setting type, Polishing chrome, Ready]
+
+notFound:
+  title: Lost.
+  body: This page doesn't exist, or it moved.
+  back: Back home

@@ -1,0 +1,103 @@
+---
+import HeroLayers from './HeroLayers';
+import ContactButton from '../ui/ContactButton.astro';
+import { site, hero } from '../../lib/config';
+import { siteTimezone } from '../../lib/geo';
+import { t, href, type Lang } from '../../lib/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const words = site.name.trim().split(/\s+/);
+const first = hero.layers[0];
+const timezone = await siteTimezone();
+// Reserve room for the longest layer label so the bar never reflows when the layer changes.
+const labelCh = Math.max(...hero.layers.map((l) => `${t(lang, 'hero.layer')} 00/00 · ${l.label}`.length)) + 1;
+---
+<section class="hero wrap" data-hero aria-labelledby="hero-title" style={`--hero-paper:${first.paper}`}>
+  <div class="hero-top">
+    <div class="hero-intro">
+      <p class="tagline" set:html={t(lang, 'hero.tagline')} />
+      <div class="hero-ctas">
+        <ContactButton lang={lang} label={t(lang, 'cta.talk')} />
+        <a class="hero-resume" href={href(lang, 'resume')}><span class="sq" aria-hidden="true"></span>{t(lang, 'cta.resume')}</a>
+      </div>
+    </div>
+    <div class="hero-side mono">
+      <span>{site.location.city}</span>
+      <time class="num" data-clock={timezone}>--:--</time>
+    </div>
+  </div>
+
+  <h1 class="hero-name display" id="hero-title">
+    <span class="sr-only">{site.name}</span>
+    <span class="hero-lines" aria-hidden="true">
+      <span class="fit hero-line line-full">{site.name}</span>
+      {words.length > 1 && words.map((w) => <span class="fit hero-line line-word">{w}</span>)}
+    </span>
+  </h1>
+
+  <div class="hero-bottom mono">
+    <span class="hero-hint">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="2" fill="currentColor"/></svg>
+      <span class="hint-mouse">{t(lang, 'hero.hint')}</span><span class="hint-touch">{t(lang, 'hero.hintTouch')}</span>
+    </span>
+    <span class="hero-layer" style={`--label-ch:${labelCh}ch`}>
+      <span class="dive-meter" aria-hidden="true"><i></i></span>
+      <span class="layer-label" data-layer-label aria-hidden="true">{t(lang, 'hero.layer')} 01/{String(hero.layers.length).padStart(2, '0')} · {first.label}</span>
+      <button type="button" data-layer-next>{t(lang, 'hero.next')} →</button>
+      <button type="button" data-motion-toggle class="motion-btn">Motion: on</button>
+    </span>
+    <span class="hero-socials">{site.socials.map((s, i) => <>{i > 0 && ' / '}<a href={s.url} rel="noopener me">{s.label}</a></>)}</span>
+  </div>
+
+  <HeroLayers client:only="react" layers={hero.layers} autoplay={hero.autoplay} dive={hero.dive} labels={{ layer: t(lang, 'hero.layer') }} />
+</section>
+
+<style>
+  .hero { position: relative; isolation: isolate; background: var(--hero-paper, #fff); color: #0B0B0B; margin-top: calc(-1 * var(--header-h)); padding-top: var(--header-h); min-height: calc(100svh - var(--banner-h, 0px)); display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; touch-action: pan-y; }
+  .hero :global(.hero-gl) { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+  /* Overlays blend against whichever layer is underneath, so they read on white and black. */
+  .hero-top, .hero-bottom { position: relative; z-index: 5; color: #fff; mix-blend-mode: difference; --fg: #fff; --bg: #000; }
+  .hero-top { display: flex; justify-content: space-between; align-items: start; gap: 24px; padding-top: 12px; }
+  .tagline { font-size: clamp(22px, 2.6vw, 38px); font-weight: 500; letter-spacing: -.025em; line-height: 1.05; margin: 0 0 24px; max-width: 22ch; }
+  .hero-ctas { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .hero-resume { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px #fff; text-decoration: none; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; transition: background .3s, color .3s; }
+  .hero-resume:hover, .hero-resume:focus-visible { background: #fff; color: #000; }
+  .hero-resume .sq { width: 7px; height: 7px; background: currentColor; }
+  .hero-side { text-align: right; display: grid; gap: 4px; }
+  .hero-side time { font-size: 22px; letter-spacing: 0; }
+  .hero-name { position: relative; z-index: 1; align-self: center; margin: 0; padding-block: 24px; }
+  .hero-lines { display: grid; justify-items: start; }
+  .line-word { display: none; }
+  :global(.gl-ready) .hero-lines { color: transparent; }
+  /* Fixed grid, not a wrapping row: a longer layer label can't push the links onto a new line. */
+  .hero-bottom { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: "hint layer social"; align-items: center; gap: 12px 24px; padding-block: 16px max(16px, env(safe-area-inset-bottom, 0px)); border-top: 1px solid #fff; }
+  .hero-hint { grid-area: hint; display: inline-flex; gap: 10px; align-items: center; min-width: 0; white-space: nowrap; overflow: hidden; }
+  .hero-hint > span { overflow: hidden; text-overflow: ellipsis; }
+  .hint-touch { display: none; }
+  .hero-layer { grid-area: layer; display: inline-flex; gap: 10px; align-items: center; white-space: nowrap; }
+  .layer-label { display: inline-block; min-width: var(--label-ch); text-align: right; }
+  /* Fills as you swipe over the name; full = dive to the next layer. */
+  .dive-meter { width: 56px; height: 3px; background: rgba(255, 255, 255, .3); border-radius: 2px; overflow: hidden; flex: none; }
+  .dive-meter i { display: block; height: 100%; background: #fff; transform-origin: left; transform: scaleX(var(--dive, 0)); }
+  .hero-layer button { background: none; border: 1.5px solid currentColor; color: inherit; border-radius: 999px; padding: 6px 12px; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+  .hero-layer button:hover { background: #fff; color: #000; }
+  .hero-socials { grid-area: social; justify-self: end; white-space: nowrap; }
+  .hero-socials a { text-decoration: none; }
+  .hero-socials a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  @media (hover: none), (pointer: coarse) { .hint-mouse { display: none; } .hint-touch { display: inline; } }
+  @media (max-width: 1000px) {
+    .hero-bottom { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "hint hint" "layer social"; }
+    .layer-label { text-align: left; }
+  }
+  @media (max-width: 640px) {
+    .line-full { display: none; }
+    .line-word { display: inline-block; }
+    .hero-side { display: none; }
+    .hero-name { padding-block: 32px; }
+    .hero-socials { display: none; }
+    .hero-bottom { font-size: 11px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "hint" "layer"; }
+    .layer-label { min-width: 0; text-align: left; }
+    .hero-layer { flex-wrap: wrap; white-space: normal; }
+  }
+</style>

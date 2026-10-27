@@ -1,0 +1,42 @@
+# The home page below the name block, top to bottom.
+# Reorder, remove or repeat entries to change the page. Nothing else needs editing.
+#
+# Every section accepts:
+#   tone: light | dark      (optional; when left out, sections alternate starting with dark)
+#   cta:  { label: <i18n key>, to: <page> }   pages: home, work, resume, about, contact, or a full URL
+#   hidden: true            (keeps the entry here but doesn't render it)
+
+sections:
+  - type: marquee
+
+  - type: education
+    show: 2                 # number of featured entries (set featured: true in the Markdown)
+    cta: { label: cta.fullResume, to: resume }
+
+  - type: github
+    weeks: 53
+    cta: { label: cta.allProjects, to: work }
+
+  - type: projects
+    limit: 4
+    cta: { label: cta.allProjects, to: work }
+
+  - type: experience
+    cta: { label: cta.fullResume, to: resume }
+
+  - type: activities
+    # Blocks in display order. size: 1 or 2 columns, or 4 for a full row.
+    # Block ids: reading, listening, running, cycling, photography, places, languages, uses.
+    # running and cycling hide themselves when there's no recent activity (see activities.yaml).
+    blocks:
+      - { id: reading, size: 1 }
+      - { id: listening, size: 1 }
+      - { id: running, size: 2 }
+      - { id: cycling, size: 2 }
+      - { id: places, size: 4 }
+      - { id: photography, size: 2 }
+      - { id: languages, size: 2 }
+      # - { id: uses, size: 2 }
+    cta: { label: cta.aboutMe, to: about }
+
+  - type: contact

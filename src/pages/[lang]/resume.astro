@@ -1,0 +1,107 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import ExperienceRows from '../../components/ExperienceRows.astro';
+import Timeline from '../../components/resume/Timeline';
+import { experienceFor, educationFor, yearValue, yearLabel } from '../../lib/content';
+import { site, resume } from '../../lib/config';
+import { t, href, langStaticPaths } from '../../lib/i18n';
+
+export const getStaticPaths = langStaticPaths;
+const { lang } = Astro.params as { lang: string };
+const roles = await experienceFor(lang);
+const edu = await educationFor(lang);
+const firstLine = (body?: string) => (body ?? '').split('\n').find((l) => l.trim().startsWith('-'))?.replace(/^\s*-\s*/, '') ?? '';
+const items = [
+  ...roles.map((r) => ({ label: r.data.company, sub: r.data.role, from: yearValue(r.data.start), to: yearValue(r.data.end), edu: false, detail: firstLine(r.body) })),
+  ...edu.filter((e) => e.data.kind === 'degree').map((e) => ({ label: e.data.institution, sub: e.data.title, from: yearValue(e.data.start ?? e.data.end), to: yearValue(e.data.end) + 0.99, edu: true, detail: e.data.highlight ?? '' })),
+];
+---
+<Base lang={lang} page="resume" title={t(lang, 'nav.resume')}>
+  <div class="wrap">
+    <PageHead title={t(lang, 'nav.resume')} metaLeft={site.name} lead={t(lang, 'resume.lead')}>
+      <div slot="meta">{site.resume.pdf && <a class="dl" href={site.resume.pdf} download>{t(lang, 'cta.download')} ↓</a>}</div>
+    </PageHead>
+    <Timeline client:visible items={items} range={resume.timeline} labels={{ year: t(lang, 'resume.year') }} />
+  </div>
+
+  <section class="section wrap" aria-labelledby="edu-title" style="margin-top:40px">
+    <div class="eyebrow mono">{t(lang, 'sections.education.eyebrow')}</div>
+    <h2 class="h2" id="edu-title" style="margin:18px 0 48px">{t(lang, 'resume.education')}</h2>
+    <ul class="edu-list">
+      {edu.map((e) => (
+        <li class:list={{ featured: e.data.featured }}>
+          <span class="num yr">{e.data.start ? `${yearLabel(e.data.start)}–` : ''}{yearLabel(e.data.end)}</span>
+          <span><b>{e.data.title}</b><span class="muted"> · {e.data.institution}</span>{e.data.highlight && <span class="hl muted">{e.data.highlight}</span>}</span>
+          <span class="mono muted">{e.data.kind}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="tone-dark" aria-labelledby="roles-title">
+    <div class="section wrap">
+      <div class="eyebrow mono">{t(lang, 'sections.experience.eyebrow')}</div>
+      <h2 class="h2" id="roles-title" style="margin:18px 0 48px">{t(lang, 'resume.roles')}</h2>
+      <ExperienceRows lang={lang} prefix="resume" />
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="skills-title">
+    <div class="sec-row"><div><div class="eyebrow mono">Toolkit</div><h2 class="h2" id="skills-title" style="margin-top:18px">{t(lang, 'resume.skills')}</h2></div><span class="mono muted">{t(lang, 'resume.skillsNote')}</span></div>
+    <div class="skills">
+      {resume.skills.map((g) => (
+        <div><h3 class="mono muted">{g.group}</h3><ul>
+          {g.items.map((s) => <li><span>{s.name}</span><span class="meter" role="img" aria-label={`${s.years} years`}>{Array.from({ length: 10 }, (_, i) => <i class={i < s.years ? 'on' : ''}></i>)}</span></li>)}
+        </ul></div>
+      ))}
+    </div>
+    <div class="resume-actions">
+      {site.resume.pdf && <a class="btn" href={site.resume.pdf} download>{t(lang, 'cta.download')} ↓</a>}
+      <a class="btn btn-ghost" href={href(lang, 'contact')}>{t(lang, 'nav.contact')}</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .dl { text-decoration: none; color: var(--fg); }
+  :global(.tl) { padding-top: 56px; display: grid; gap: 28px; }
+  :global(.tl-top) { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; }
+  :global(.tl-year) { font-size: clamp(96px, 16vw, 240px); line-height: .8; letter-spacing: -.03em; }
+  :global(.tl-now) { max-width: 40ch; display: grid; gap: 4px; min-height: 88px; align-content: end; }
+  :global(.tl-now b) { font-size: 22px; font-weight: 500; letter-spacing: -.02em; }
+  :global(.tl-chart) { display: grid; grid-template-columns: minmax(120px, 240px) minmax(0, 1fr); gap: 0 24px; }
+  :global(.tl-labels) { display: grid; }
+  :global(.tl-label) { padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; color: var(--muted); transition: color .3s; height: 64px; }
+  :global(.tl-label.on) { color: var(--fg); }
+  :global(.tl-label small) { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  :global(.tl-tracks) { position: relative; cursor: ew-resize; touch-action: pan-y; }
+  :global(.tl-track) { position: relative; border-top: 1px solid var(--line); height: 64px; }
+  :global(.tl-bar) { position: absolute; top: 50%; height: 10px; margin-top: -5px; background: var(--line); transition: background .35s; }
+  :global(.tl-bar.edu) { background: repeating-linear-gradient(90deg, var(--line) 0 4px, transparent 4px 7px); }
+  :global(.tl-bar.on) { background: var(--fg); }
+  :global(.tl-bar.edu.on) { background: repeating-linear-gradient(90deg, var(--fg) 0 4px, transparent 4px 7px); }
+  :global(.tl-cursor) { position: absolute; top: -6px; bottom: -6px; width: 1.5px; background: var(--fg); pointer-events: none; transition: left .25s var(--ease); }
+  :global(.tl-scrub) { grid-column: 2; padding-top: 16px; }
+  :global(.tl-scrub input) { width: 100%; accent-color: #0B0B0B; height: 28px; }
+  :global(.tl-ticks) { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .06em; color: var(--muted); }
+  @media (max-width: 700px) {
+    :global(.tl-chart) { grid-template-columns: minmax(0, 1fr); }
+    :global(.tl-labels) { display: none; }
+    :global(.tl-track) { height: 28px; }
+    :global(.tl-scrub) { grid-column: 1; }
+  }
+  .edu-list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--fg); }
+  .edu-list li { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 16px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .edu-list .yr { font-size: 22px; }
+  .edu-list b { font-weight: 600; font-size: 19px; }
+  .edu-list .hl { display: block; margin-top: 4px; }
+  .edu-list li.featured b::after { content: " ■"; font-size: 10px; vertical-align: 3px; }
+  @media (max-width: 640px) { .edu-list li { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+  .sec-row { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 48px; }
+  .skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px 24px; }
+  .skills h3 { margin: 0 0 14px; font-weight: 400; }
+  .skills ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .skills li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .resume-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 64px; }
+</style>

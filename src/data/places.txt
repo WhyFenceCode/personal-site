@@ -1,0 +1,19 @@
+# Places you've visited. One per line. Lines starting with # are ignored.
+#
+#   City, Country | year | note
+#
+# Year and note are optional. Coordinates are looked up once when the site builds and saved in
+# places.cache.json (commit that file). If a lookup is wrong, pin it with @lat,lng:
+#   Springfield, United States | 2024 | @39.80,-89.64
+#
+# SAMPLE DATA. Replace with your own.
+
+Toronto, Canada | 2026
+Montreal, Canada | 2025
+Vancouver, Canada | 2024
+New York, United States | 2025
+Lisbon, Portugal | 2024 | First film camera
+Berlin, Germany | 2023
+Tokyo, Japan | 2023
+Reykjavik, Iceland | 2022
+Mexico City, Mexico | 2022

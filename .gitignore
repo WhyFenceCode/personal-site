@@ -1,0 +1,17 @@
+node_modules/
+design/
+dist/
+.astro/
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Secrets: never commit these
+.dev.vars
+*.pem
+*.key
+.claude/settings.local.json
+
+# Private notes (never committed)
+private/

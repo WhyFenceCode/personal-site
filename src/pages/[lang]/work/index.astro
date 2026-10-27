@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../../layouts/Base.astro';
+import PageHead from '../../../components/PageHead.astro';
+import { projectsFor, slugOf } from '../../../lib/content';
+import { t, href, langStaticPaths } from '../../../lib/i18n';
+
+export const getStaticPaths = langStaticPaths;
+const { lang } = Astro.params as { lang: string };
+const projects = await projectsFor(lang);
+const cats = ['all', ...new Set(projects.map((p) => p.data.category))];
+const years = projects.map((p) => p.data.year);
+---
+<Base lang={lang} page="work" title={t(lang, 'nav.work')}>
+  <div class="wrap">
+    <PageHead title={t(lang, 'nav.work')} metaLeft={`${t(lang, 'work.meta')} ${Math.min(...years)} – ${Math.max(...years)}`} metaRight={String(projects.length).padStart(2, '0')} />
+    <div class="toolbar">
+      <div class="filters" role="group" aria-label="Filter projects" data-filters>
+        {cats.map((c) => (
+          <button type="button" data-filter={c} aria-pressed={c === 'all' ? 'true' : 'false'}>
+            {c === 'all' ? t(lang, 'work.all') : c}<sup class="num">{c === 'all' ? projects.length : projects.filter((p) => p.data.category === c).length}</sup>
+          </button>
+        ))}
+      </div>
+      <span class="mono muted">{t(lang, 'work.hint')}</span>
+    </div>
+    <div class="grid" data-grid>
+      {projects.map((p) => (
+        <a class="card" href={href(lang, `work/${slugOf(p.id)}`)} data-cat={p.data.category}>
+          <div class="thumb">
+            {p.data.cover
+              ? <Image src={p.data.cover} alt="" widths={[480, 800, 1200]} sizes="(max-width: 720px) 100vw, 50vw" class="cover" />
+              : <><canvas class="dith" width="240" height="180" data-art={p.data.art} data-dither aria-hidden="true"></canvas><canvas class="smooth" width="720" height="540" data-art={p.data.art} aria-hidden="true"></canvas></>}
+          </div>
+          <div class="card-meta"><span class="card-title">{p.data.title}</span><span class="mono muted">{p.data.kind} · {p.data.year}</span></div>
+          <p>{p.data.summary}</p>
+        </a>
+      ))}
+    </div>
+    <p class="sr-only" aria-live="polite" data-filter-status></p>
+  </div>
+  <div class="section"></div>
+</Base>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const group = document.querySelector('[data-filters]'); if (!group) return;
+    const status = document.querySelector('[data-filter-status]')!;
+    group.addEventListener('click', (e) => {
+      const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return;
+      group.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      let n = 0;
+      document.querySelectorAll<HTMLElement>('[data-grid] .card').forEach((c) => { const on = b.dataset.filter === 'all' || c.dataset.cat === b.dataset.filter; c.hidden = !on; n += +on; });
+      status.textContent = `${n} projects shown`;
+    });
+  });
+</script>
+
+<style>
+  .toolbar { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 24px 40px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filters button { background: none; color: inherit; border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  .filters button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .filters sup { font-size: 11px; margin-left: 4px; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px 24px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .card { text-decoration: none; display: grid; gap: 14px; align-content: start; }
+  .thumb { position: relative; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; border-radius: 4px; background: #EDEDED; }
+  .thumb canvas, .thumb :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .7s var(--ease), transform 1.2s var(--ease); }
+  .dith { image-rendering: pixelated; }
+  .smooth { opacity: 0; }
+  .card:hover .smooth, .card:focus-visible .smooth { opacity: 1; }
+  .card:hover canvas, .card:hover :global(img), .card:focus-visible canvas { transform: scale(1.03); }
+  .card-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .card-title { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: 34px; line-height: .9; }
+  .card p { margin: 0; color: var(--muted); max-width: 46ch; }
+</style>

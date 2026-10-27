@@ -1,0 +1,56 @@
+# Activity blocks for the "Off the clock" section. Which ones show, their order and width are
+# set in home.yaml. All values below are SAMPLE DATA: replace them with your own.
+
+# Books come from the plain-text file src/data/reading.txt. Only the yearly goal lives here.
+reading:
+  goal: 24
+
+# Hand-entered. Change it whenever you like; nothing updates automatically.
+listening:
+  updated: 2026-10
+  nowPlaying: { title: "1/1", artist: Brian Eno, album: Music for Airports }
+  topArtists: [Brian Eno, Floating Points, Nils Frahm, Khruangbin, Bonobo]
+
+# Running and cycling. Each block hides itself when nothing was logged in the last
+# `activeWithinDays` days, so a quiet season simply disappears from the page.
+training:
+  source: static            # static | strava  (strava reads build-time secrets, see README "Strava")
+  unit: km
+  activeWithinDays: 30
+  running:                  # used when source is static, and as the fallback if Strava is unreachable
+    goal: 1200
+    lastActivity: 2026-10-24
+    weeks: [18, 22, 0, 25, 31, 28, 12, 35, 30, 33, 41, 26, 0, 38, 44, 40, 36, 47, 29, 42, 50, 46, 31, 52, 48, 39]
+    longest: { km: 21.1, name: Half marathon, date: 2026-09-14 }
+  cycling:                  # last ride is older than 30 days, so this block is hidden right now
+    goal: 3000
+    lastActivity: 2026-08-02
+    weeks: [60, 85, 0, 120, 95, 140, 110, 0, 75, 130, 160, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    longest: { km: 112, name: Lake loop, date: 2026-06-20 }
+
+# A link card to your photography site (no photos are shown here).
+# The optional banner at the very top of the page is configured in site.yaml under `banner`.
+photography:
+  url: "https://photos.example.com"
+  label: See the photographs
+  description: Film and digital, mostly cities at the edges of the day.
+  meta: Film · Digital
+
+# Places come from the plain-text file src/data/places.txt.
+places:
+  title: Places
+
+languages:
+  items:
+    - { name: English, level: 5, note: Native }
+    - { name: French, level: 3, note: Intermediate }
+
+# Optional "Uses" block: what's on your desk. Add `- { id: uses, size: 2 }` to home.yaml to show it.
+uses:
+  groups:
+    - name: Desk
+      items: [MacBook Pro 14", LG UltraFine 5K, Keychron Q1 (brown switches), Logitech MX Master 3S]
+    - name: Software
+      items: [Figma, VS Code, Raycast, Arc]
+    - name: Camera
+      items: [Olympus OM-1, Fujifilm X100V]

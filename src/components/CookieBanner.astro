@@ -1,0 +1,26 @@
+---
+/* Only rendered when an analytics provider is set and analytics.consent is true. Reject and Allow carry equal weight. */
+import { analyticsScript } from '../lib/analytics';
+import { t, href, type Lang } from '../lib/i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+---
+<section id="cookies" class="tone-dark" aria-labelledby="ck-title" hidden
+  data-analytics={JSON.stringify(analyticsScript())} transition:persist>
+  <h2 id="ck-title">{t(lang, 'cookie.title')}</h2>
+  <p>{t(lang, 'cookie.body')}</p>
+  <div class="acts">
+    <button type="button" data-ck="reject">{t(lang, 'cookie.reject')}</button>
+    <button type="button" data-ck="accept">{t(lang, 'cookie.accept')}</button>
+    <a class="full" href={href(lang, 'legal/cookies')}>{t(lang, 'cookie.policy')}</a>
+  </div>
+</section>
+
+<style>
+  #cookies { position: fixed; z-index: 80; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); width: min(400px, calc(100vw - 32px)); border: 1.5px solid #fff; border-radius: 6px; padding: 18px; display: grid; gap: 12px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 0; }
+  p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  button { padding: 10px; border-radius: 999px; border: 1.5px solid var(--fg); background: none; color: inherit; cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .full { grid-column: 1 / -1; text-align: center; font-size: 13px; text-underline-offset: 3px; }
+</style>

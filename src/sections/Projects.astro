@@ -1,0 +1,39 @@
+---
+import Section from '../components/ui/Section.astro';
+import { projectsFor, slugOf } from '../lib/content';
+import { t, href, type Lang } from '../lib/i18n';
+import type { Cta } from '../lib/config';
+
+interface Props { lang: Lang; tone: 'light' | 'dark'; limit?: number; cta?: Cta }
+const { lang, tone, limit = 4, cta } = Astro.props;
+const all = await projectsFor(lang);
+const list = all.slice(0, limit);
+---
+<Section lang={lang} id="projects" tone={tone} eyebrow={t(lang, 'sections.projects.eyebrow')} title={t(lang, 'sections.projects.title')} count={String(all.length).padStart(2, '0')} cta={cta}>
+  <div class="index">
+    {list.map((p, i) => (
+      <a href={href(lang, `work/${slugOf(p.id)}`)} data-peek={p.data.art} data-peek-src={p.data.cover?.src}>
+        <span class="n num">{String(i + 1).padStart(2, '0')}</span>
+        <span class="t">{p.data.title}</span>
+        <span class="k mono muted">{p.data.kind}</span>
+        <span class="y num">{p.data.year}</span>
+        <span class="s muted">{p.data.summary}</span>
+      </a>
+    ))}
+  </div>
+</Section>
+
+<style>
+  .index { border-top: 1.5px solid var(--fg); }
+  .index a { display: grid; grid-template-columns: 56px minmax(0, 1fr) minmax(0, 220px) 64px; grid-template-areas: "n t k y" ". s s s"; gap: 6px 16px; align-items: baseline; padding: 22px 0 18px; border-bottom: 1px solid var(--line); text-decoration: none; transition: padding .5s var(--ease); }
+  .index a:hover, .index a:focus-visible { padding-left: 20px; }
+  .n { grid-area: n; font-size: 18px; } .t { grid-area: t; } .k { grid-area: k; } .y { grid-area: y; text-align: right; font-size: 20px; }
+  .s { grid-area: s; max-width: 60ch; font-size: 15px; max-height: 0; overflow: hidden; opacity: 0; transition: max-height .5s var(--ease), opacity .4s; }
+  .index a:hover .s, .index a:focus-visible .s { max-height: 4em; opacity: 1; }
+  .t { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: -.02em; font-size: clamp(36px, 6vw, 92px); line-height: .88; }
+  @media (max-width: 640px) {
+    .index a { grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-areas: "n t y" ". s s"; }
+    .k { display: none; }
+    .s { max-height: none; opacity: 1; }
+  }
+</style>

@@ -1,0 +1,36 @@
+# The name block at the top of the home page.
+#
+# Each time the ink is swiped across the name, the page dives one layer deeper:
+# the layer inside the ink becomes the new surface and the next one waits underneath.
+# After the last layer it loops back to the first.
+#
+# kind:   flat   = 2D type drawn on a canvas
+#         chrome = inflated 3D metal letters (Three.js)
+#         rope   = a braided rope laid along the letter outlines (Three.js); ink = rope colour
+#         blocks = the letters built from floating cubes that scatter from the ink (Three.js); ink = cube colour
+# font:   display | serif | pixel | mono | text
+# case:   upper | none
+# ink / paper: text and background colour of the layer
+# outline: true draws only the letter outlines
+
+# How much movement over the name it takes to dive one layer, as a share of the screen width.
+# Any direction counts, including back-and-forth scrubbing. 0.45 = a bit under half the screen.
+# Lower is easier; the meter next to the layer label shows how close you are.
+dive: 0.45
+
+autoplay:
+  mobile: true        # touch devices get a self-playing ink path that crosses the name
+  desktop: true       # the ink wanders on its own when the pointer is away
+  intervalSeconds: 5  # how long one self-playing sweep takes
+  selfDive: touch     # who gets automatic layer dives: touch | always | never (desktop only dives when you swipe)
+  firstDiveAfter: 8   # seconds after the page loads before the first automatic dive
+
+layers:
+  - { id: grotesk,      label: Grotesk,      kind: flat,   font: display, weight: 800, stretch: 87.5, case: upper, ink: "#0B0B0B", paper: "#FFFFFF" }
+  - { id: chrome,       label: Chrome,       kind: chrome, font: display, weight: 800, stretch: 87.5, case: upper, paper: "#0B0B0B" }
+  - { id: serif,        label: Serif,        kind: flat,   font: serif,   weight: 400, italic: true,  case: none,  ink: "#0B0B0B", paper: "#F2F1EE" }
+  - { id: rope,         label: Rope,         kind: rope,   font: display, weight: 800, stretch: 87.5, case: upper, ink: "#EAE6DE", paper: "#0B0B0B" }
+  - { id: blocks,       label: Blocks,       kind: blocks, font: display, weight: 800, stretch: 87.5, case: upper, ink: "#1A1A1A", paper: "#F2F1EE" }
+  - { id: pixel,        label: Pixel,        kind: flat,   font: pixel,   weight: 600, case: upper, ink: "#FFFFFF", paper: "#0B0B0B" }
+  - { id: outline,      label: Outline,      kind: flat,   font: display, weight: 800, stretch: 75,   case: upper, ink: "#0B0B0B", paper: "#FFFFFF", outline: true }
+  - { id: chrome-serif, label: Chrome serif, kind: chrome, font: serif,   weight: 400, italic: true,  case: none,  paper: "#141414" }

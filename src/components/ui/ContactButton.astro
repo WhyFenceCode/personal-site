@@ -1,0 +1,10 @@
+---
+/* Split pill: the label rolls to a second line on hover and the arrow disc turns toward you. */
+import { href, type Lang } from '../../lib/i18n';
+interface Props { lang: Lang; label: string; to?: string; class?: string }
+const { lang, label, to = 'contact', class: cls } = Astro.props;
+---
+<a class:list={['cbtn', cls]} href={href(lang, to)}>
+  <span class="cbtn-label"><span>{label}</span><span aria-hidden="true">{label}</span></span>
+  <span class="cbtn-disc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+</a>

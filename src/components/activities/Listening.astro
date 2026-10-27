@@ -1,0 +1,34 @@
+---
+import Tile from './Tile.astro';
+import { t, type Lang } from '../../lib/i18n';
+interface Props { lang: Lang; size: 1 | 2 | 4; data: any }
+const { lang, size, data } = Astro.props;
+---
+<Tile title={t(lang, 'activities.listening.title')} meta="33⅓ rpm" size={size} class="listening">
+  <div class="deck">
+    <div class="record" aria-hidden="true"></div>
+    {data.nowPlaying && (
+      <div>
+        <span class="mono muted">{t(lang, 'activities.listening.now')}</span>
+        <p class="np">{data.nowPlaying.title}<br /><span class="muted">{data.nowPlaying.artist}, {data.nowPlaying.album}</span></p>
+      </div>
+    )}
+  </div>
+  {data.topArtists?.length > 0 && (
+    <div>
+      <span class="mono muted">{t(lang, 'activities.listening.top')}</span>
+      <ol class="top">{data.topArtists.slice(0, 5).map((a: string) => <li>{a}</li>)}</ol>
+    </div>
+  )}
+</Tile>
+
+<style>
+  .deck { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px; align-items: center; }
+  .record { width: 112px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, var(--bg) 0 5%, var(--fg) 5.5% 18%, #222 18.5% 20%, transparent 20.5%), repeating-radial-gradient(circle, #151515 0 2px, #262626 2px 3px); box-shadow: 0 0 0 1px var(--line); animation: spin 2.4s linear infinite; animation-play-state: paused; }
+  :global(.listening:hover) .record, :global(.listening:focus-within) .record { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .np { margin: 6px 0 0; font-size: 18px; line-height: 1.3; }
+  .top { margin: 8px 0 0; padding: 0; list-style: none; counter-reset: a; display: grid; gap: 4px; }
+  .top li { counter-increment: a; display: flex; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  .top li::before { content: counter(a, decimal-leading-zero); font-family: var(--font-display); font-weight: 700; font-stretch: 85%; }
+</style>

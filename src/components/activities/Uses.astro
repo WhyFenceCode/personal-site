@@ -1,0 +1,21 @@
+---
+/* Optional "Uses" block: desk, software and gear. */
+import Tile from './Tile.astro';
+import { t, type Lang } from '../../lib/i18n';
+interface Props { lang: Lang; size: 1 | 2 | 4; data: { groups: { name: string; items: string[] }[] } }
+const { lang, size, data } = Astro.props;
+---
+<Tile title={t(lang, 'activities.uses.title')} size={size}>
+  <div class="groups">
+    {data.groups.map((g) => (
+      <div><h4 class="mono muted">{g.name}</h4><ul>{g.items.map((i) => <li>{i}</li>)}</ul></div>
+    ))}
+  </div>
+</Tile>
+
+<style>
+  .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; }
+  h4 { margin: 0 0 8px; font-weight: 400; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  li { border-bottom: 1px solid var(--line); padding-bottom: 6px; font-size: 15px; }
+</style>

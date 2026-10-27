@@ -1,0 +1,28 @@
+---
+/* A link card to your photography site. The whole card is the link. */
+import Tile from './Tile.astro';
+import { t, type Lang } from '../../lib/i18n';
+interface Props { lang: Lang; size: 1 | 2 | 4; data: { url: string; label?: string; description?: string; meta?: string } }
+const { lang, size, data } = Astro.props;
+const host = (() => { try { return new URL(data.url).host; } catch { return data.url; } })();
+---
+<Tile title={t(lang, 'activities.photography.title')} meta={data.meta} size={size} class="photo-card">
+  {data.description && <p class="desc">{data.description}</p>}
+  <a class="go" href={data.url} rel="noopener">
+    <span class="label">{data.label ?? t(lang, 'activities.photography.visit')}<span class="mono muted host">{host}</span></span>
+    <span class="disc" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 13L13 3M5 3h8v8" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+  </a>
+</Tile>
+
+<style>
+  .desc { margin: 0; font-size: clamp(20px, 1.8vw, 26px); line-height: 1.25; letter-spacing: -.02em; max-width: 26ch; }
+  .go { display: flex; justify-content: space-between; align-items: end; gap: 16px; text-decoration: none; }
+  .go::after { content: ""; position: absolute; inset: 0; }
+  .label { display: grid; gap: 6px; font-family: var(--font-display); font-weight: 700; font-stretch: 85%; text-transform: uppercase; font-size: 24px; line-height: 1; }
+  .host { font-family: var(--font-mono); font-weight: 400; text-transform: none; letter-spacing: .04em; font-size: 12px; }
+  .disc { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); flex: none; transition: transform .5s var(--ease); }
+  :global(.photo-card) { transition: background .4s var(--ease), color .4s var(--ease); }
+  :global(.photo-card:hover), :global(.photo-card:focus-within) { background: var(--fg); color: var(--bg); }
+  :global(.photo-card:hover) .disc, :global(.photo-card:focus-within) .disc { background: var(--bg); color: var(--fg); transform: rotate(45deg); }
+  :global(.photo-card:hover) .muted { color: inherit; opacity: .7; }
+</style>

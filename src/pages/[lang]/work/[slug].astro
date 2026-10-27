@@ -1,0 +1,60 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import PageHead from '../../../components/PageHead.astro';
+import { projectsFor, slugOf } from '../../../lib/content';
+import { languages, t, href } from '../../../lib/i18n';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const lang of languages) for (const p of await projectsFor(lang)) paths.push({ params: { lang, slug: slugOf(p.id) } });
+  return paths;
+}
+const { lang, slug } = Astro.params as { lang: string; slug: string };
+const all = await projectsFor(lang);
+const i = all.findIndex((p) => slugOf(p.id) === slug);
+const p = all[i], next = all[(i + 1) % all.length];
+const { Content } = await render(p);
+const facts = [[t(lang, 'work.role'), p.data.role], [t(lang, 'work.year'), p.data.year], [t(lang, 'work.type'), p.data.kind], [t(lang, 'work.stack'), p.data.stack.join(', ')]];
+---
+<Base lang={lang} page="work" title={p.data.title} description={p.data.summary}>
+  <div class="wrap">
+    <PageHead title={p.data.title} lead={p.data.summary}>
+      <div slot="meta"><a href={href(lang, 'work')} class="back">← {t(lang, 'nav.work')}</a></div>
+    </PageHead>
+    <div class="proj-hero">
+      {p.data.cover ? <Image src={p.data.cover} alt="" widths={[800, 1400, 2000]} sizes="100vw" /> : <canvas width="1280" height="640" data-art={p.data.art} aria-hidden="true"></canvas>}
+    </div>
+    <dl class="facts">{facts.map(([k, v]) => <div><dt class="mono muted">{k}</dt><dd>{v}</dd></div>)}</dl>
+    <div class="prose-grid">
+      <div class="side">
+        <div class="mono muted">{t(lang, 'work.overview')}</div>
+        {p.data.links.length > 0 && <ul class="links">{p.data.links.map((l) => <li><a class="link" href={l.url} rel="noopener">{l.label} ↗</a></li>)}</ul>}
+      </div>
+      <div class="prose-site"><Content /></div>
+    </div>
+  </div>
+  <div class="tone-dark">
+    <a class="next wrap" href={href(lang, `work/${slugOf(next.id)}`)}>
+      <span><span class="mono muted" style="display:block;margin-bottom:12px">{t(lang, 'work.next')}</span><span class="display next-title">{next.data.title}</span></span>
+      <svg width="48" height="28" viewBox="0 0 48 28" aria-hidden="true"><path d="M0 14h45M33 2l12 12-12 12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+    </a>
+  </div>
+</Base>
+
+<style>
+  .back { text-decoration: none; }
+  .proj-hero { aspect-ratio: 2 / 1; max-width: 100%; position: relative; overflow: hidden; border-radius: 4px; background: #EDEDED; margin-top: 32px; }
+  .proj-hero canvas, .proj-hero :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; padding-block: 28px; border-bottom: 1px solid var(--line); margin: 0; }
+  .facts dd { margin: 6px 0 0; }
+  @media (max-width: 700px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .prose-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 24px 48px; padding-block: 56px 96px; }
+  .links { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
+  @media (max-width: 720px) { .prose-grid { grid-template-columns: minmax(0, 1fr); } }
+  .next { display: flex; justify-content: space-between; align-items: end; gap: 24px; padding-block: 56px; text-decoration: none; }
+  .next-title { font-size: clamp(56px, 10vw, 160px); }
+  .next svg { transition: transform .5s var(--ease); }
+  .next:hover svg { transform: translateX(10px); }
+</style>

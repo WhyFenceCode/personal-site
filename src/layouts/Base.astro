@@ -1,0 +1,102 @@
+---
+import '@fontsource-variable/bricolage-grotesque/standard.css';
+import '@fontsource-variable/instrument-sans/standard.css';
+import '@fontsource-variable/pixelify-sans/wght.css'; // only used by the hero's pixel layer
+import '@fontsource/dm-mono/400.css';
+import '@fontsource/dm-mono/500.css';
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Loader from '../components/Loader.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+import Banner from '../components/Banner.astro';
+import { existsSync } from 'node:fs';
+import { site } from '../lib/config';
+import { analyticsScript } from '../lib/analytics';
+import { languages, t, switchPath, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; title?: string; description?: string; page?: string }
+const { lang, title, description, page = '' } = Astro.props;
+const fullTitle = title ? `${title} · ${site.name}` : site.name;
+const desc = description ?? t(lang, 'meta.description');
+const analytics = analyticsScript();
+const needsConsent = !!analytics && site.analytics.consent;
+const showBanner = site.banner.enabled && (site.banner.pages === 'all' || page === 'home');
+const portraitOk = site.portrait.enabled && existsSync(`public${site.portrait.src}`);
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
+---
+<!doctype html>
+<html lang={lang} data-page={page} data-numbers={site.typography.numbers} data-headings={site.typography.headings}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    {languages.map((l) => <link rel="alternate" hreflang={l} href={new URL(switchPath(Astro.url.pathname, l), Astro.site ?? site.url).href} />)}
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:type" content="website" />
+    {portraitOk && <meta property="og:image" content={new URL(site.portrait.src, Astro.site ?? site.url).href} />}
+    <meta name="theme-color" content="#0B0B0B" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline define:vars={{ BANNER: site.banner.url }}>
+      // Decide before first paint: show the intro once per session, and honour reduced motion.
+      try {
+        var d = document.documentElement;
+        if (localStorage.getItem('site.motion') === 'off') d.classList.add('no-motion');
+        if (localStorage.getItem('site.banner') === BANNER) d.classList.add('banner-hidden');
+        if (!sessionStorage.getItem('site.seen') && !matchMedia('(prefers-reduced-motion: reduce)').matches && !d.classList.contains('no-motion')) d.classList.add('intro');
+      } catch (e) {}
+    </script>
+    {analytics && !needsConsent && <script is:inline defer src={analytics.src} {...analytics.attrs}></script>}
+    <ClientRouter fallback="none" />
+  </head>
+  <body
+    data-transitions={String(site.features.pageTransitions)}
+    data-ring={String(site.features.cursorRing)}
+    data-loader={String(site.features.loader)}
+  >
+    <a class="skip-link" href="#main">{t(lang, 'nav.skip')}</a>
+    {site.features.loader && <Loader lang={lang} />}
+    <canvas id="flood" aria-hidden="true" transition:persist></canvas>
+    <div id="ring" aria-hidden="true" transition:persist></div>
+    <div class="sr-only" aria-live="polite" id="announcer" transition:persist></div>
+    <div id="peek" aria-hidden="true" transition:persist><canvas width="300" height="225"></canvas><img alt="" hidden /></div>
+    {showBanner && <Banner lang={lang} />}
+    <script is:inline>
+      // The hero fills the first screen minus the banner; keep --banner-h in sync (0 when hidden or dismissed).
+      (function () {
+        var r = document.documentElement, b = document.querySelector('[data-banner]');
+        function set() { r.style.setProperty('--banner-h', (b && b.offsetParent !== null ? b.offsetHeight : 0) + 'px'); }
+        set();
+        if (b && window.ResizeObserver) new ResizeObserver(set).observe(b);
+      })();
+    </script>
+    <Header lang={lang} page={page} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer lang={lang} page={page} />
+    {needsConsent && <CookieBanner lang={lang} />}
+    <script>
+      import '../scripts/site';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .skip-link { position: fixed; left: 16px; top: -60px; z-index: 200; background: #0B0B0B; color: #fff; padding: 10px 16px; border-radius: 999px; text-decoration: none; }
+  .skip-link:focus { top: calc(12px + env(safe-area-inset-top, 0px)); }
+  #flood { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none; }
+  #ring { position: fixed; left: 0; top: 0; z-index: 120; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 1.5px solid #fff; mix-blend-mode: difference; pointer-events: none; transform: translate3d(-100px, -100px, 0) scale(0); opacity: 0; }
+  html.has-ring #ring.on { opacity: 1; }
+  @media (forced-colors: active) { #ring, #flood { display: none; } }
+  main { display: block; }
+  #peek { position: fixed; left: 0; top: 0; width: 300px; aspect-ratio: 4 / 3; z-index: 30; pointer-events: none; opacity: 0; transition: opacity .3s; overflow: hidden; border-radius: 4px; }
+  #peek.on { opacity: 1; }
+  #peek canvas, #peek img { width: 100%; height: 100%; display: block; object-fit: cover; }
+</style>

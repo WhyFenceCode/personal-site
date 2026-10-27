@@ -1,0 +1,25 @@
+---
+import { site } from '../lib/config';
+import { t, type Lang } from '../lib/i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const steps = t(lang, 'loader.steps') as string[];
+---
+<div id="loader" aria-hidden="true"></div>
+<div class="ld-ui wrap" id="ld-ui" role="status" aria-label="Loading" data-steps={JSON.stringify(steps)}>
+  <div class="ld-top"><span class="ld-brand">{site.name}</span><button class="ld-skip mono" type="button" id="ld-skip">{t(lang, 'loader.skip')}</button></div>
+  <div></div>
+  <div class="ld-bottom"><span class="ld-count stat" id="ld-num" aria-hidden="true">0</span><span class="mono" id="ld-log">{steps[0]}</span></div>
+</div>
+
+<style>
+  #loader, .ld-ui { display: none; }
+  :global(html.intro) #loader { display: block; position: fixed; inset: 0; z-index: 88; background: #fff; }
+  :global(html.intro) .ld-ui { display: grid; position: fixed; inset: 0; z-index: 95; pointer-events: none; color: #fff; mix-blend-mode: difference; grid-template-rows: var(--header-h) 1fr auto; padding-top: env(safe-area-inset-top, 0px); padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)); }
+  .ld-ui { --fg: #fff; }
+  .ld-top { display: flex; justify-content: space-between; align-items: center; }
+  .ld-brand { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; font-size: 20px; text-transform: uppercase; }
+  .ld-bottom { display: flex; justify-content: space-between; align-items: end; gap: 16px; }
+  .ld-count { font-size: clamp(120px, 24vw, 380px); line-height: .8; font-variant-numeric: tabular-nums; }
+  .ld-skip { pointer-events: auto; background: none; color: inherit; border: 1.5px solid currentColor; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+</style>

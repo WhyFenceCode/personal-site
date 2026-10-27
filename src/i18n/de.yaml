@@ -1,0 +1,114 @@
+# Interface text for German. Missing keys fall back to English.
+meta:
+  label: Deutsch
+  short: DE
+  description: Designer und Entwickler für ruhige, präzise Interfaces im Web.
+
+nav:
+  home: Start
+  work: Arbeiten
+  resume: Lebenslauf
+  about: Über mich
+  contact: Kontakt
+  menu: Menü
+  close: Schließen
+  skip: Zum Inhalt springen
+
+hero:
+  tagline: "Interfaces ohne Überflüssiges.<br>Gestaltet und gebaut von einer Person."
+  role: Designer & Entwickler
+  hint: Zieh über den Namen, um tiefer zu gehen
+  hintTouch: Wisch über den Namen, um tiefer zu gehen
+  layer: Ebene
+  next: Nächste Ebene
+
+cta:
+  talk: Projekt starten
+  resume: Lebenslauf
+  fullResume: Ganzer Lebenslauf
+  allProjects: Alle Projekte
+  aboutMe: Mehr über mich
+  copy: E-Mail kopieren
+  email: E-Mail schreiben
+  copied: Kopiert
+  download: PDF herunterladen
+  viewResume: Lebenslauf ansehen
+
+sections:
+  education: { eyebrow: Studium, title: Ausbildung }
+  github: { eyebrow: Commit-Log, title: Shipping, total: Beiträge im letzten Jahr, streak: Tage in Folge, longest: längste Serie, recent: Letzte Pushes, repos: Aktive Repositories, sample: Beispieldaten. Trag deinen GitHub-Namen in site.yaml ein. }
+  projects: { eyebrow: Ausgewählte Arbeiten, title: Projekte }
+  experience: { eyebrow: Laufbahn, title: Erfahrung }
+  activities: { eyebrow: Nach Feierabend, title: Hobbys }
+  contact: { eyebrow: Kontakt, title: Schreib mir. }
+
+activities:
+  reading: { title: Lesen, current: Lese gerade, finished: Dieses Jahr gelesen, goal: "{n} von {goal} Büchern dieses Jahr" }
+  listening: { title: Hören, now: In Dauerschleife, top: Meistgehört }
+  running: { title: Laufen }
+  cycling: { title: Radfahren }
+  training: { total: "{unit} in den letzten 26 Wochen", longest: Längste Strecke, goal: "Jahresziel {goal} {unit}", hover: Woche antippen }
+  photography: { title: Fotografie, visit: Zur Foto-Seite }
+  places: { title: Orte, count: "{n} Orte · {c} Länder", hover: Pin antippen }
+  languages: { title: Sprachen }
+  uses: { title: Ausrüstung }
+
+banner:
+  close: Hinweis ausblenden
+
+footer:
+  resumeTitle: Die ganze Geschichte auf einer Seite.
+  resumeBody: Erfahrung, Ausbildung, Skills und eine Zeitleiste zum Durchscrollen.
+  say: Hallo sagen
+  site: Seite
+  elsewhere: Anderswo
+  legal: Rechtliches
+  cookies: Cookie-Einstellungen
+  built: Gebaut mit Astro, React und Three.js
+
+work:
+  meta: Projekte
+  hint: Mit der Maus darüber, um das Bild ganz zu sehen
+  all: Alle
+  next: Nächstes Projekt
+  overview: Überblick
+  role: Rolle
+  year: Jahr
+  type: Art
+  stack: Stack
+  links: Links
+
+resume:
+  lead: Zieh an der Zeitleiste oder nutze die Pfeiltasten, um zu sehen, was ich in jedem Jahr gemacht habe.
+  roles: Stationen
+  education: Ausbildung
+  skills: Skills
+  skillsNote: Quadrate zeigen Jahre Erfahrung
+  year: Jahr
+
+about:
+  eyebrow: Über mich
+
+legal:
+  title: Rechtliches
+  privacy: Datenschutz
+  cookies: Cookies
+  imprint: Impressum
+  accessibility: Barrierefreiheit
+  updated: Zuletzt aktualisiert
+
+cookie:
+  title: Deine Privatsphäre
+  body: Diese Seite speichert nur deine Sprache. Anonyme Statistiken laufen nur mit deiner Zustimmung.
+  reject: Ablehnen
+  accept: Erlauben
+  policy: Cookie-Richtlinie lesen
+
+loader:
+  skip: Überspringen
+  steps: [Tinte mischen, Schrift setzen, Chrom polieren, Fertig]
+
+notFound:
+  title: Verlaufen.
+  body: Diese Seite gibt es nicht, oder sie ist umgezogen.
+  back: Zur Startseite

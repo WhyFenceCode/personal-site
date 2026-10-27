@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/hero/Hero.astro';
+import { SECTIONS } from '../../sections';
+import { home } from '../../lib/config';
+import { langStaticPaths } from '../../lib/i18n';
+
+export const getStaticPaths = langStaticPaths;
+const { lang } = Astro.params as { lang: string };
+
+// Sections alternate dark/light (starting dark, under the white name block) unless a tone is set.
+const sections = home.sections.filter((s) => !s.hidden).map((s, i) => ({ ...s, tone: s.tone ?? (i % 2 === 0 ? 'dark' : 'light') }));
+---
+<Base lang={lang} page="home">
+  <Hero lang={lang} />
+  {sections.map((s) => {
+    const Component = SECTIONS[s.type] as any;
+    return <Component lang={lang} {...s} />;
+  })}
+</Base>

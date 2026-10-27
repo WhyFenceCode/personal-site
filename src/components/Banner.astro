@@ -1,0 +1,23 @@
+---
+/* Optional bar at the very top of the page (site.yaml → banner). Dismissing it is remembered per browser. */
+import { site } from '../lib/config';
+import { t, type Lang } from '../lib/i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const b = site.banner;
+---
+<aside class="banner tone-dark wrap" aria-label="Announcement" data-banner={b.url}>
+  <p><span class="sq" aria-hidden="true"></span>{b.text}</p>
+  <a href={b.url} rel="noopener">{b.label} <span aria-hidden="true">↗</span></a>
+  {b.dismissible && <button type="button" data-banner-close aria-label={t(lang, 'banner.close')}>×</button>}
+</aside>
+
+<style>
+  .banner { position: relative; z-index: 60; display: flex; align-items: center; justify-content: center; gap: 8px 20px; flex-wrap: wrap; min-height: 40px; padding-block: 8px; padding-right: calc(var(--gutter-r) + 32px); font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  :global(html.banner-hidden) .banner { display: none; }
+  p { margin: 0; display: inline-flex; align-items: center; gap: 10px; color: var(--muted); }
+  .sq { width: 6px; height: 6px; background: var(--fg); }
+  a { text-decoration: none; border-bottom: 1px solid currentColor; }
+  button { position: absolute; right: var(--gutter-r); top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: none; color: inherit; cursor: pointer; font-size: 16px; line-height: 1; }
+  button:hover { background: var(--fg); color: var(--bg); }
+</style>

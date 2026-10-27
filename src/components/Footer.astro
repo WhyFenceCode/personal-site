@@ -1,0 +1,67 @@
+---
+import LangSwitch from './LangSwitch.astro';
+import { site } from '../lib/config';
+import { t, href, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; page?: string }
+const { lang, page } = Astro.props;
+// The "see the resume" card is pointless on the resume page itself.
+const showResumeCta = page !== 'resume';
+const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []), 'accessibility'];
+---
+<footer class="site-footer tone-dark wrap" id="footer">
+  {showResumeCta && (
+    <a class="resume-cta" href={href(lang, 'resume')}>
+      <span class="mono muted eyebrow">{t(lang, 'nav.resume')}</span>
+      <span class="rc-title">{t(lang, 'footer.resumeTitle')}</span>
+      <span class="rc-body muted">{t(lang, 'footer.resumeBody')}</span>
+      <span class="rc-go" aria-hidden="true"><svg width="40" height="24" viewBox="0 0 40 24"><path d="M0 12h37M27 2l10 10-10 10" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>
+    </a>
+  )}
+
+  <div class="foot-cols">
+    <div><div class="mono muted">{t(lang, 'footer.say')}</div><p class="foot-mail">{site.email}</p></div>
+    <div><div class="mono muted">{t(lang, 'footer.site')}</div><ul>
+      {['work', 'resume', 'about'].map((k) => <li><a href={href(lang, k)}>{t(lang, `nav.${k}`)}</a></li>)}
+    </ul></div>
+    <div><div class="mono muted">{t(lang, 'footer.elsewhere')}</div><ul>
+      {site.socials.map((s) => <li><a href={s.url} rel="noopener me">{s.label}</a></li>)}
+    </ul></div>
+    <div><div class="mono muted">{t(lang, 'footer.legal')}</div><ul>
+      {legal.map((k) => <li><a href={href(lang, `legal/${k}`)}>{t(lang, `legal.${k}`)}</a></li>)}
+    </ul></div>
+  </div>
+
+  <div class="foot-mark" aria-hidden="true" data-ink="footer"><span class="fit">{site.name}</span></div>
+
+  <div class="foot-bottom mono muted">
+    <span>© {new Date().getFullYear()} {site.name}</span>
+    <span class="flex flex-wrap items-center gap-4">
+      {site.analytics.provider !== 'none' && site.analytics.consent && <button class="text-btn mono" type="button" data-open-cookies>{t(lang, 'footer.cookies')}</button>}
+      <button class="text-btn mono" type="button" data-motion-toggle>Motion: on</button>
+      <LangSwitch lang={lang} />
+    </span>
+  </div>
+</footer>
+
+<style>
+  .site-footer { position: relative; isolation: isolate; overflow: hidden; padding-top: clamp(56px, 8vw, 96px); padding-bottom: max(20px, env(safe-area-inset-bottom, 0px)); }
+  .resume-cta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 24px; text-decoration: none; border: 1.5px solid var(--fg); border-radius: 8px; padding: clamp(24px, 4vw, 48px); margin-bottom: clamp(56px, 8vw, 96px); transition: background .4s var(--ease), color .4s var(--ease); }
+  .resume-cta .eyebrow { grid-column: 1 / -1; }
+  .rc-title { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: clamp(36px, 6vw, 88px); line-height: .9; letter-spacing: -.02em; max-width: 14ch; }
+  .rc-body { grid-column: 1; max-width: 46ch; }
+  .rc-go { grid-column: 2; grid-row: 2 / 4; align-self: center; width: clamp(64px, 8vw, 96px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); transition: transform .5s var(--ease); }
+  .resume-cta:hover, .resume-cta:focus-visible { background: var(--fg); color: var(--bg); }
+  .resume-cta:hover .muted { color: inherit; opacity: .7; }
+  .resume-cta:hover .rc-go { background: var(--bg); color: var(--fg); transform: rotate(-45deg); }
+  .foot-cols { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .foot-cols ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
+  .foot-cols a { text-decoration: none; }
+  .foot-cols a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .foot-mail { font-size: clamp(20px, 2.3vw, 30px); letter-spacing: -.02em; margin: 10px 0 0; font-weight: 500; overflow-wrap: anywhere; }
+  /* Lighter than the hero: same family, medium weight, a little wider. */
+  .foot-mark { isolation: isolate; overflow: hidden; margin: 72px 0 20px; font-family: var(--font-display); font-weight: 500; font-stretch: 92%; letter-spacing: -.04em; line-height: .84; text-transform: uppercase; position: relative; }
+  .foot-bottom { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 16px; }
+  .text-btn { background: none; border: 0; padding: 0; cursor: pointer; color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .foot-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .foot-cols > :first-child { grid-column: 1 / -1; } .resume-cta { grid-template-columns: minmax(0, 1fr); } .rc-go { grid-column: 1; grid-row: auto; } }
+</style>
