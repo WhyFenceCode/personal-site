@@ -2,7 +2,7 @@
 meta:
   label: English
   short: EN
-  description: Designer and developer building calm, precise interfaces for the web.
+  description: Engineeirng student at Queen's University. Portfolio of Torsten Young, working towards a career in engineering and design. Based in Kingston, Ontario, Canada.
 
 nav:
   home: Home
@@ -15,8 +15,8 @@ nav:
   skip: Skip to content
 
 hero:
-  tagline: "Interfaces with nothing extra.<br>Designed and built by one person."
-  role: Designer & developer
+  tagline: "Student at Queen's University<br>Hobby Photographer"
+  role: Engineering Student
   hint: Drag across the name to go deeper
   hintTouch: Swipe across the name to go deeper
   layer: Layer

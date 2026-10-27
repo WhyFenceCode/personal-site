@@ -5,10 +5,12 @@ import ExperienceRows from '../../components/ExperienceRows.astro';
 import Timeline from '../../components/resume/Timeline';
 import { experienceFor, educationFor, yearValue, yearLabel } from '../../lib/content';
 import { site, resume } from '../../lib/config';
+import { resumePdf } from '../../lib/resume';
 import { t, href, langStaticPaths } from '../../lib/i18n';
 
 export const getStaticPaths = langStaticPaths;
 const { lang } = Astro.params as { lang: string };
+const pdf = resumePdf(); // null hides the download links
 const roles = await experienceFor(lang);
 const edu = await educationFor(lang);
 const firstLine = (body?: string) => (body ?? '').split('\n').find((l) => l.trim().startsWith('-'))?.replace(/^\s*-\s*/, '') ?? '';
@@ -20,7 +22,7 @@ const items = [
 <Base lang={lang} page="resume" title={t(lang, 'nav.resume')}>
   <div class="wrap">
     <PageHead title={t(lang, 'nav.resume')} metaLeft={site.name} lead={t(lang, 'resume.lead')}>
-      <div slot="meta">{site.resume.pdf && <a class="dl" href={site.resume.pdf} download>{t(lang, 'cta.download')} ↓</a>}</div>
+      <div slot="meta">{pdf && <a class="dl" href={pdf} download>{t(lang, 'cta.download')} ↓</a>}</div>
     </PageHead>
     <Timeline client:visible items={items} range={resume.timeline} labels={{ year: t(lang, 'resume.year') }} />
   </div>
@@ -57,7 +59,7 @@ const items = [
       ))}
     </div>
     <div class="resume-actions">
-      {site.resume.pdf && <a class="btn" href={site.resume.pdf} download>{t(lang, 'cta.download')} ↓</a>}
+      {pdf && <a class="btn" href={pdf} download>{t(lang, 'cta.download')} ↓</a>}
       <a class="btn btn-ghost" href={href(lang, 'contact')}>{t(lang, 'nav.contact')}</a>
     </div>
   </section>

@@ -10,4 +10,4 @@ This site aims to meet WCAG 2.2 level AA.
 - The 3D name is decorative; the name is always available as text.
 - Every page works with a keyboard alone, with visible focus.
 
-If something doesn't work for you, email the address in the footer and I'll reply within five working days.
+If something doesn't work for you, email the address in the footer and I'll aim to reply within five working days.

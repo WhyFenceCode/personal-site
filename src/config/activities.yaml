@@ -3,7 +3,7 @@
 
 # Books come from the plain-text file src/data/reading.txt. Only the yearly goal lives here.
 reading:
-  goal: 24
+  goal: 7
 
 # Hand-entered. Change it whenever you like; nothing updates automatically.
 listening:
@@ -31,9 +31,9 @@ training:
 # A link card to your photography site (no photos are shown here).
 # The optional banner at the very top of the page is configured in site.yaml under `banner`.
 photography:
-  url: "https://photos.example.com"
+  url: "https://photos.torstenyoung.com"
   label: See the photographs
-  description: Film and digital, mostly cities at the edges of the day.
+  description: Film and digital, whatever happens to catch my eye.
   meta: Film · Digital
 
 # Places come from the plain-text file src/data/places.txt.
@@ -43,9 +43,10 @@ places:
 languages:
   items:
     - { name: English, level: 5, note: Native }
-    - { name: French, level: 3, note: Intermediate }
+    - { name: German, level: 5, note: Native }
+    - { name: French, level: 2, note: Learning }
 
-# Optional "Uses" block: what's on your desk. Add `- { id: uses, size: 2 }` to home.yaml to show it.
+# Optional "Uses" block: what's on your desk. Add `- { id: uses, size: 2 }` to home.yaml to show it. The below is SAMPLE DATA: replace it with your own. The `groups` array can be any number of groups, each with a name and a list of items.
 uses:
   groups:
     - name: Desk

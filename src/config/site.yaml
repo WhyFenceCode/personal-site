@@ -1,37 +1,37 @@
 # Site-wide settings. Every page reads from here.
 # Text that changes per language (tagline, labels, CTAs) lives in src/i18n/<lang>.yaml.
 
-name: Your Name
-email: hello@yourdomain.com
-url: https://yourdomain.com
+name: Torsten Young
+email: contact@torstenyoung.com
+url: https://torstenyoung.com
 
 location:
-  city: Your City
-  region: ""                # province or state, e.g. Ontario. Helps the city lookup.
+  city: Kingston
+  region: "Ontario"                # province or state, e.g. Ontario. Helps the city lookup.
   country: Canada
-  timezone: auto            # auto = worked out from the city when the site builds. Or set one, e.g. America/Toronto
+  timezone: auto           # auto = worked out from the city when the site builds. Or set one, e.g. America/Toronto
 
 # Languages are detected from this list. The first one is the default.
 # One language hides the switch, two shows a toggle, three or more shows a dropdown.
 # Each language needs src/i18n/<code>.yaml. Content falls back to the default language
 # when a translated Markdown file is missing.
-languages: [en, de]
+languages: [en]
 
 socials:
-  - { label: GitHub, url: "https://github.com/yourname" }
-  - { label: LinkedIn, url: "https://www.linkedin.com/in/yourname" }
+  - { label: GitHub, url: "https://github.com/WhyFenceCode" }
+  - { label: LinkedIn, url: "https://www.linkedin.com/in/torsten-young/" }
 
 github:
-  username: ""              # your GitHub handle. Public contributions only. Empty = sample data.
+  username: "WhyFenceCode"              # your GitHub handle. Public contributions only. Empty = sample data.
 
 resume:
-  pdf: /resume.pdf          # put the file in /public
+  pdf: ""                  # e.g. /resume.pdf (file in /public) or a full URL. Empty hides the download buttons.
 
 # Your photo. Used on the About page and as the image when the site is shared (link previews).
 portrait:
-  enabled: true             # false hides it everywhere; the About page goes text-only
+  enabled: false             # false hides it everywhere; the About page goes text-only
   src: /portrait.jpg        # put the file in /public. A placeholder shows until it exists.
-  alt: Portrait of Your Name
+  alt: Portrait of Torsten Young
 
 # Slim bar at the very top of the page, e.g. pointing to your photography site.
 banner:
@@ -39,7 +39,7 @@ banner:
   pages: home               # home | all
   text: I also take photographs.
   label: Visit the photo site
-  url: "https://photos.example.com"
+  url: "https://photos.torstenyoung.com"
   dismissible: true
 
 # Type choices.
@@ -61,12 +61,12 @@ analytics:
   provider: none
   consent: false
   token: ""                 # cloudflare: beacon token · umami: website id · goatcounter: site code
-  domain: yourdomain.com    # plausible: your domain
+  domain: torstenyoung.com    # plausible: your domain
   src: ""                   # optional: custom script URL (e.g. a self-hosted Umami or Plausible)
 
 legal:
-  owner: Your Name
+  owner: Torsten Young
   jurisdiction: Canada
   imprint: false            # an imprint (German "Impressum") is only required for sites run from Germany/Austria
-  address: [Street 1, City, Province, Postal code, Canada]
+  address: [Not required as site is based in Canada]               # Street 1, City, Province, Postal code, Canada
   updated: 2026-10-26

@@ -22,7 +22,7 @@ Your language, whether you've dismissed the banner, and whether you've turned mo
 browser's local storage. They never leave your device, and you can clear them in your browser settings.
 
 ## 5. Statistics
-If statistics are switched on, they are anonymous and cookieless: they count visits without identifying you or
+Statistics are anonymous and cookieless: they count visits without identifying you or
 following you to other sites. Where consent is asked for, nothing loads until you allow it, and you can change your
 mind under "Cookie settings" in the footer.
 

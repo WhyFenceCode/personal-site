@@ -8,6 +8,8 @@
 
 sections:
   - type: marquee
+    # The words in the scrolling band
+    items: [Engineering, Front-end Design, Learning, Photography]
 
   - type: education
     show: 2                 # number of featured entries (set featured: true in the Markdown)

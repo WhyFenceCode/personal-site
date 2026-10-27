@@ -9,11 +9,12 @@
 # SAMPLE DATA. Replace with your own.
 
 Toronto, Canada | 2026
-Montreal, Canada | 2025
-Vancouver, Canada | 2024
-New York, United States | 2025
-Lisbon, Portugal | 2024 | First film camera
-Berlin, Germany | 2023
-Tokyo, Japan | 2023
-Reykjavik, Iceland | 2022
-Mexico City, Mexico | 2022
+Kingston, Canada | 2026
+Westerland, Germany | 2026
+Hamburg, Germany | 2026
+Amsterdam, Holland | 2026
+Paris, France | 2025
+Ottawa, Canada | 2024
+Montreal, Canada | 2024
+Quebec City, Canada | 2024
+Vancouver, Canada | 2008

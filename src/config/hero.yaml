@@ -33,4 +33,3 @@ layers:
   - { id: pixel,        label: Pixel,        kind: flat,   font: pixel,   weight: 600, case: upper, ink: "#FFFFFF", paper: "#0B0B0B" }
   - { id: chrome-serif, label: Chrome serif, kind: chrome, font: serif,   weight: 400, italic: true,  case: none,  paper: "#141414" }
   - { id: outline,      label: Outline,      kind: flat,   font: display, weight: 800, stretch: 75,   case: upper, ink: "#0B0B0B", paper: "#FFFFFF", outline: true }
-# - { id: rope,         label: Rope,         kind: rope,   font: display, weight: 800, stretch: 87.5, case: upper, ink: "#0B0B0B", paper: "#ECEBE8", text: HELLO }

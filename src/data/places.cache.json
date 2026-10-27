@@ -48,5 +48,46 @@
     "lat": 19.3207722,
     "lng": -99.1514677,
     "country": "Mexico"
+  },
+  "kinston, ontario, canada": null,
+  "kingston, ontario, canada": {
+    "lat": 44.3054151,
+    "lng": -76.4283781,
+    "country": "Canada"
+  },
+  "kingston, canada": {
+    "lat": 44.3054151,
+    "lng": -76.4283781,
+    "country": "Canada"
+  },
+  "paris, france": {
+    "lat": 48.8534951,
+    "lng": 2.3483915,
+    "country": "France"
+  },
+  "westerland, germany": {
+    "lat": 54.9064856,
+    "lng": 8.3071734,
+    "country": "Germany"
+  },
+  "hamburg, germany": {
+    "lat": 53.5501721,
+    "lng": 10.0013165,
+    "country": "Germany"
+  },
+  "amsterdam, holland": {
+    "lat": 52.3730796,
+    "lng": 4.8924534,
+    "country": "Netherlands"
+  },
+  "ottawa, canada": {
+    "lat": 45.4208777,
+    "lng": -75.6901106,
+    "country": "Canada"
+  },
+  "quebec city, canada": {
+    "lat": 46.8137431,
+    "lng": -71.2084061,
+    "country": "Canada"
   }
 }

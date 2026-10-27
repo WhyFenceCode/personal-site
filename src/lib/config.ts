@@ -89,7 +89,7 @@ const heroSchema = z.object({
 const cta = z.object({ label: z.string(), to: z.string() });
 const sectionBase = { tone: z.enum(['light', 'dark']).optional(), cta: cta.optional(), hidden: z.boolean().default(false) };
 const sectionSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('marquee'), ...sectionBase }),
+  z.object({ type: z.literal('marquee'), items: z.array(z.string()).optional(), ...sectionBase }),
   z.object({ type: z.literal('education'), show: z.number().default(2), ...sectionBase }),
   z.object({ type: z.literal('github'), weeks: z.number().default(53), ...sectionBase }),
   z.object({ type: z.literal('projects'), limit: z.number().default(4), ...sectionBase }),

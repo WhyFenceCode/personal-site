@@ -6,11 +6,6 @@
 #
 # SAMPLE DATA. Replace with your own.
 
-now      The Shape of Design | Frank Chimero | 120/220
-2026-09  Piranesi | Susanna Clarke
-2026-07  Thinking with Type | Ellen Lupton
-2026-05  The Design of Everyday Things | Don Norman
-2026-03  Grid Systems in Graphic Design | Josef Müller-Brockmann
-2026-01  Steal Like an Artist | Austin Kleon
-2025-11  Klara and the Sun | Kazuo Ishiguro
-want     The Timeless Way of Building | Christopher Alexander
+now Thinking Fast and Slow | Daniel Kahneman
+2026-06 The Handmaids Tale | Margaret Atwood
+want The Testaments | Margaret Atwood
