@@ -58,7 +58,7 @@ features:
 #   provider: none | cloudflare | plausible | umami | goatcounter
 #   consent:  the banner only appears when this is true. Cookieless providers usually don't need it.
 analytics:
-  provider: none
+  provider: cloudflare
   consent: false
   token: ""                 # cloudflare: beacon token · umami: website id · goatcounter: site code
   domain: torstenyoung.com    # plausible: your domain
@@ -69,5 +69,5 @@ legal:
   jurisdiction: Canada
   imprint: false            # an imprint (German "Impressum") is only required for sites run from Germany/Austria
   address: []               # optional mailing address, e.g. [Street 1, City, Province, Postal code]. Empty = email is the contact.
-  hosting: ""               # your host's name once chosen, e.g. Cloudflare. Named in the privacy policy.
+  hosting: "Cloudflare, Inc."               # your host's name once chosen, e.g. Cloudflare. Named in the privacy policy.
   updated: 2026-10-27
