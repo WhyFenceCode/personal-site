@@ -3,8 +3,6 @@
 #   now      Title | Author | 120/220      what you're reading (page progress is optional)
 #   2026-09  Title | Author                finished, with year-month
 #   want     Title | Author                on the pile (optional, not shown yet)
-#
-# SAMPLE DATA. Replace with your own.
 
 now Thinking, Fast and Slow | Daniel Kahneman
 2026-06 The Handmaid's Tale | Margaret Atwood

@@ -1,5 +1,5 @@
 # Activity blocks for the "Off the clock" section. Which ones show, their order and width are
-# set in home.yaml. All values below are SAMPLE DATA: replace them with your own.
+# set in home.yaml.
 
 # Books come from the plain-text file src/data/reading.txt. Only the yearly goal lives here.
 reading:
@@ -46,7 +46,7 @@ languages:
     - { name: German, level: 5, note: Native }
     - { name: French, level: 2, note: Learning }
 
-# Optional "Uses" block: what's on your desk. Add `- { id: uses, size: 2 }` to home.yaml to show it. The below is SAMPLE DATA: replace it with your own. The `groups` array can be any number of groups, each with a name and a list of items.
+# Optional "Uses" block: what's on your desk. Add `- { id: uses, size: 2 }` to home.yaml to show it. The items below are placeholders: replace them before showing it. The `groups` array can be any number of groups, each with a name and a list of items.
 uses:
   groups:
     - name: Desk

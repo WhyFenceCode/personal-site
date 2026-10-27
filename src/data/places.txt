@@ -5,8 +5,6 @@
 # Year and note are optional. Coordinates are looked up once when the site builds and saved in
 # places.cache.json (commit that file). If a lookup is wrong, pin it with @lat,lng:
 #   Springfield, United States | 2024 | @39.80,-89.64
-#
-# SAMPLE DATA. Replace with your own.
 
 Toronto, Canada | 2026
 Kingston, Canada | 2026

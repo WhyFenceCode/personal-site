@@ -5,7 +5,7 @@
 timeline: {}
   # timeline: { from: 2020, to: 2030 }
 
-# Skills, grouped. "rating" is a simple 1–5 score and fills that many of the five squares. SAMPLE DATA.
+# Skills, grouped. "rating" is a simple 1–5 score and fills that many of the five squares.
 skills:
   - group: Engineering
     items:

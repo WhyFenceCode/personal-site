@@ -15,12 +15,12 @@ sections:
     show: 2                 # number of featured entries (set featured: true in the Markdown)
     cta: { label: cta.fullResume, to: resume }
 
-  - type: certifications   # hidden until you add an education entry with kind: certificate
-    cta: { label: cta.fullResume, to: resume }
-
   - type: github
     weeks: 53
     cta: { label: cta.allProjects, to: work }
+
+  - type: certifications   # hidden until you add an education entry with kind: certificate
+    cta: { label: cta.fullResume, to: resume }
 
   - type: projects
     limit: 4
