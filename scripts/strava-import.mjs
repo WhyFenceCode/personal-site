@@ -7,7 +7,7 @@
 //
 // Only this ends up in src/data/training.json, which the site reads at build time:
 //   - kilometres per week (weeks start Monday, UTC), all activities with a distance added together
-//   - the longest single effort: its distance, date and type such as "Run" (no name, no time of day)
+//   - the single longest activity in the last 26 weeks: its distance, date and type such as "Run" (no name, no time)
 //   - the date of the most recent activity
 // Activity names, descriptions, IDs, times of day, routes and GPS files, heart rate, gear and photos are
 // read past and dropped. The export itself is never copied into the project: keep it outside, or delete it.
@@ -78,6 +78,8 @@ const day = (d) => d.toISOString().slice(0, 10);
 const typeName = (t) => String(t).trim().replace(/[\s-]+(.)/g, (_, c) => c.toUpperCase()) || 'Activity';
 
 /* ---------- Sanitise: keep only date, distance and type, then add everything up ---------- */
+// The site's graph covers the last 26 weeks, and "Longest" is the single longest activity inside that window.
+const since = day(weekStart(new Date(Date.now() - 25 * 7 * 864e5)));
 const weeks = {}; let longest, lastActivity, count = 0, skipped = 0;
 for (const r of rows) {
   const d = date(r[iDate]), k = km(r);
@@ -85,20 +87,20 @@ for (const r of rows) {
   if (!(k > 0)) continue; // strength sessions, yoga…: no distance, nothing to add
   const w = day(weekStart(d));
   weeks[w] = Math.round(((weeks[w] ?? 0) + k) * 10) / 10;
-  if (!longest || k > longest.km) longest = { km: Math.round(k * 10) / 10, date: day(d), type: typeName(r[iType]) };
+  if (w >= since && (!longest || k > longest.km)) longest = { km: Math.round(k * 10) / 10, date: day(d), type: typeName(r[iType]) };
   if (!lastActivity || day(d) > lastActivity) lastActivity = day(d);
   count++;
 }
 // Only the last year of weeks is kept; the site shows 26.
 const cutoff = day(new Date(Date.now() - 371 * 864e5));
-const kept = Object.fromEntries(Object.entries(weeks).filter(([w]) => w >= cutoff).sort());
+const recent = Object.fromEntries(Object.entries(weeks).filter(([w]) => w >= cutoff).sort(([a], [b]) => (a < b ? -1 : 1)));
 
-const out = { importedAt: day(new Date()), weeks: kept, longest, lastActivity };
+const out = { importedAt: day(new Date()), weeks: recent, longest, lastActivity };
 writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n');
 
 console.log(`Wrote ${OUT} (imported ${out.importedAt}):`);
-console.log(count ? `  ${count} activities with a distance · last ${lastActivity} · longest ${longest.km} km ${longest.type} (${longest.date})` : '  no activities with a distance found');
+console.log(count ? `  ${count} activities with a distance · last ${lastActivity}${longest ? ` · longest in the last 26 weeks ${longest.km} km ${longest.type} (${longest.date})` : ''}` : '  no activities with a distance found');
 if (skipped) console.log(`  ${skipped} rows skipped (no readable date)`);
 console.log(`
-Only weekly totals, the longest effort and the last date were kept. Check training.source is "import" in
+Only weekly totals, the longest activity of the last 26 weeks and the last date were kept. Check training.source is "import" in
 src/config/activities.yaml, then commit ${OUT} and push to publish. You can delete the export now.`);

@@ -14,7 +14,8 @@ import { activities } from './config';
 
 export type Stats = { weeks: number[]; total: number; longest?: { km: number; date?: string; type?: string; name?: string }; lastActivity?: string; unit: string; source: 'import' | 'static'; updated?: string };
 
-/** What `pnpm strava:import` writes: weekly km keyed by the Monday that starts the week (UTC). */
+/** What `pnpm strava:import` writes: weekly km keyed by the Monday that starts the week (UTC), and the single
+ *  longest activity within the 26 weeks before the import. */
 export type TrainingImport = { importedAt: string; weeks: Record<string, number>; longest?: { km: number; date: string; type: string }; lastActivity?: string };
 
 const WEEKS = 26;
@@ -33,11 +34,14 @@ function fromImport(): Stats | null {
     const data: TrainingImport = JSON.parse(readFileSync(FILE, 'utf8'));
     const now = weekStart(new Date());
     // The last 26 weeks, oldest first, ending with the current week.
-    const weeks = Array.from({ length: WEEKS }, (_, i) => {
+    const keys = Array.from({ length: WEEKS }, (_, i) => {
       const d = new Date(now); d.setUTCDate(d.getUTCDate() - (WEEKS - 1 - i) * 7);
-      return Math.round(data.weeks?.[d.toISOString().slice(0, 10)] ?? 0);
+      return d.toISOString().slice(0, 10);
     });
-    return { weeks, total: weeks.reduce((a, b) => a + b, 0), longest: data.longest, lastActivity: data.lastActivity, unit: 'km', source: 'import', updated: data.importedAt };
+    const weeks = keys.map((k) => Math.round(data.weeks?.[k] ?? 0));
+    // The window moves with each build: once the longest activity is older than the graph, stop showing it.
+    const longest = data.longest && data.longest.date >= keys[0] ? data.longest : undefined;
+    return { weeks, total: weeks.reduce((a, b) => a + b, 0), longest, lastActivity: data.lastActivity, unit: 'km', source: 'import', updated: data.importedAt };
   } catch (e) {
     console.warn(`[training] couldn't read ${FILE} (${(e as Error).message}); using the numbers in activities.yaml`);
     return null;
