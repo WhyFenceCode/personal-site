@@ -54,9 +54,13 @@ function drawLines(ctx: CanvasRenderingContext2D, L: Layer, lines: Line[], scale
     let size = (100 * line.w) / Math.max(1, m.width);
     const inkH = ((asc + desc) * size) / 100;
     if (inkH > line.h * 1.12) size *= (line.h * 1.12) / inkH;
-    const px = size * scale;
+    let px = size * scale;
     setFont(ctx, L, px);
-    const m2 = ctx.measureText(text);
+    let m2 = ctx.measureText(text);
+    // Width doesn't always scale linearly with size (variable widths, hinting), so check at the final size and
+    // shrink to the line if it came out wider; otherwise wide faces like the chrome layer run off the edges.
+    const target = line.w * scale;
+    if (m2.width > target) { px *= target / m2.width; setFont(ctx, L, px); m2 = ctx.measureText(text); }
     const x = (line.x + line.w / 2) * scale - m2.width / 2;
     const y = (line.y + line.h / 2) * scale + (m2.actualBoundingBoxAscent - m2.actualBoundingBoxDescent) / 2;
     if (outline) { ctx.lineWidth = Math.max(1.5 * scale, px * 0.018); ctx.strokeStyle = color; ctx.lineJoin = 'round'; ctx.strokeText(text, x, y); }
