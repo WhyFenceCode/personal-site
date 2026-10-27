@@ -33,16 +33,18 @@ const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
           <p class="dev-note mono">Dev only: {host} doesn't allow <code>{Astro.url.origin}</code> to frame it, so your browser blocks it here.
             It will load on {new URL(Astro.site ?? 'https://example.com').host}. To see it locally, add {Astro.url.origin} to that site's <code>frame-ancestors</code>.</p>
         )}
-        <div class="shield" data-shield>
-          <div class="card" role="group" aria-labelledby="frame-card-title" data-card>
+        {/* Outside sites: a solid cover and nothing loaded until Continue. This site's own preview loads straight
+            away with no cover; the cover only appears to stop it nesting inside itself. */}
+        <div class="shield" data-shield hidden={!outside}>
+          {outside && <div class="card" role="group" aria-labelledby="frame-card-title" data-card>
             <p class="card-title mono" id="frame-card-title">{t(lang, 'work.preview.title')}</p>
-            <p class="card-note">{outside ? t(lang, 'work.preview.outside', { host }) : t(lang, 'work.preview.own')}</p>
+            <p class="card-note">{t(lang, 'work.preview.outside', { host })}</p>
             {/* The same split pill as the contact buttons (global .cbtn), in white on the dark card. */}
             <button type="button" class="cbtn card-go" data-go>
               <span class="cbtn-label"><span>{t(lang, 'work.preview.continue')}</span><span aria-hidden="true">{t(lang, 'work.preview.continue')}</span></span>
               <span class="cbtn-disc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
             </button>
-          </div>
+          </div>}
           <div class="card" role="note" data-nested hidden>
             <p class="card-title mono">{t(lang, 'work.preview.nestedTitle')}</p>
             <p class="card-note">{t(lang, 'work.preview.nested', { host })}</p>
@@ -67,12 +69,17 @@ const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
       try { framed = window.self !== window.top; } catch {}
       if (framed && iframe.hasAttribute('data-self')) {
         frame.classList.add('is-nested');
-        frame.querySelector('[data-card]')?.setAttribute('hidden', '');
+        shield?.removeAttribute('hidden');
         frame.querySelector('[data-nested]')?.removeAttribute('hidden');
         return;
       }
-      iframe.loading = 'lazy';
-      iframe.src = iframe.dataset.src!;
+      const start = () => {
+        iframe.loading = 'lazy';
+        iframe.src = iframe.dataset.src!;
+        iframe.removeAttribute('tabindex');
+        frame.classList.add('is-live');
+        if (state) state.lastChild!.textContent = state.dataset.on ?? '';
+      };
       // Render at desktop width and scale down, so the whole site shows in its real desktop layout.
       const W = 1440;
       const fit = () => {
@@ -80,13 +87,9 @@ const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
         iframe.style.width = `${W}px`; iframe.style.height = `${view.clientHeight / k}px`; iframe.style.transform = `scale(${k})`;
       };
       fit(); new ResizeObserver(fit).observe(view);
-      frame.querySelector('[data-go]')?.addEventListener('click', () => {
-        shield?.remove();
-        iframe.removeAttribute('tabindex');
-        frame.classList.add('is-live');
-        if (state) state.lastChild!.textContent = state.dataset.on ?? '';
-        iframe.focus();
-      });
+      // This site's own preview needs no consent; an outside site loads only once Continue is pressed.
+      if (iframe.hasAttribute('data-self')) { start(); return; }
+      frame.querySelector('[data-go]')?.addEventListener('click', () => { start(); shield?.remove(); iframe.focus(); });
     });
   });
 </script>
@@ -110,12 +113,10 @@ const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
 
   .dev-note { position: absolute; left: 16px; right: 16px; top: 16px; z-index: 1; margin: 0; padding: 12px 14px; border-radius: 8px; background: #FFF6D6; color: #3A2E00;
     font-size: 11px; line-height: 1.5; text-transform: none; letter-spacing: .02em; }
-  /* Until Continue is pressed, the shield takes the pointer so wheel and touch scrolling move the page, not the
-     embed. Hovering greys the site out behind the card, so the card is what you notice. */
-  .shield { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: rgb(11 11 11 / 0);
-    transition: background .35s var(--ease), backdrop-filter .35s var(--ease); }
-  .shield:hover, .shield:focus-within { background: rgb(11 11 11 / .26); backdrop-filter: grayscale(1); -webkit-backdrop-filter: grayscale(1); }
-  :global(.is-nested) .shield { background: rgb(11 11 11 / .42); backdrop-filter: grayscale(1) blur(2px); -webkit-backdrop-filter: grayscale(1) blur(2px); }
+  /* Until Continue is pressed, a solid grey cover sits over the empty window (nothing from the other site has
+     loaded yet), with the card in the middle. */
+  .shield { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: #CFCFCF; }
+  .shield[hidden] { display: none; }
   .card { display: grid; gap: 10px; justify-items: start; width: min(380px, 100%); padding: 20px 22px; border-radius: 14px; border: 1px solid rgb(255 255 255 / .16);
     background: rgb(11 11 11 / .86); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 18px 44px -16px rgb(0 0 0 / .55); }
   .card[hidden] { display: none; }

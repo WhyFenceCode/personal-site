@@ -4,6 +4,7 @@
 //   pnpm shots            capture missing screenshots
 //   pnpm shots --all      re-capture every live project
 //   pnpm shots orbit      re-capture one project by its file name
+//   pnpm shots:self       this site's own card, with motion on and the ink mid-swipe (see shot-self.mjs)
 //
 // Commit the images. This runs on your machine (not during the hosted build), so builds stay fast.
 import { readdirSync, readFileSync, existsSync, mkdirSync } from 'node:fs';
@@ -27,7 +28,10 @@ for (const lang of readdirSync(ROOT)) {
   }
 }
 
-const todo = [...projects].filter(([slug]) => (only.length ? only.includes(slug) : all || !existsSync(join(OUT, `${slug}.jpg`))));
+// This site's own project gets its shot from `pnpm shots:self` (motion on, mid-swipe), so the bulk runs skip it.
+const own = new URL(parse(readFileSync('src/config/site.yaml', 'utf8')).url).origin;
+const isOwn = (u) => { try { return new URL(u).origin === own; } catch { return false; } };
+const todo = [...projects].filter(([slug, url]) => (only.length ? only.includes(slug) : (all || !existsSync(join(OUT, `${slug}.jpg`))) && !isOwn(url)));
 if (!todo.length) { console.log('[shots] nothing to do (use --all to re-capture)'); process.exit(0); }
 
 mkdirSync(OUT, { recursive: true });

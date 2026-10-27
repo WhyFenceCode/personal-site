@@ -89,8 +89,7 @@ work:
     continue: Continue
     nestedTitle: Already in a preview
     nested: "You're looking at this site inside its own preview, so it stops here instead of nesting forever. Open {host} in its own tab to explore it."
-    outside: "This is {host}, an outside website, loaded live in this page. It sees your visit and may set its own cookies; its own privacy policy applies."
-    own: "A live copy of this site, running inside the page."
+    outside: "Continue loads {host}, an outside website, here in this page. It will see your visit and may set its own cookies; its own privacy policy applies."
     alt: Screenshot of
 
 resume:

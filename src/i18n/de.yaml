@@ -89,8 +89,7 @@ work:
     continue: Weiter
     nestedTitle: Bereits in einer Vorschau
     nested: "Du siehst diese Seite in ihrer eigenen Vorschau, deshalb endet sie hier statt sich endlos zu verschachteln. Öffne {host} in einem eigenen Tab."
-    outside: "Das ist {host}, eine externe Website, live in diese Seite geladen. Sie sieht deinen Besuch und kann eigene Cookies setzen; es gilt ihre eigene Datenschutzerklärung."
-    own: "Eine Live-Version dieser Seite, direkt hier eingebettet."
+    outside: "Weiter lädt {host}, eine externe Website, hier in diese Seite. Sie sieht deinen Besuch und kann eigene Cookies setzen; es gilt ihre eigene Datenschutzerklärung."
     alt: Screenshot von
 
 resume:
