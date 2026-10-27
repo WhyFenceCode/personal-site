@@ -63,7 +63,7 @@ function compose(env, now, items, notes) {
     '',
     lines.join('\r\n'),
   ].join('\r\n');
-  return new EmailMessage(env.FROM, env.REMIND_TO, raw);
+  return { message: new EmailMessage(env.FROM, env.REMIND_TO, raw), text: lines.join('\n') };
 }
 
 export default {
@@ -71,7 +71,10 @@ export default {
     if (!env.REMIND_TO) throw new Error('REMIND_TO is not set: run `wrangler secret put REMIND_TO`');
     const now = new Date(event.scheduledTime);
     const items = due(now), notes = await staleNotes(env.SITE);
-    await env.MAIL.send(compose(env, now, items, notes));
+    const { message, text } = compose(env, now, items, notes);
+    // Shown in the `wrangler dev` terminal and in the worker's logs on Cloudflare (no address, just the content).
+    console.log(`Sending reminder:\n\n${text}`);
+    await env.MAIL.send(message);
   },
   // No web access: the worker has no public URL, and this answers anything that reaches it anyway.
   async fetch() {

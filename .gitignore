@@ -15,3 +15,6 @@ dist/
 
 # Private notes (never committed)
 private/
+
+# Wrangler local dev state (simulated storage, logs, saved emails)
+.wrangler/
