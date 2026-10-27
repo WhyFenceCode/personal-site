@@ -21,7 +21,7 @@ const d = p.data;
 const cover = coverFor(p);
 // Embed whenever the real domain is allowed to frame the site. In dev the page runs on localhost, which the
 // other site may not allow; then a note says so instead of leaving an unexplained "refused to connect".
-const interactive = !!d.live && d.preview && new URL(d.live).origin !== new URL(site.url).origin && (await canFrame(d.live, site.url));
+const interactive = !!d.live && d.preview && (await canFrame(d.live, site.url));
 const devBlocked = import.meta.env.DEV && interactive && !(await canFrame(d.live!, Astro.url.origin));
 const facts: [string, string][] = [
   [t(lang, 'work.client'), d.client ?? ''],
@@ -48,7 +48,8 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
       </div>
     </header>
 
-    <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} art={d.art} interactive={interactive} devBlocked={devBlocked} />
+    {/* The big window only for a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
+    {(cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
 
     <div class="case-body">
       <aside class="facts">

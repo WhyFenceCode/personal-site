@@ -35,7 +35,9 @@ async function check(url: string, siteUrl: string): Promise<boolean> {
       const sources = fa.split(/\s+/).slice(1);
       const origin = new URL(siteUrl).origin;
       const host = new URL(siteUrl).host;
-      return sources.some((s) => s === '*' || s.replace(/\/$/, '') === origin || s === host || (s.startsWith('https://*.') && host.endsWith(s.slice(9))));
+      // 'self' allows pages from the framed site's own origin, e.g. this site's own project page.
+      const self = sources.includes("'self'") && new URL(r.url).origin === origin;
+      return self || sources.some((s) => s === '*' || s.replace(/\/$/, '') === origin || s === host || (s.startsWith('https://*.') && host.endsWith(s.slice(9))));
     }
     return true;
   } catch (e) {
