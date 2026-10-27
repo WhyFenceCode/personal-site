@@ -44,8 +44,10 @@ contact any other company. The one exception is a project page that shows anothe
   If you would rather not connect to them, don't open those project pages; every project is also described in
   text and a screenshot elsewhere on this site.
 - **Links.** Links to other websites open in a new tab. Their own privacy policies apply.
-- **Content shown on this site** (GitHub activity, map locations, exercise totals) is fetched by the build
+- **Content shown on this site** (GitHub activity, map locations) is fetched by the build
   server when the site is published, not by your browser. No information about visitors is sent to those services.
+- **Exercise totals** come from a summary of my own Strava export that I import myself. Only weekly
+  distances are published, and visitors' browsers never contact Strava.
 
 ## 5. How it is protected
 The site is served only over an encrypted connection (HTTPS), and it collects as little as possible: there is

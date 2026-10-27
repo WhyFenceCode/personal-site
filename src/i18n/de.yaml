@@ -47,9 +47,7 @@ sections:
 activities:
   reading: { title: Lesen, current: Lese gerade, next: Als Nächstes, finished: Dieses Jahr gelesen, goal: "{n} von {goal} Büchern dieses Jahr" }
   listening: { title: Hören, now: In Dauerschleife, top: Meistgehört }
-  running: { title: Laufen }
-  cycling: { title: Radfahren }
-  training: { total: "{unit} in den letzten 26 Wochen", longest: Längste Strecke, goal: "Jahresziel {goal} {unit}", hover: Woche antippen, live: Daten von Strava, sample: "Beispieldaten, nicht live von Strava" }
+  training: { title: Unterwegs, meta: "Laufen · Rad · Gehen", total: "{unit} in den letzten 26 Wochen", longest: Längste Strecke, hover: Woche antippen, imported: "Aus meinem Strava-Export, {date}", sample: "Beispieldaten, nicht von Strava" }
   photography: { title: Fotografie, visit: Zur Foto-Seite }
   places: { title: Orte, count: "{n} Orte · {c} Länder", hover: Pin antippen }
   languages: { title: Sprachen }

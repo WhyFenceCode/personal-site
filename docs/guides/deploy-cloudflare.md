@@ -35,8 +35,6 @@ The repo has no remote yet.
    | `NODE_VERSION` | `24` | Astro 7 needs a current Node |
    | `PNPM_VERSION` | `11.20.0` | Matches `packageManager` in package.json |
 
-   Add the Strava secrets here too if you use it ([running-and-cycling.md](running-and-cycling.md)), as type
-   **Secret**.
 4. **Save and Deploy.** The first build takes a few minutes. You get a `*.pages.dev` address to check it on.
    The build log ends with `[check-secrets] ok`. If the scan fails, the deploy stops, which is what you want.
 
@@ -66,8 +64,11 @@ live-preview check use. If you ever use a different domain, change it there.
 
 ## 5. After launch
 - **Updates:** every push to `main` rebuilds and deploys. Pushes to other branches get preview addresses.
-- **Fresh data:** GitHub, Strava and place data only update on a build. Set up the daily rebuild in
-  [scheduled-rebuilds.md](scheduled-rebuilds.md).
+- **Fresh data:** GitHub and place data only update on a build. Set up the daily rebuild in
+  [scheduled-rebuilds.md](scheduled-rebuilds.md). Your Strava numbers update when you run
+  `pnpm strava:import` and push ([running-and-cycling.md](running-and-cycling.md)).
+- **Weekly reminder email:** a small worker that reminds you what to update and flags anything stale:
+  [reminders.md](reminders.md).
 - **Analytics (optional):** Cloudflare Web Analytics is cookieless. Enable it in the dashboard, then set
   `analytics.provider: cloudflare` in `site.yaml`; the privacy policy updates itself.
 - **Rolling back:** Pages project → **Deployments** → pick an older one → **Rollback**.

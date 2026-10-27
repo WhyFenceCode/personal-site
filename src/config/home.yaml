@@ -31,13 +31,12 @@ sections:
 
   - type: activities
     # Blocks in display order. size: 1 or 2 columns, or 4 for a full row.
-    # Block ids: reading, listening, running, cycling, photography, places, languages, uses.
-    # running and cycling hide themselves when there's no recent activity (see activities.yaml).
+    # Block ids: reading, listening, training, photography, places, languages, uses.
+    # training (distance from all activities) hides itself when there's no recent activity (see activities.yaml).
     blocks:
       - { id: reading, size: 1 }
       - { id: listening, size: 1 }
-      - { id: running, size: 2 }
-      - { id: cycling, size: 2 }
+      - { id: training, size: 2 }
       - { id: places, size: 4 }
       - { id: photography, size: 2 }
       - { id: languages, size: 2 }

@@ -10,7 +10,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "check:secrets": "node scripts/check-secrets.mjs",
-    "shots": "node scripts/screenshots.mjs"
+    "shots": "node scripts/screenshots.mjs",
+    "strava:import": "node scripts/strava-import.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.4",

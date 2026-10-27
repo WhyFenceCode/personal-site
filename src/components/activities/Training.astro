@@ -1,16 +1,19 @@
 ---
-/* Running or cycling: weekly distance for the last 26 weeks. Only rendered when there was recent activity. */
+/* Distance moved across all activities: weekly totals for the last 26 weeks. Only rendered when there was
+   recent activity. No goal on purpose: it's a record, not a target. */
 import Tile from './Tile.astro';
 import { t, type Lang } from '../../lib/i18n';
-import type { Sport, Stats } from '../../lib/strava';
-interface Props { lang: Lang; size: 1 | 2 | 4; sport: Sport; data: Stats }
-const { lang, size, sport, data } = Astro.props;
+import type { Stats } from '../../lib/training';
+interface Props { lang: Lang; size: 1 | 2 | 4; data: Stats }
+const { lang, size, data } = Astro.props;
+// "VirtualRide" → "Virtual ride"
+const kind = (s?: string) => s ? s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^(.)(.*)$/, (_, a, b) => a + b.toLowerCase()) : '';
 const { weeks, unit } = data;
 const max = Math.max(...weeks, 1);
 const W = 400, H = 120, bw = W / Math.max(1, weeks.length);
 const fmt = (n: number) => n.toLocaleString(lang);
 ---
-<Tile title={t(lang, `activities.${sport}.title`)} meta={data.goal ? t(lang, 'activities.training.goal', { goal: fmt(data.goal), unit }) : undefined} size={size}>
+<Tile title={t(lang, 'activities.training.title')} meta={t(lang, 'activities.training.meta')} size={size}>
   <figure class="run" data-run data-unit={unit}>
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`${fmt(data.total)} ${unit} over ${weeks.length} weeks, best week ${max} ${unit}`}>
       {weeks.map((v, i) => <rect x={i * bw + 1.5} y={H - (v / max) * (H - 6)} width={bw - 3} height={Math.max(1, (v / max) * (H - 6))} data-v={v} data-w={weeks.length - i} />)}
@@ -19,10 +22,10 @@ const fmt = (n: number) => n.toLocaleString(lang);
   </figure>
   <div class="stats">
     <div><span class="stat big">{fmt(data.total)}</span><span class="mono muted">{t(lang, 'activities.training.total', { unit })}</span></div>
-    {data.longest && <div><span class="stat big">{data.longest.km}</span><span class="mono muted">{t(lang, 'activities.training.longest')}{data.longest.name && ` · ${data.longest.name}`}</span></div>}
+    {data.longest && <div><span class="stat big">{data.longest.km}</span><span class="mono muted">{t(lang, 'activities.training.longest')}{(data.longest.name || data.longest.type) && ` · ${data.longest.name ?? kind(data.longest.type)}`}</span></div>}
   </div>
-  {data.source === 'strava'
-    ? <p class="mono muted attr">{t(lang, 'activities.training.live')}</p>
+  {data.source === 'import'
+    ? <p class="mono muted attr">{t(lang, 'activities.training.imported', { date: new Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(data.updated!)) })}</p>
     : <p class="mono muted attr">{t(lang, 'activities.training.sample')}</p>}
 </Tile>
 

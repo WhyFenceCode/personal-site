@@ -1,6 +1,6 @@
 ---
 /* Hobby blocks. Which blocks show, in what order and how wide, comes from home.yaml.
-   Data comes from activities.yaml, the text files in src/data, or Strava at build time. */
+   Data comes from activities.yaml, the text files in src/data, and the imported Strava summary. */
 import Section from '../components/ui/Section.astro';
 import Reading from '../components/activities/Reading.astro';
 import Listening from '../components/activities/Listening.astro';
@@ -11,7 +11,7 @@ import Languages from '../components/activities/Languages.astro';
 import Uses from '../components/activities/Uses.astro';
 import { activities, type Cta } from '../lib/config';
 import { reading, places } from '../lib/lists';
-import { training, isRecent } from '../lib/strava';
+import { training, isRecent } from '../lib/training';
 import { t, type Lang } from '../lib/i18n';
 
 interface Props { lang: Lang; tone: 'light' | 'dark'; blocks: { id: string; size: 1 | 2 | 4 }[]; cta?: Cta }
@@ -21,8 +21,7 @@ const { lang, tone, blocks, cta } = Astro.props;
 const BLOCKS: Record<string, { C: any; load: () => Promise<Record<string, unknown> | null> }> = {
   reading: { C: Reading, load: async () => ({ data: { goal: activities.reading?.goal, ...reading() } }) },
   listening: { C: Listening, load: async () => (activities.listening ? { data: activities.listening } : null) },
-  running: { C: Training, load: async () => { const s = (await training()).running; return isRecent(s) ? { sport: 'running', data: s } : null; } },
-  cycling: { C: Training, load: async () => { const s = (await training()).cycling; return isRecent(s) ? { sport: 'cycling', data: s } : null; } },
+  training: { C: Training, load: async () => { const s = training(); return isRecent(s) ? { data: s } : null; } },
   photography: { C: Photography, load: async () => (activities.photography?.url ? { data: activities.photography } : null) },
   places: { C: Places, load: async () => { const p = await places(); return p.length ? { data: { ...activities.places, places: p } } : null; } },
   languages: { C: Languages, load: async () => (activities.languages ? { data: activities.languages } : null) },

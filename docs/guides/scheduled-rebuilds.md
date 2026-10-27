@@ -1,6 +1,6 @@
 # Scheduled rebuilds
 
-The site is static: GitHub activity, Strava totals, the place lookups and the "this year" reading count are
+The site is static: GitHub activity, the place lookups and the "this year" reading count are
 worked out when the site **builds**, not when someone visits. To keep them fresh, rebuild on a schedule.
 Daily is plenty.
 
@@ -36,7 +36,7 @@ GitHub masks secret values in logs, and `curl -fsS … > /dev/null` doesn't prin
 Both have "build hooks" / "deploy hooks" in the project settings. Same workflow, different URL.
 
 ## Build secrets on the host
-Values like Strava credentials go in the **host's** environment variables, not in GitHub, because the host runs
+Any build secrets you add later go in the **host's** environment variables, not in GitHub, because the host runs
 the build:
 
 - Cloudflare Pages: **Settings → Variables and Secrets → Add**, type **Secret** (encrypted), for Production

@@ -1,0 +1,21 @@
+// Weekly reminder email for keeping torstenyoung.com up to date.
+// Setup and deploy: docs/guides/reminders.md
+{
+  "name": "site-reminders",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  // No public URL: the worker only runs on its schedule.
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {
+    // Mondays 13:00 UTC = 9:00 in Kingston (EDT), 8:00 in winter (EST).
+    "crons": ["0 13 * * 1"]
+  },
+  // Sends through Cloudflare Email Routing. It can only deliver to addresses verified there, so it can't be
+  // used to email anyone else. The recipient is the REMIND_TO secret, so no address is stored in the repo.
+  "send_email": [{ "name": "MAIL" }],
+  "vars": {
+    "SITE": "https://torstenyoung.com",
+    "FROM": "reminders@torstenyoung.com"
+  }
+}

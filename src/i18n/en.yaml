@@ -47,9 +47,7 @@ sections:
 activities:
   reading: { title: Reading, current: Currently reading, next: Up next, finished: Finished this year, goal: "{n} of {goal} books this year" }
   listening: { title: Listening, now: On repeat, top: Most played }
-  running: { title: Running }
-  cycling: { title: Cycling }
-  training: { total: "{unit} in the last 26 weeks", longest: Longest, goal: "Yearly goal {goal} {unit}", hover: Hover a week, live: Data from Strava, sample: "Sample data, not live from Strava" }
+  training: { title: On the move, meta: "Run · ride · walk", total: "{unit} in the last 26 weeks", longest: Longest, hover: Hover a week, imported: "From my Strava export, {date}", sample: "Sample data, not from Strava" }
   photography: { title: Photography, visit: Visit the photo site }
   places: { title: Places, count: "{n} places · {c} countries", hover: Hover a pin }
   languages: { title: Languages }

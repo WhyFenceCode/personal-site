@@ -11,22 +11,16 @@ listening:
   nowPlaying: { song: "Come Out and Play", artist: The Offspring }   # the song on repeat, then who made it
   topArtists: [Rihanna, Taylor Swift, The Offspring, Anti-Flag, Paris Paloma]
 
-# Running and cycling. Each block hides itself when nothing was logged in the last
+# Distance moved, all activities together. The block hides itself when nothing was logged in the last
 # `activeWithinDays` days, so a quiet season simply disappears from the page.
 training:
-  source: static            # static | strava  (strava reads build-time secrets, see README "Strava")
+  source: import            # import | static. import reads src/data/training.json (pnpm strava:import); without it the numbers below are used
   unit: km
   activeWithinDays: 30
-  running:                  # used when source is static, and as the fallback if Strava is unreachable
-    goal: 1200
-    lastActivity: 2026-10-24
-    weeks: [18, 22, 0, 25, 31, 28, 12, 35, 30, 33, 41, 26, 0, 38, 44, 40, 36, 47, 29, 42, 50, 46, 31, 52, 48, 39]
-    longest: { km: 21.1, name: Half marathon, date: 2026-09-14 }
-  cycling:                  # last ride is older than 30 days, so this block is hidden right now
-    goal: 3000
-    lastActivity: 2026-08-02
-    weeks: [60, 85, 0, 120, 95, 140, 110, 0, 75, 130, 160, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    longest: { km: 112, name: Lake loop, date: 2026-06-20 }
+  # Used when source is static, and as the fallback before the first import:
+  lastActivity: 2026-10-24
+  weeks: [18, 22, 0, 25, 31, 28, 12, 35, 30, 33, 41, 26, 0, 38, 44, 40, 36, 47, 29, 42, 50, 46, 31, 52, 48, 39]   # 26 weekly km, oldest first
+  longest: { km: 21.1, type: Run, date: 2026-09-14 }
 
 # A link card to your photography site (no photos are shown here).
 # The optional banner at the very top of the page is configured in site.yaml under `banner`.

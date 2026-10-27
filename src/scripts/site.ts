@@ -204,9 +204,22 @@ function initClock() {
   tick(); clockTimer = window.setInterval(tick, 20000);
 }
 
-/* ---------- Project index: a preview follows the pointer ---------- */
+/* ---------- Project index: a preview follows the pointer ----------
+   pointerleave alone can miss: clicking a project swaps the page under the pointer, and scrolling moves a row
+   away without the mouse moving. So the preview also hides whenever the pointer isn't over a project row,
+   on scroll, on click, when the page changes and when the window loses focus. */
 let peekLoop = 0, tx = 0, ty = 0;
-addEventListener('pointermove', (e) => { tx = e.clientX + 28; ty = e.clientY - 110; }, { passive: true });
+const hidePeek = () => $('#peek')?.classList.remove('on');
+addEventListener('pointermove', (e) => {
+  tx = e.clientX + 28; ty = e.clientY - 110;
+  if (!(e.target as Element).closest?.('[data-peek]')) hidePeek();
+}, { passive: true });
+addEventListener('scroll', hidePeek, { passive: true });
+addEventListener('pointerdown', hidePeek, true);
+addEventListener('blur', hidePeek);
+document.addEventListener('astro:before-preparation', hidePeek);
+document.addEventListener('astro:after-swap', hidePeek);
+document.documentElement.addEventListener('pointerleave', hidePeek);
 function initPeek() {
   const peek = $('#peek'); if (!peek || !fine.matches) return;
   const cv = $<HTMLCanvasElement>('canvas', peek)!, img = $<HTMLImageElement>('img', peek)!;
@@ -218,7 +231,7 @@ function initPeek() {
       else { paintArt(cv, a.dataset.peek!); img.hidden = true; cv.hidden = false; peek.style.width = ''; }
       peek.classList.add('on');
     });
-    a.addEventListener('pointerleave', () => peek.classList.remove('on'));
+    a.addEventListener('pointerleave', hidePeek);
   });
   cancelAnimationFrame(peekLoop);
   const loop = () => { const k = motionOn() ? 0.14 : 1; x += (tx - x) * k; y += (ty - y) * k; peek.style.transform = `translate3d(${x}px, ${y}px, 0)`; peekLoop = requestAnimationFrame(loop); };
