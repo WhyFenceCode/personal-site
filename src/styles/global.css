@@ -27,6 +27,12 @@
 
 @layer base {
   html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  /* Minimal scrollbar: a thin mid-grey thumb, no track, readable on both light and dark sections. */
+  html { scrollbar-width: thin; scrollbar-color: rgb(128 128 128 / .55) transparent; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgb(128 128 128 / .55); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(128 128 128 / .85); }
   body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { color: inherit; }
   :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 3px; }

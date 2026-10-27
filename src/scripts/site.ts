@@ -28,22 +28,53 @@ let fitTimer = 0;
 addEventListener('resize', () => { cancelAnimationFrame(fitTimer); fitTimer = requestAnimationFrame(fitAll); });
 document.fonts?.ready.then(fitAll);
 
-/* ---------- Cursor circle (persists across pages) ---------- */
+/* ---------- Cursor dot (persists across pages) ----------
+   Sits exactly on the pointer (no lag, so pointing stays precise) and grows over anything clickable.
+   The system cursor is only hidden once the dot is tracking a real mouse (class ring-live), and CSS keeps it
+   in high-contrast modes. Over an embedded site (iframe) the dot hides and that page's own cursor shows. */
 const fine = matchMedia('(hover: hover) and (pointer: fine)');
 const ring = $('#ring')!;
-let mx = -100, my = -100, rx = -100, ry = -100, rs = 0, rsT = 0;
+let mx = -100, my = -100, rs = 0.3, rsT = 0.3;
 if (document.body.dataset.ring === 'true') {
-  document.documentElement.classList.toggle('has-ring', fine.matches);
-  addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; mx = e.clientX; my = e.clientY; ring.classList.add('on'); }, { passive: true });
-  document.addEventListener('pointerover', (e) => { rsT = (e.target as Element).closest?.('a, button, select, [role="tab"], input[type="range"], [data-ring]') ? 1 : 0; });
-  document.documentElement.addEventListener('pointerleave', () => (rsT = 0));
+  const root = document.documentElement;
+  root.classList.toggle('has-ring', fine.matches);
+  const hide = () => { ring.classList.remove('on'); root.classList.remove('ring-live'); };
+  addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; mx = e.clientX; my = e.clientY; ring.classList.add('on'); root.classList.add('ring-live'); }, { passive: true });
+  document.addEventListener('pointerover', (e) => {
+    const el = e.target as Element;
+    if (el.closest?.('iframe')) { hide(); return; }
+    rsT = el.closest?.('a, button, select, label, [role="tab"], input, [data-ring]') ? 1 : 0.3;
+  });
+  root.addEventListener('pointerleave', hide);
+  addEventListener('blur', hide);
   const loop = () => {
-    const k = motionOn() ? 0.3 : 1;
-    rx += (mx - rx) * k; ry += (my - ry) * k; rs += (rsT - rs) * (motionOn() ? 0.22 : 1);
-    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0) scale(${rs})`;
+    rs += (rsT - rs) * (motionOn() ? 0.25 : 1);
+    ring.style.transform = `translate3d(${mx}px, ${my}px, 0) scale(${rs})`;
     requestAnimationFrame(loop);
   };
   loop();
+}
+
+/* ---------- Scroll progress ring (persists across pages) ---------- */
+const progress = $<HTMLButtonElement>('#progress');
+if (progress) {
+  let raf = 0;
+  const update = () => {
+    raf = 0;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+    progress.style.setProperty('--p', p.toFixed(4));
+    progress.classList.toggle('on', max > innerHeight * 0.25 && scrollY > 8);
+  };
+  const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
+  addEventListener('scroll', queue, { passive: true });
+  addEventListener('resize', queue);
+  document.addEventListener('astro:page-load', queue);
+  new ResizeObserver(queue).observe(document.body);
+  progress.addEventListener('click', () => {
+    scrollTo({ top: 0, behavior: motionOn() ? 'smooth' : 'auto' });
+    $('#main')?.focus({ preventScroll: true });
+  });
 }
 
 /* ---------- Page transitions: ink covers from the click, opens from the centre ---------- */

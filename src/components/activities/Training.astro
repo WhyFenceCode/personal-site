@@ -21,7 +21,9 @@ const fmt = (n: number) => n.toLocaleString(lang);
     <div><span class="stat big">{fmt(data.total)}</span><span class="mono muted">{t(lang, 'activities.training.total', { unit })}</span></div>
     {data.longest && <div><span class="stat big">{data.longest.km}</span><span class="mono muted">{t(lang, 'activities.training.longest')}{data.longest.name && ` · ${data.longest.name}`}</span></div>}
   </div>
-  {data.source === 'strava' && <p class="mono muted attr">Data from Strava</p>}
+  {data.source === 'strava'
+    ? <p class="mono muted attr">{t(lang, 'activities.training.live')}</p>
+    : <p class="mono muted attr">{t(lang, 'activities.training.sample')}</p>}
 </Tile>
 
 <script>

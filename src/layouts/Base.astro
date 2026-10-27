@@ -72,6 +72,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     {site.features.loader && <Loader lang={lang} />}
     <canvas id="flood" aria-hidden="true" transition:persist></canvas>
     <div id="ring" aria-hidden="true" transition:persist></div>
+    <button type="button" id="progress" aria-label={t(lang, 'nav.top')} transition:persist>
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" pathLength="1" /></svg>
+    </button>
     <div class="sr-only" aria-live="polite" id="announcer" transition:persist></div>
     <div id="peek" aria-hidden="true" transition:persist><canvas width="300" height="225"></canvas><img alt="" hidden /></div>
     {showBanner && <Banner lang={lang} />}
@@ -100,9 +103,25 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
   .skip-link { position: fixed; left: 16px; top: -60px; z-index: 200; background: #0B0B0B; color: #fff; padding: 10px 16px; border-radius: 999px; text-decoration: none; }
   .skip-link:focus { top: calc(12px + env(safe-area-inset-top, 0px)); }
   #flood { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none; }
-  #ring { position: fixed; left: 0; top: 0; z-index: 120; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 1.5px solid #fff; mix-blend-mode: difference; pointer-events: none; transform: translate3d(-100px, -100px, 0) scale(0); opacity: 0; }
+  /* The cursor: a solid dot that inverts whatever is under it, growing over things you can click.
+     The system cursor is hidden only for a mouse, only once the dot is tracking it, and never in high-contrast
+     (forced colours) or increased-contrast modes, where the system cursor stays. */
+  #ring { position: fixed; left: 0; top: 0; z-index: 120; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; background: #fff; mix-blend-mode: difference; pointer-events: none; transform: translate3d(-100px, -100px, 0) scale(.3); opacity: 0; transition: opacity .2s; }
   html.has-ring #ring.on { opacity: 1; }
-  @media (forced-colors: active) { #ring, #flood { display: none; } }
+  @media (forced-colors: none) and (prefers-contrast: no-preference) { html.has-ring.ring-live, html.has-ring.ring-live * { cursor: none !important; } }
+  @media (forced-colors: active), (prefers-contrast: more) { #ring { display: none; } }
+  @media (forced-colors: active) { #flood { display: none; } }
+
+  /* Scroll progress: a ring in the corner that draws itself clockwise from the top as you scroll. Inverts
+     what's behind it; clicking it goes back to the top. */
+  #progress { position: fixed; right: max(18px, env(safe-area-inset-right, 0px)); bottom: max(18px, env(safe-area-inset-bottom, 0px)); z-index: 70; width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; background: none; color: #fff; mix-blend-mode: difference; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .4s, transform .4s var(--ease); }
+  #progress.on { opacity: 1; pointer-events: auto; }
+  #progress:hover { transform: scale(1.12); }
+  #progress:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  #progress svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+  #progress circle { fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: butt; stroke-dasharray: var(--p, 0) 1; }
+  html.intro #progress { opacity: 0; }
+  @media (forced-colors: active) { #progress { mix-blend-mode: normal; color: CanvasText; } }
   main { display: block; }
   #peek { position: fixed; left: 0; top: 0; width: 300px; height: 225px; z-index: 30; pointer-events: none; opacity: 0; transition: opacity .3s; overflow: hidden; border-radius: 4px; }
   #peek.on { opacity: 1; }

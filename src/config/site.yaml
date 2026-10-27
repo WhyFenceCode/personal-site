@@ -52,7 +52,7 @@ typography:
 features:
   loader: true              # intro animation, once per browser session
   pageTransitions: true     # ink flood between pages
-  cursorRing: true          # small circle over links and buttons (system cursor always stays)
+  cursorRing: true          # inverting dot cursor (hides the system cursor for mice, except in high-contrast modes)
 
 # Analytics. See README "Analytics" for the trade-offs.
 #   provider: none | cloudflare | plausible | umami | goatcounter

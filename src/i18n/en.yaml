@@ -13,6 +13,7 @@ nav:
   menu: Menu
   close: Close
   skip: Skip to content
+  top: Back to top
 
 hero:
   tagline: "Student at Queen's University<br>Hobby Photographer"
@@ -48,7 +49,7 @@ activities:
   listening: { title: Listening, now: On repeat, top: Most played }
   running: { title: Running }
   cycling: { title: Cycling }
-  training: { total: "{unit} in the last 26 weeks", longest: Longest, goal: "Yearly goal {goal} {unit}", hover: Hover a week }
+  training: { total: "{unit} in the last 26 weeks", longest: Longest, goal: "Yearly goal {goal} {unit}", hover: Hover a week, live: Data from Strava, sample: "Sample data, not live from Strava" }
   photography: { title: Photography, visit: Visit the photo site }
   places: { title: Places, count: "{n} places · {c} countries", hover: Hover a pin }
   languages: { title: Languages }
