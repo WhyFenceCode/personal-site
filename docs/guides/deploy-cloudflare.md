@@ -17,8 +17,12 @@ The repo has no remote yet.
    and `pnpm build` ends with a secret scan.
 
 ## 2. Create the Pages project
-1. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**. Authorise GitHub and pick
-   the repository. Only give Cloudflare access to this one repository.
+Cloudflare's **Create an app** screen now leads with Workers. Use Pages instead: click **Continue to Pages**
+at the bottom, then **Import an existing Git repository → Get started**. Pick `personal-site` and click
+**Begin setup**; the build settings below appear on the next screen. (Pages has the deploy hooks the daily
+rebuild uses.)
+
+1. Authorise GitHub when asked, and only give Cloudflare access to this one repository.
 2. Build settings:
 
    | Setting | Value |
