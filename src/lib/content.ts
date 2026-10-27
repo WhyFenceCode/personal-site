@@ -27,6 +27,13 @@ export function yearValue(v?: string): number {
   const [y, m] = v.split('-').map(Number);
   return y + (m ? (m - 1) / 12 : 0);
 }
+/** The moment an entry ends, exclusive: "2026-06" runs to the end of June, "2026" to the end of the year,
+ *  and no end means it's ongoing (now). Pair with yearValue(start) for a [start, end) span in years. */
+export function endValue(v?: string): number {
+  if (!v) return yearValue();
+  const [y, m] = v.split('-').map(Number);
+  return m ? y + m / 12 : y + 1;
+}
 export const yearLabel = (v?: string, now = 'Now') => (v ? v.split('-')[0] : now);
 
 export async function projectsFor(lang: Lang) {

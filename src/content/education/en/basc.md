@@ -2,8 +2,8 @@
 title: BASc in Engineering
 institution: Queen's University
 kind: degree
-start: 2026
-end: 2030
+start: 2026-9
+end: 2030-5
 highlight: Learning the experience, ethics, and knowledge base needed for safe and productive Engineering in our society.
 featured: true
 order: 1

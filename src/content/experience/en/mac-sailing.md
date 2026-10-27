@@ -1,8 +1,9 @@
 ---
 company: MAC Sailing
-role: Intermediate Sailing Instructor
+role: Junior/Intermediate Sailing Instructor
 location: Vancouver
-start: 2025
+start: 2025-06
+end: 2026-08
 tags: [Instruction, Leadership]
 ---
 - Delivered instructional content to students in a clear manner.

@@ -2,8 +2,8 @@
 company: IB at Sir Winston Churchill Secondary School
 role: IB Director
 location: Vancouver
-start: 2024
-end: 2026
+start: 2024-12
+end: 2026-05
 tags: [Leadership, Planning]
 ---
 - Planned and ran a two-day overnight experience for the incoming IB class, helping them get used to each other, while running information sessions in a fun and enjoyable way. 

@@ -2,8 +2,8 @@
 title: IB Diploma and Dogwood Diploma
 institution: Sir Winston Churchill Secondary School
 kind: degree
-start: 2024
-end: 2026
+start: 2024-09
+end: 2026-06
 highlight: Studied, planned for and succeeded in my IB Diploma program, culminating in the final exam.
 featured: true
 order: 2
