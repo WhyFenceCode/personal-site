@@ -36,7 +36,8 @@
   body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { color: inherit; }
   :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 3px; }
-  ::selection { background: #0B0B0B; color: #fff; }
+  /* Selected text: a mid-grey wash that shows on both light and dark sections, text keeps its colour. */
+  ::selection { background: rgb(128 128 128 / .38); color: inherit; }
   [hidden] { display: none !important; }
   code { font-family: var(--font-mono); font-size: .9em; }
 }

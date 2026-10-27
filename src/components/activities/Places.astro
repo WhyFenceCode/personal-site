@@ -23,7 +23,8 @@ for (const p of data.places) {
 const pins = data.places.map((p, i) => { const [x, y] = projection([p.lng, p.lat]) ?? [0, 0]; return { p, i, x, y }; });
 const aria = (p: Place) => [p.name, p.year, p.note].filter(Boolean).join(', ');
 ---
-<Tile title={data.title ?? t(lang, 'activities.places.title')} meta={t(lang, 'activities.places.count', { n: data.places.length, c: visited.size })} size={size}>
+{/* The map always uses the light palette, even in a dark section: grey land on white reads best. */}
+<Tile title={data.title ?? t(lang, 'activities.places.title')} meta={t(lang, 'activities.places.count', { n: data.places.length, c: visited.size })} size={size} class="tone-light">
   <figure class="map" data-cards data-map>
     <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-label={`Map of ${data.places.length} places in ${visited.size} countries`}>
       <g class="land" aria-hidden="true">{countries.map((f: any) => <path d={path(f) ?? ''} class:list={{ visited: visited.has(f.properties.name) }} />)}</g>

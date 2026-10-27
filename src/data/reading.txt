@@ -4,6 +4,8 @@
 #   2026-09  Title | Author                finished, with year-month
 #   want     Title | Author                on the pile (optional, not shown yet)
 
-now Thinking, Fast and Slow | Daniel Kahneman
+now Thinking Fast and Slow | Daniel Kahneman
 2026-06 The Handmaid's Tale | Margaret Atwood
 want The Testaments | Margaret Atwood
+2026-08 Chronicle of a Death Foretold | Gabriel García Márquez
+2026-08 A Short History of Nearly Everything | Bill Bryson

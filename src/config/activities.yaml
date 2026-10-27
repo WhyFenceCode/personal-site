@@ -8,8 +8,8 @@ reading:
 # Hand-entered. Change it whenever you like; nothing updates automatically.
 listening:
   updated: 2026-10
-  nowPlaying: { title: "1/1", artist: Brian Eno, album: Music for Airports }
-  topArtists: [Brian Eno, Floating Points, Nils Frahm, Khruangbin, Bonobo]
+  nowPlaying: { song: "Come Out and Play", artist: The Offspring }   # the song on repeat, then who made it
+  topArtists: [Rihanna, Taylor Swift, The Offspring, Anti-Flag, Paris Paloma]
 
 # Running and cycling. Each block hides itself when nothing was logged in the last
 # `activeWithinDays` days, so a quiet season simply disappears from the page.
