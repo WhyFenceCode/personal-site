@@ -89,18 +89,25 @@ async function load(username: string, weeks: number): Promise<GithubData> {
   let days = username ? await calendar(username) : null;
   const sample = !days;
   if (!days) days = sampleDays();
-  let repos = SAMPLE_REPOS, pushes = SAMPLE_PUSHES;
+  // Sample repos and pushes only when no username is set. With a real account, a failed request shows
+  // nothing rather than made-up entries.
+  let repos = username ? [] : SAMPLE_REPOS, pushes = username ? [] : SAMPLE_PUSHES;
   if (username) {
     try {
       const r = await getJSON(`https://api.github.com/users/${encodeURIComponent(username)}/repos?sort=pushed&per_page=6&type=owner`);
       repos = r.filter((x: any) => !x.fork).slice(0, 3).map((x: any) => ({ name: x.name, url: x.html_url, description: x.description ?? '', language: x.language, stars: x.stargazers_count, pushedAt: x.pushed_at }));
     } catch (e) { console.warn('[github] repos failed:', (e as Error).message); }
     try {
+      // Push events only carry the commit SHA now (no messages), so look up the newest commit of each push.
       const ev = await getJSON(`https://api.github.com/users/${encodeURIComponent(username)}/events/public?per_page=40`);
-      pushes = ev.filter((e: any) => e.type === 'PushEvent').flatMap((e: any) => (e.payload.commits ?? []).slice(-1).map((c: any) => ({
-        repo: e.repo.name.split('/')[1], message: c.message.split('\n')[0], date: e.created_at, url: `https://github.com/${e.repo.name}/commit/${c.sha}`,
-      }))).slice(0, 4);
-      if (!pushes.length) pushes = [];
+      const recent = ev.filter((e: any) => e.type === 'PushEvent' && e.payload?.head).slice(0, 4);
+      const found = await Promise.all(recent.map(async (e: any): Promise<Push | null> => {
+        try {
+          const c = await getJSON(`https://api.github.com/repos/${e.repo.name}/commits/${e.payload.head}`);
+          return { repo: e.repo.name.split('/')[1], message: String(c.commit?.message ?? '').split('\n')[0], date: e.created_at, url: c.html_url ?? `https://github.com/${e.repo.name}/commit/${e.payload.head}` };
+        } catch { return null; }
+      }));
+      pushes = found.filter((p): p is Push => !!p && !!p.message);
     } catch (e) { console.warn('[github] events failed:', (e as Error).message); }
   }
   const recent = days.slice(-weeks * 7);
