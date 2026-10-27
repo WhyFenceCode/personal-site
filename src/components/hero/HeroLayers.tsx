@@ -10,12 +10,13 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { inkField, loopOn, differenceInk, NOISE, MASK_GLSL, type InkField } from '../../scripts/gl';
 import { motionOn, onMotion, isTouch } from '../../scripts/motion';
 
 type Layer = {
   id: string; label: string; kind: 'flat' | 'chrome' | 'rope' | 'blocks'; font: 'display' | 'serif' | 'pixel' | 'mono' | 'text';
-  weight: number; stretch: number; italic: boolean; case: 'upper' | 'none'; ink: string; paper: string; outline: boolean;
+  weight: number; stretch: number; italic: boolean; case: 'upper' | 'none'; ink: string; paper: string; outline: boolean; text?: string;
 };
 type Props = {
   layers: Layer[];
@@ -63,57 +64,84 @@ function drawLines(ctx: CanvasRenderingContext2D, L: Layer, lines: Line[], scale
   }
 }
 
-/* ---------- Outline tracing for the rope layer ---------- */
+/* ---------- Stroke tracing for the rope layer ---------- */
 type Pt = [number, number];
-/** Marching squares over a white-on-black mask: closed outline loops, in mask pixels. */
-function contours(md: Uint8ClampedArray, w: number, h: number): Pt[][] {
-  const inside = (x: number, y: number) => md[(y * w + x) * 4] > 127;
-  const hEdge = (x: number, y: number) => (y * (w + 1) + x) * 2, vEdge = (x: number, y: number) => (y * (w + 1) + x) * 2 + 1;
-  const adj = new Map<number, number[]>();
-  const link = (a: number, b: number) => { (adj.get(a) ?? adj.set(a, []).get(a)!).push(b); (adj.get(b) ?? adj.set(b, []).get(b)!).push(a); };
-  // Corner bits: top-left 8, top-right 4, bottom-right 2, bottom-left 1. Edges: 0 top, 1 right, 2 bottom, 3 left.
-  const TABLE = [[], [3, 2], [2, 1], [3, 1], [0, 1], [3, 0, 2, 1], [0, 2], [3, 0], [3, 0], [0, 2], [0, 1, 3, 2], [0, 1], [3, 1], [2, 1], [3, 2], []];
-  for (let y = 0; y < h - 1; y++) for (let x = 0; x < w - 1; x++) {
-    const c = (inside(x, y) ? 8 : 0) | (inside(x + 1, y) ? 4 : 0) | (inside(x + 1, y + 1) ? 2 : 0) | (inside(x, y + 1) ? 1 : 0);
-    const e = [hEdge(x, y), vEdge(x + 1, y), hEdge(x, y + 1), vEdge(x, y)], t = TABLE[c];
-    for (let i = 0; i < t.length; i += 2) link(e[t[i]], e[t[i + 1]]);
-  }
-  const pos = (id: number): Pt => { const b = id >> 1, x = b % (w + 1), y = Math.floor(b / (w + 1)); return id & 1 ? [x, y + 0.5] : [x + 0.5, y]; };
-  const seen = new Set<number>(), loops: Pt[][] = [];
-  for (const first of adj.keys()) {
-    if (seen.has(first)) continue;
-    const loop: Pt[] = []; let prev = -1, cur = first;
-    while (!seen.has(cur)) {
-      seen.add(cur); loop.push(pos(cur));
-      const next = (adj.get(cur) ?? []).find((n) => n !== prev && !seen.has(n));
-      if (next === undefined) break;
-      prev = cur; cur = next;
+/** Zhang–Suen thinning: reduces each letter stroke in a white-on-black mask to a 1-pixel centre line. */
+function thin(md: Uint8ClampedArray, w: number, h: number): Uint8Array {
+  const img = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) img[i] = md[i * 4] > 127 ? 1 : 0;
+  const del: number[] = [];
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let pass = 0; pass < 2; pass++) {
+      del.length = 0;
+      for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+        const i = y * w + x; if (!img[i]) continue;
+        const p2 = img[i - w], p3 = img[i - w + 1], p4 = img[i + 1], p5 = img[i + w + 1], p6 = img[i + w], p7 = img[i + w - 1], p8 = img[i - 1], p9 = img[i - w - 1];
+        const b = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+        if (b < 2 || b > 6) continue;
+        const seq = [p2, p3, p4, p5, p6, p7, p8, p9, p2];
+        let a = 0; for (let k = 0; k < 8; k++) if (!seq[k] && seq[k + 1]) a++;
+        if (a !== 1) continue;
+        if (pass === 0 ? (p2 * p4 * p6 || p4 * p6 * p8) : (p2 * p4 * p8 || p2 * p6 * p8)) continue;
+        del.push(i);
+      }
+      for (const i of del) img[i] = 0;
+      if (del.length) changed = true;
     }
-    if (loop.length > 8) loops.push(loop);
   }
-  return loops;
+  return img;
 }
-const perimeter = (l: Pt[]) => l.reduce((s, p, i) => s + Math.hypot(p[0] - l[(i + 1) % l.length][0], p[1] - l[(i + 1) % l.length][1]), 0);
-/** Moving-average smoothing on a closed loop (removes the pixel staircase). */
-function smooth(l: Pt[], passes: number): Pt[] {
+/** Splits a 1-pixel skeleton into polylines between ends and junctions (closed loops for O, D, etc.). */
+function strokes(sk: Uint8Array, w: number, h: number): Pt[][] {
+  const N = [-w - 1, -w, -w + 1, -1, 1, w - 1, w, w + 1];
+  const nb = (i: number) => N.map((d) => i + d).filter((j) => j >= 0 && j < w * h && sk[j] && Math.abs((j % w) - (i % w)) <= 1);
+  const deg = (i: number) => nb(i).length;
+  const node = (i: number) => deg(i) !== 2;
+  const used = new Set<string>(), seen = new Set<number>();
+  const key = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`);
+  const xy = (i: number): Pt => [i % w, Math.floor(i / w)];
+  const walk = (from: number, to: number) => {
+    const path = [from]; let prev = from, cur = to;
+    used.add(key(prev, cur));
+    for (;;) {
+      path.push(cur);
+      if (node(cur) || seen.has(cur)) break;
+      seen.add(cur);
+      const next = nb(cur).find((j) => j !== prev && !used.has(key(cur, j)));
+      if (next === undefined) break;
+      used.add(key(cur, next)); prev = cur; cur = next;
+    }
+    return path;
+  };
+  const out: Pt[][] = [];
+  for (let i = 0; i < w * h; i++) if (sk[i] && node(i)) for (const j of nb(i)) if (!used.has(key(i, j))) out.push(walk(i, j).map(xy));
+  for (let i = 0; i < w * h; i++) if (sk[i] && !node(i) && !seen.has(i)) { const j = nb(i)[0]; if (j !== undefined) out.push(walk(i, j).map(xy)); }
+  return out;
+}
+const pathLength = (l: Pt[]) => l.reduce((s, p, i) => (i ? s + Math.hypot(p[0] - l[i - 1][0], p[1] - l[i - 1][1]) : 0), 0);
+/** Moving-average smoothing that keeps the end points in place. */
+function smoothOpen(l: Pt[], passes: number): Pt[] {
   let out = l;
-  for (let k = 0; k < passes; k++) out = out.map((_, i) => {
-    let sx = 0, sy = 0;
-    for (let j = -2; j <= 2; j++) { const q = out[(i + j + out.length) % out.length]; sx += q[0]; sy += q[1]; }
-    return [sx / 5, sy / 5] as Pt;
+  for (let k = 0; k < passes; k++) out = out.map((p, i) => {
+    if (i === 0 || i === out.length - 1) return p;
+    const a = out[i - 1], b = out[i + 1];
+    return [(a[0] + p[0] * 2 + b[0]) / 4, (a[1] + p[1] * 2 + b[1]) / 4] as Pt;
   });
   return out;
 }
-/** Even spacing along a closed loop. */
-function resample(l: Pt[], step: number): Pt[] {
+/** Even spacing along an open path. */
+function resampleOpen(l: Pt[], step: number): Pt[] {
   const out: Pt[] = [l[0]]; let carry = 0;
-  for (let i = 0; i < l.length; i++) {
-    const a = l[i], b = l[(i + 1) % l.length], seg = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  for (let i = 0; i < l.length - 1; i++) {
+    const a = l[i], b = l[i + 1], seg = Math.hypot(b[0] - a[0], b[1] - a[1]);
     let d = step - carry;
     while (d <= seg) { const t = d / seg; out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); d += step; }
     carry = seg - (d - step);
   }
-  return out.length > 3 ? out.slice(0, -1) : out;
+  out.push(l[l.length - 1]);
+  return out;
 }
 
 function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props): () => void {
@@ -127,6 +155,8 @@ function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props)
   catch { cv.remove(); return differenceInk(host); }
   const dpr = Math.min(devicePixelRatio || 1, touch ? 1.5 : 2);
   renderer.setPixelRatio(dpr);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -245,74 +275,161 @@ function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props)
     return { tex: st.rt.texture, render: () => st.draw(), dispose: () => { geo.dispose(); mat.dispose(); alpha.dispose(); st.rt.dispose(); } };
   }
 
-  /** A braided rope laid along every letter outline. */
-  function buildRope(L: Layer): Built {
-    const { md, bl, bt, cw, ch, S } = textMask(L, touch ? 0.3 : 0.4);
-    const r = Math.max(2.5, fontPx * 0.04);
-    const loops = contours(md, cw, ch)
-      .map((loop) => smooth(loop.map(([x, y]) => [bl + x / S, bt + y / S] as Pt), 3))
-      .filter((loop) => perimeter(loop) > fontPx * 0.2)
-      .map((loop) => resample(loop, r * 0.8));
-    const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(L.ink), roughness: 0.8, metalness: 0, envMapIntensity: 0.9 });
-    const st = stage(L);
-    const geos: THREE.BufferGeometry[] = [];
-    const pitch = r * 7, strands = 3;
-    for (const loop of loops) {
-      let arc = 0;
-      const arcs = loop.map((p, i) => (i ? (arc += Math.hypot(p[0] - loop[i - 1][0], p[1] - loop[i - 1][1])) : 0));
-      for (let s = 0; s < strands; s++) {
-        const pts = loop.map((p, i) => {
-          const a = loop[(i + 1) % loop.length], b = loop[(i - 1 + loop.length) % loop.length];
-          let tx = a[0] - b[0], ty = a[1] - b[1]; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
-          const th = (arcs[i] / pitch) * Math.PI * 2 + (s * Math.PI * 2) / strands;
-          const v = toScene(p[0], p[1]);
-          // Each strand winds around the centre line (in-plane normal and depth); the whole rope rises and falls slowly.
-          v.x += -ty * Math.cos(th) * r * 0.5; v.y -= tx * Math.cos(th) * r * 0.5;
-          v.z += Math.sin(th) * r * 0.5 + Math.sin(arcs[i] / (fontPx * 0.5)) * r * 1.2;
-          return v;
-        });
-        const curve = new THREE.CatmullRomCurve3(pts, true);
-        const geo = new THREE.TubeGeometry(curve, Math.min(4000, pts.length * 2), r * 0.55, touch ? 5 : 7, true);
-        geos.push(geo);
-        st.group.add(new THREE.Mesh(geo, mat));
-      }
-    }
-    st.draw();
-    return { tex: st.rt.texture, render: () => st.draw(), dispose: () => { geos.forEach((g) => g.dispose()); mat.dispose(); st.rt.dispose(); } };
+  /** Soft shadows: a light from the upper left casts the 3D object onto an invisible plane behind it. */
+  function addShadow(scene: THREE.Scene, depth: number, opacity = 0.22) {
+    const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+    sun.position.set(-W * 0.25, H * 0.45, fontPx * 5);
+    sun.castShadow = true;
+    const sc = sun.shadow.camera as THREE.OrthographicCamera;
+    sc.left = -W / 1.6; sc.right = W / 1.6; sc.top = H / 1.6; sc.bottom = -H / 1.6; sc.near = 1; sc.far = fontPx * 14;
+    sun.shadow.mapSize.set(touch ? 1024 : 2048, touch ? 1024 : 2048);
+    sun.shadow.radius = 6; sun.shadow.bias = -0.0005;
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(W * 2, H * 2), new THREE.ShadowMaterial({ opacity }));
+    plane.position.z = -depth; plane.receiveShadow = true;
+    scene.add(sun, sun.target, plane);
+    return () => { plane.geometry.dispose(); (plane.material as THREE.Material).dispose(); sun.dispose(); };
   }
 
-  /** The name rebuilt from small cubes that float, and scatter away from the ink. */
-  function buildBlocks(L: Layer): Built {
-    const { md, bl, bt, bw, bh, cw, ch, S } = textMask(L, 0.5);
-    const cell = Math.max(5, fontPx * 0.07);
-    const cells: { x: number; y: number; ph: number }[] = [];
-    for (let y = bt + cell / 2; y < bt + bh; y += cell) for (let x = bl + cell / 2; x < bl + bw; x += cell) {
-      const mx = Math.min(cw - 1, Math.round((x - bl) * S)), my = Math.min(ch - 1, Math.round((y - bt) * S));
-      if (md[(my * cw + mx) * 4] > 127) cells.push({ x, y, ph: Math.random() * Math.PI * 2 });
+  /** A glossy ribbed tube folded along the centre line of every letter stroke, labels running along it. */
+  function buildRope(L: Layer): Built {
+    const target = touch ? 56 : 72;                          // mask text height in pixels for tracing
+    const { md, bl, bt, cw, ch, S } = textMask(L, Math.min(0.6, target / Math.max(1, fontPx)));
+    const r = Math.max(3, fontPx * (L.font === 'serif' ? 0.035 : 0.065));   // tube radius ≈ half a stroke
+    const paths = strokes(thin(md, cw, ch), cw, ch)
+      .map((pth) => pth.map(([x, y]) => [bl + x / S, bt + y / S] as Pt))
+      .filter((pth) => pathLength(pth) > r * 1.2)
+      .map((pth) => resampleOpen(smoothOpen(pth, 4), r * 0.5));
+
+    // Texture along the tube: one rib per tile with a white label pill on it.
+    const period = r * 2.6, text = (L.text ?? 'HELLO').toUpperCase();
+    const tile = document.createElement('canvas'); tile.width = 256; tile.height = 128;
+    const tc = tile.getContext('2d')!;
+    const rib = tc.createLinearGradient(0, 0, 256, 0);
+    rib.addColorStop(0, '#000'); rib.addColorStop(0.18, '#1c1c1c'); rib.addColorStop(0.5, '#0e0e0e'); rib.addColorStop(0.82, '#1c1c1c'); rib.addColorStop(1, '#000');
+    tc.fillStyle = rib; tc.fillRect(0, 0, 256, 128);
+    tc.font = '600 20px "DM Mono", monospace'; tc.textAlign = 'center'; tc.textBaseline = 'middle';
+    for (const cy of [32, 96]) {
+      tc.fillStyle = '#F4F4F2'; tc.beginPath(); tc.roundRect(58, cy - 15, 140, 30, 15); tc.fill();
+      tc.fillStyle = '#0B0B0B'; tc.fillText(text.slice(0, 7), 128, cy + 1);
     }
-    const geo = new THREE.BoxGeometry(cell * 0.86, cell * 0.86, cell * 0.86);
-    const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(L.ink), roughness: 0.38, metalness: 0.15, envMapIntensity: 1.1 });
-    const mesh = new THREE.InstancedMesh(geo, mat, Math.max(1, cells.length));
-    const st = stage(L); st.group.add(mesh);
-    const o = new THREE.Object3D();
-    const place = (t: number) => {
-      for (let i = 0; i < cells.length; i++) {
-        const c = cells[i];
-        const dx = c.x - F.ax, dy = c.y - F.ay, d = Math.hypot(dx, dy) || 1;
-        const f = Math.max(0, 1 - d / (F.R * 1.4)) ** 2; // 0..1, strongest under the ink
-        const push = f * cell * 3;
-        o.position.copy(toScene(c.x + (dx / d) * push, c.y + (dy / d) * push));
-        o.position.z = Math.sin(t * 0.9 + c.ph) * cell * 0.45 + f * cell * 6;
-        o.rotation.set(Math.sin(t * 0.6 + c.ph) * 0.3 + f * 1.4, Math.cos(t * 0.5 + c.ph) * 0.3 + f * 1.4, 0);
-        o.updateMatrix(); mesh.setMatrixAt(i, o.matrix);
+    const bump = document.createElement('canvas'); bump.width = 256; bump.height = 8;
+    const bctx = bump.getContext('2d')!;
+    const bg = bctx.createLinearGradient(0, 0, 256, 0);
+    bg.addColorStop(0, '#000'); bg.addColorStop(0.2, '#fff'); bg.addColorStop(0.8, '#fff'); bg.addColorStop(1, '#000');
+    bctx.fillStyle = bg; bctx.fillRect(0, 0, 256, 8);
+    const baseMap = new THREE.CanvasTexture(tile); baseMap.colorSpace = THREE.SRGBColorSpace; baseMap.anisotropy = 4;
+    const baseBump = new THREE.CanvasTexture(bump);
+    for (const t of [baseMap, baseBump]) { t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.RepeatWrapping; }
+
+    const st = stage(L);
+    const disposers: (() => void)[] = [addShadow(st.scene, r * 4, 0.2)];
+    const capGeo = new THREE.SphereGeometry(r * 0.9, 24, 16);
+    const capMat = new THREE.MeshPhysicalMaterial({ color: 0x0c0c0c, roughness: 0.38, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 0.45 });
+    disposers.push(() => { capGeo.dispose(); capMat.dispose(); baseMap.dispose(); baseBump.dispose(); });
+    for (const pth of paths) {
+      let arc = 0;
+      const pts = pth.map((p, i) => {
+        if (i) arc += Math.hypot(p[0] - pth[i - 1][0], p[1] - pth[i - 1][1]);
+        const v = toScene(p[0], p[1]);
+        v.z = r * 1.5 + Math.sin(arc / (fontPx * 0.45) + p[0] * 0.01) * r * 0.9;   // a slow rise and fall, like a folded hose
+        return v;
+      });
+      if (pts.length < 2) continue;
+      const curve = new THREE.CatmullRomCurve3(pts);
+      const len = curve.getLength();
+      const ribs = Math.max(1, Math.round(len / period));
+      const geo = new THREE.TubeGeometry(curve, ribs * (touch ? 6 : 10), r, touch ? 10 : 16, false);
+      const pos = geo.attributes.position, uv = geo.attributes.uv, centre = new THREE.Vector3(), v = new THREE.Vector3();
+      for (let i = 0; i < pos.count; i++) {
+        const u = uv.getX(i), frac = (u * ribs) % 1;
+        const k = 0.8 + 0.2 * Math.sqrt(Math.sin(Math.PI * frac));   // 0.8 at the seams, 1.0 mid-rib
+        curve.getPointAt(Math.min(1, u), centre);
+        v.fromBufferAttribute(pos, i).sub(centre).multiplyScalar(k).add(centre);
+        pos.setXYZ(i, v.x, v.y, v.z);
       }
-      mesh.instanceMatrix.needsUpdate = true;
+      geo.computeVertexNormals();
+      const map = baseMap.clone(), bumpMap = baseBump.clone();
+      map.repeat.set(ribs, 1); bumpMap.repeat.copy(map.repeat);
+      map.needsUpdate = true; bumpMap.needsUpdate = true;
+      const mat = new THREE.MeshPhysicalMaterial({ map, bumpMap, bumpScale: 1.5, roughness: 0.38, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 0.45 });
+      const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true;
+      st.group.add(mesh);
+      for (const end of [pts[0], pts[pts.length - 1]]) { const cap = new THREE.Mesh(capGeo, capMat); cap.position.copy(end); cap.castShadow = true; st.group.add(cap); }
+      disposers.push(() => { geo.dispose(); mat.dispose(); map.dispose(); bumpMap.dispose(); });
+    }
+    st.draw();
+    return { tex: st.rt.texture, render: () => st.draw(), dispose: () => { disposers.forEach((d) => d()); st.rt.dispose(); } };
+  }
+
+  /** One slightly rounded block per letter, floating at small angles; blocks near the ink lift and turn toward it. */
+  function buildBlocks(L: Layer): Built {
+    const st = stage(L);
+    const light = new THREE.Color(L.paper).getHSL({ h: 0, s: 0, l: 0 }).l > 0.5;
+    const body = light ? '#FBFBFA' : '#1B1B1B';
+    const sideTone = light ? '#E4E3E0' : '#121212';   // sides a shade off the face so each block's edges read
+    const blocks: { mesh: THREE.Mesh; x: number; y: number; size: number; rx: number; ry: number; rz: number; ph: number }[] = [];
+    const disposers: (() => void)[] = [];
+    const side = new THREE.MeshPhysicalMaterial({ color: sideTone, roughness: 0.55, clearcoat: 0.25, clearcoatRoughness: 0.4, envMapIntensity: 0.7 });
+    disposers.push(() => side.dispose());
+    let maxSize = 0;
+    for (const line of lines) {
+      const chars = [...(L.case === 'upper' ? line.text.toUpperCase() : line.text)];
+      // A compact row centred on the name: blocks sit close together with a small gap (a wider one for spaces),
+      // and the whole row stays within ~80% of the name's width so it never reaches the screen edges.
+      const letters = chars.filter((c) => c.trim()).length, spaces = chars.length - letters;
+      const gapK = 0.24, spaceK = 0.5;
+      const units = letters + (letters - 1) * gapK + spaces * spaceK;
+      const size = Math.min(line.h * 0.7, (line.w * 0.8) / Math.max(1, units));
+      let cursor = line.x + line.w / 2 - (units * size) / 2;
+      const centres = chars.map((c) => {
+        if (!c.trim()) { cursor += size * spaceK; return 0; }
+        const x = cursor + size / 2; cursor += size * (1 + gapK); return x;
+      });
+      maxSize = Math.max(maxSize, size);
+      chars.forEach((c, i) => {
+        if (!c.trim()) return;
+        const face = document.createElement('canvas'); face.width = face.height = 256;
+        const fc = face.getContext('2d')!;
+        fc.fillStyle = body; fc.fillRect(0, 0, 256, 256);
+        setFont(fc, L, 180); fc.fillStyle = L.ink; fc.textAlign = 'center'; fc.textBaseline = 'alphabetic';
+        const m = fc.measureText(c);
+        fc.fillText(c, 128, 128 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);
+        const map = new THREE.CanvasTexture(face); map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = 4;
+        // Matte faces so the letter never washes out in a highlight; a little sheen on the sides.
+        // Fully matte, with little reflected light, so the printed letter stays deep black.
+        const front = new THREE.MeshStandardMaterial({ color: '#ffffff', map, roughness: 1, metalness: 0, envMapIntensity: 0.2 });
+        const geo = new RoundedBoxGeometry(size, size, size, 4, size * 0.12);
+        // Box material order: +x, -x, +y, -y, +z (front, facing the viewer), -z
+        const mesh = new THREE.Mesh(geo, [side, side, side, side, front, side]);
+        mesh.castShadow = true;
+        st.group.add(mesh);
+        const ph = Math.random() * Math.PI * 2;
+        blocks.push({ mesh, x: centres[i], y: line.y + line.h / 2, size, ph,
+          rx: (Math.random() - 0.5) * 0.4, ry: (Math.random() - 0.5) * 0.36, rz: (Math.random() - 0.5) * 0.26 });
+        disposers.push(() => { geo.dispose(); front.dispose(); map.dispose(); });
+      });
+    }
+    disposers.push(addShadow(st.scene, maxSize * 0.9, 0.24));
+    const place = (t: number) => {
+      for (const b of blocks) {
+        const dx = F.ax - b.x, dy = F.ay - b.y, d = Math.hypot(dx, dy) || 1;
+        const f = Math.max(0, 1 - d / (F.R * 1.8)) ** 2;
+        const p = toScene(b.x, b.y);
+        p.y += Math.sin(t * 0.8 + b.ph) * b.size * 0.05;
+        p.z = Math.sin(t * 0.6 + b.ph) * b.size * 0.12 + f * b.size * 0.5;
+        b.mesh.position.copy(p);
+        b.mesh.rotation.set(
+          b.rx + Math.sin(t * 0.5 + b.ph) * 0.06 - (dy / d) * f * 0.35,
+          b.ry + Math.cos(t * 0.45 + b.ph) * 0.06 + (dx / d) * f * 0.35,
+          b.rz + Math.sin(t * 0.35 + b.ph) * 0.04,
+        );
+      }
     };
     st.draw(() => place(0));
     return {
       tex: st.rt.texture,
       render: () => st.draw(() => place(motionOn() ? performance.now() / 1000 : 0)),
-      dispose: () => { geo.dispose(); mat.dispose(); mesh.dispose(); st.rt.dispose(); },
+      dispose: () => { disposers.forEach((d) => d()); st.rt.dispose(); },
     };
   }
 
@@ -350,7 +467,7 @@ function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props)
   function finish() {
     k = idx(k + 1); commitFrom = null; charge = 0; uniforms.uCommit.value.set(0, 0, 0);
     F.clear(); cooldownUntil = performance.now() + 600;
-    if (queued > 0 && motionOn()) { queued--; requestAnimationFrame(() => commit((box.l + box.r) / 2, (box.t + box.b) / 2, true)); }
+    if (queued > 0 && motionOn()) { queued--; setTimeout(() => commit((box.l + box.r) / 2, (box.t + box.b) / 2, true), 0); }
     bind(); prune(); label();
   }
 

@@ -72,6 +72,7 @@ const layerSchema = z.object({
   ink: z.string().default('#0B0B0B'),
   paper: z.string().default('#FFFFFF'),
   outline: z.boolean().default(false),
+  text: z.string().optional(),   // rope layer: the word printed on the labels
 });
 const heroSchema = z.object({
   dive: z.number().min(0.05).max(2).default(0.45),
