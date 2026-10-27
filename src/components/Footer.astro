@@ -20,7 +20,7 @@ const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []),
   )}
 
   <div class="foot-cols">
-    <div><div class="mono muted">{t(lang, 'footer.say')}</div><p class="foot-mail">{site.email}</p></div>
+    <div><div class="mono muted">{t(lang, 'footer.say')}</div><p class="foot-mail"><a href={`mailto:${site.email}`}>{site.email}</a></p></div>
     <div><div class="mono muted">{t(lang, 'footer.site')}</div><ul>
       {['work', 'resume', 'about'].map((k) => <li><a href={href(lang, k)}>{t(lang, `nav.${k}`)}</a></li>)}
     </ul></div>
@@ -58,6 +58,8 @@ const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []),
   .foot-cols ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
   .foot-cols a { text-decoration: none; }
   .foot-cols a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .foot-mail a { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: .18em; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); transition: text-decoration-color .3s; }
+  .foot-mail a:hover { text-decoration-color: currentColor; }
   .foot-mail { font-size: clamp(20px, 2.3vw, 30px); letter-spacing: -.02em; margin: 10px 0 0; font-weight: 500; overflow-wrap: anywhere; }
   /* Lighter than the hero: same family, medium weight, a little wider. */
   .foot-mark { isolation: isolate; overflow: hidden; margin: 72px 0 20px; font-family: var(--font-display); font-weight: 500; font-stretch: 92%; letter-spacing: -.04em; line-height: .84; text-transform: uppercase; position: relative; }

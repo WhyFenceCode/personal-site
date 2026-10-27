@@ -457,7 +457,7 @@ function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props)
   function commit(x: number, y: number, forced = false) {
     if (commitFrom) { if (forced) queued++; return; }
     if (!forced && performance.now() < cooldownUntil) return;
-    if (!motionOn()) { finish(); draw(); return; }
+    if (!motionOn()) return; // motion off: the name stays on the serif layer
     commitFrom = [x, y]; commitT0 = performance.now();
     // If animation frames stall (background tab, slow device), complete the dive anyway.
     const started = commitT0;
@@ -533,7 +533,15 @@ function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props)
     }
     draw();
   }
-  function still() { F.clear(); draw(); }
+  // With motion off the hero rests on the serif layer (or the first one, if there's no serif layer): no ink, no diving.
+  const restIndex = Math.max(0, layers.findIndex((L) => L.id === 'serif'));
+  function still() {
+    if (k !== restIndex || commitFrom) {
+      k = restIndex; commitFrom = null; queued = 0; charge = 0; uniforms.uCommit.value.set(0, 0, 0);
+      prune(); bind(); label();
+    }
+    F.clear(); draw();
+  }
 
   function resize() {
     measure();

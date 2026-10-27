@@ -78,6 +78,9 @@ const labelCh = Math.max(...hero.layers.map((l) => `${t(lang, 'hero.layer')} 00/
   .hero-layer { grid-area: layer; display: inline-flex; gap: 10px; align-items: center; white-space: nowrap; }
   .layer-label { display: inline-block; min-width: var(--label-ch); text-align: right; }
   /* Fills as you swipe over the name; full = dive to the next layer. */
+  /* Motion off: the name rests on one layer, so the swipe hint, meter and Next button go. */
+  :global(html.no-motion) .hero-hint, :global(html.no-motion) .dive-meter { visibility: hidden; }
+  :global(html.no-motion) [data-layer-next] { display: none; }
   .dive-meter { width: 56px; height: 3px; background: rgba(255, 255, 255, .3); border-radius: 2px; overflow: hidden; flex: none; }
   .dive-meter i { display: block; height: 100%; background: #fff; transform-origin: left; transform: scaleX(var(--dive, 0)); }
   .hero-layer button { background: none; border: 1.5px solid currentColor; color: inherit; border-radius: 999px; padding: 6px 12px; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }

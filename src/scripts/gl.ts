@@ -12,12 +12,23 @@ export const NOISE = /* glsl */ `
 
 /** Turns the soft field into a crisp blob with a wobbly, slowly drifting edge. */
 export const MASK_GLSL = /* glsl */ `
-  float inkMask(sampler2D field, vec2 uv, vec2 res, float t){
+  float inkMaskB(sampler2D field, vec2 uv, vec2 res, float t, float bias){
     vec2 q = uv * res / 240. + vec2(t * .07, -t * .05);
     vec2 warp = vec2(fbm(q), fbm(q + 5.2)) - .5;
     float f = texture2D(field, uv + warp * 90. / res).a;
     f += (fbm(q * 1.7 + 3.1) - .5) * .18 * smoothstep(.05, .5, f);
-    return smoothstep(.48, .52, f);
+    return smoothstep(.48, .52, f - bias);
+  }
+  float inkMask(sampler2D field, vec2 uv, vec2 res, float t){ return inkMaskB(field, uv, res, t, 0.); }`;
+
+/* Near the top of its box the ink thins and breaks up into specks (a noisy, rising threshold) and fades,
+   instead of being cut off by a straight line. The sides and bottom are left as they are. */
+const EDGE_GLSL = /* glsl */ `
+  float inkEdge(vec2 uv, vec2 res, float t){
+    float d = (1. - uv.y) * res.y; // distance from the top edge (vUv.y is 1 at the top)
+    float band = min(res.y * .4, 110.);
+    float n = fbm(uv * res / 26. + vec2(t * .15, 0.));
+    return smoothstep(0., band, d + (n - .5) * band * 1.1);
   }`;
 
 export interface InkField {
@@ -27,7 +38,6 @@ export interface InkField {
   t: number; inside: boolean; lastMove: number;
   resize(): void;
   step(now: number, dt: number): void;
-  still(x?: number, y?: number): void;
   clear(): void;
   /** When set, the agent follows this instead of wandering (used by autoplay). */
   driver: ((now: number) => [number, number] | null) | null;
@@ -49,7 +59,6 @@ export function inkField(host: HTMLElement, opts: { wander?: boolean } = {}): In
       field.width = Math.ceil(f.W * S); field.height = Math.ceil(f.H * S);
       f.R = Math.max(56, Math.min(190, Math.min(f.W, f.H) * 0.2));
     },
-    still(x = 0.68, y = 0.55) { f.clear(); fx.globalCompositeOperation = 'lighter'; for (let i = 0; i < 6; i++) stamp(f.W * x, f.H * y, f.R * 1.15); },
     clear() { fx.clearRect(0, 0, field.width, field.height); drops.length = 0; },
     step(now, dt) {
       f.t += dt;
@@ -160,15 +169,16 @@ export function differenceInk(host: HTMLElement, opts: { wander?: boolean } = {}
   Object.assign(cv.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', mixBlendMode: 'difference', zIndex: '3' });
   host.appendChild(cv);
   let G: ReturnType<typeof makeGL> = null;
-  try { G = makeGL(cv, MASK_GLSL + 'uniform sampler2D uField; uniform vec2 uRes; uniform float uT; void main(){ float m = inkMask(uField, vUv, uRes, uT); gl_FragColor = vec4(vec3(m), m); }'); } catch { G = null; }
+  try { G = makeGL(cv, MASK_GLSL + EDGE_GLSL + 'uniform sampler2D uField; uniform vec2 uRes; uniform float uT; void main(){ float e = inkEdge(vUv, uRes, uT); float m = inkMaskB(uField, vUv, uRes, uT, (1. - e) * .45) * smoothstep(0., .3, e); gl_FragColor = vec4(vec3(m), m); }'); } catch { G = null; }
   if (!G) { cv.remove(); return () => {}; }
   const { gl } = G, F = inkField(host, opts);
   const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach((p) => gl.texParameteri(gl.TEXTURE_2D, p, gl.LINEAR));
   [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach((p) => gl.texParameteri(gl.TEXTURE_2D, p, gl.CLAMP_TO_EDGE));
   const render = () => { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, F.field); G!.set2('uRes', F.W, F.H); G!.set1('uT', F.t); G!.draw(); };
-  const size = () => { F.resize(); const d = Math.min(devicePixelRatio || 1, 1.5); cv.width = Math.round(F.W * d); cv.height = Math.round(F.H * d); if (!motionOn()) { F.still(); render(); } };
+  const size = () => { F.resize(); const d = Math.min(devicePixelRatio || 1, 1.5); cv.width = Math.round(F.W * d); cv.height = Math.round(F.H * d); if (!motionOn()) { F.clear(); render(); } };
   const ro = new ResizeObserver(size); ro.observe(host);
-  const stop = loopOn(host, (now, dt) => { F.step(now, dt); render(); }, () => { F.still(); render(); });
+  // With motion off there's no ink at all, not even a resting splotch.
+  const stop = loopOn(host, (now, dt) => { F.step(now, dt); render(); }, () => { F.clear(); render(); });
   return () => { stop(); ro.disconnect(); F.destroy(); cv.remove(); };
 }
