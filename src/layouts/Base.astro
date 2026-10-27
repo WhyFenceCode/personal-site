@@ -45,13 +45,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <script is:inline define:vars={{ BANNER: site.banner.url }}>
-      // Decide before first paint: show the intro once per session, and honour reduced motion.
+    <script is:inline>
+      // Decide before first paint. The intro plays on every fresh open of the site (a new tab, a typed URL, a
+      // reload), but not when moving between pages inside it; reduced motion skips it. The flag lives on
+      // window, which survives in-site navigation but not a fresh load.
       try {
         var d = document.documentElement;
         if (localStorage.getItem('site.motion') === 'off') d.classList.add('no-motion');
-        if (localStorage.getItem('site.banner') === BANNER) d.classList.add('banner-hidden');
-        if (!sessionStorage.getItem('site.seen') && !matchMedia('(prefers-reduced-motion: reduce)').matches && !d.classList.contains('no-motion')) d.classList.add('intro');
+        if (!window.__siteOpened) {
+          window.__siteOpened = true;
+          localStorage.removeItem('site.banner'); sessionStorage.removeItem('site.seen'); // no longer used
+          if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !d.classList.contains('no-motion')) d.classList.add('intro');
+        }
+        if (window.__bannerClosed) d.classList.add('banner-hidden');
       } catch (e) {}
     </script>
     {analytics && !needsConsent && <script is:inline defer src={analytics.src} {...analytics.attrs}></script>}

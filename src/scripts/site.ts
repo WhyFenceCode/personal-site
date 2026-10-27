@@ -58,16 +58,17 @@ document.addEventListener('astro:before-preparation', (ev: any) => {
   ev.loader = async () => { covered = true; await Promise.all([flood('cover', lastClick[0], lastClick[1], 560), load()]); };
 });
 document.addEventListener('astro:after-swap', () => {
+  // A closed banner stays closed while moving between pages, and comes back on the next fresh open.
+  if ((window as { __bannerClosed?: boolean }).__bannerClosed) document.documentElement.classList.add('banner-hidden');
   if (!covered) return;
   floodDraw('cover', 1e5, innerWidth / 2, innerHeight / 2);
   requestAnimationFrame(() => flood('reveal', innerWidth / 2, innerHeight / 2, 720).then(() => { floodClear(); covered = false; }));
 });
 
-/* ---------- Intro (first page of a session) ---------- */
+/* ---------- Intro (every fresh open of the site; see the inline script in Base.astro) ---------- */
 async function runIntro() {
   const root = document.documentElement;
   if (!root.classList.contains('intro')) return;
-  try { sessionStorage.setItem('site.seen', '1'); } catch {}
   const num = $('#ld-num'), log = $('#ld-log'), ui = $('#ld-ui');
   if (!num || !ui) { root.classList.remove('intro'); return; }
   const steps: string[] = JSON.parse(ui.dataset.steps || '[]');
@@ -124,7 +125,7 @@ document.addEventListener('click', async (e) => {
   const pause = t.closest<HTMLButtonElement>('[data-marquee-pause]');
   if (pause) { const m = pause.closest('.marquee')!; const p = m.classList.toggle('paused'); pause.setAttribute('aria-pressed', String(p)); pause.textContent = p ? pause.dataset.play! : pause.dataset.pause!; return; }
   const bannerClose = t.closest('[data-banner-close]');
-  if (bannerClose) { const bar = bannerClose.closest<HTMLElement>('[data-banner]')!; try { localStorage.setItem('site.banner', bar.dataset.banner!); } catch {} document.documentElement.classList.add('banner-hidden'); return; }
+  if (bannerClose) { (window as { __bannerClosed?: boolean }).__bannerClosed = true; document.documentElement.classList.add('banner-hidden'); return; }
   if (t.closest('[data-open-cookies]')) { const c = $('#cookies'); if (c) { c.hidden = false; c.querySelector('button')?.focus(); } return; }
   const ck = t.closest<HTMLElement>('[data-ck]');
   if (ck) { try { localStorage.setItem('site.consent', ck.dataset.ck!); } catch {} $('#cookies')!.hidden = true; if (ck.dataset.ck === 'accept') loadAnalytics(); }

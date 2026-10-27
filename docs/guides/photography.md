@@ -25,10 +25,9 @@ banner:
   text: I also take photographs.
   label: Visit the photo site
   url: "https://photos.example.com"
-  dismissible: true    # adds a close button; the choice is remembered in the visitor's browser
+  dismissible: true    # adds a close button; it stays closed while browsing and returns on the next visit
 ```
 
-The hero shrinks by the banner's height so the name still fits on the first screen. If you change the `url`,
-visitors who dismissed the old banner see the new one.
+The hero shrinks by the banner's height so the name still fits on the first screen.
 
 The banner works for any announcement, not just photography.

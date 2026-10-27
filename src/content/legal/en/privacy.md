@@ -22,7 +22,7 @@ Postal address: {{address}}
 | Information | Why | Legal basis | Kept for |
 | --- | --- | --- | --- |
 | Server logs: IP address, browser type, page requested, date and time | To deliver the site and keep it secure | Necessary to run the site (PIPEDA: implied consent; GDPR: legitimate interests, Art. 6(1)(f)) | Deleted by the host after a short period, normally within 30 days |
-| Preferences stored in your browser: language, motion setting, dismissed banner | To remember your choices | Strictly necessary | Until you clear your browser storage. Never sent anywhere |
+| Preferences stored in your browser: language and motion setting | To remember your choices | Strictly necessary | Until you clear your browser storage. Never sent anywhere |
 | Connection data sent to an embedded project website (IP address, browser type, referring page) when you open a project page that shows it live | To show the project as it really works | Legitimate interests (Art. 6(1)(f)); PIPEDA: implied consent, as you choose to open the page | Set by that website; see its own policy |
 | Emails you send | To reply to you | Your consent (Art. 6(1)(a)) | Deleted once the conversation is finished, and within 24 months at most |
 
@@ -54,7 +54,7 @@ almost nothing to protect.
 ## 6. Your rights
 You can ask to see the personal information held about you, have it corrected or deleted, and withdraw consent
 you have given. If you are in the EU or UK you can also ask to restrict or object to its use and to receive a copy
-in a portable format. Write to **{{email}}**. You will get a reply within 30 days.
+in a portable format. Write to **{{email}}**. We aim to provide a reply within 30 days.
 
 ## 7. Complaints
 Please get in touch first so the problem can be fixed. You can also complain to the
