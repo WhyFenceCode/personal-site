@@ -16,7 +16,7 @@ import { motionOn, onMotion, isTouch } from '../../scripts/motion';
 
 type Layer = {
   id: string; label: string; kind: 'flat' | 'chrome' | 'rope' | 'blocks'; font: 'display' | 'serif' | 'pixel' | 'mono' | 'text';
-  weight: number; stretch: number; italic: boolean; case: 'upper' | 'none'; ink: string; paper: string; outline: boolean; text?: string;
+  weight: number; stretch: number; italic: boolean; case: 'upper' | 'none'; ink: string; paper: string; outline: boolean; text?: string; scale: number;
 };
 type Props = {
   layers: Layer[];
@@ -61,6 +61,8 @@ function drawLines(ctx: CanvasRenderingContext2D, L: Layer, lines: Line[], scale
     // shrink to the line if it came out wider; otherwise wide faces like the chrome layer run off the edges.
     const target = line.w * scale;
     if (m2.width > target) { px *= target / m2.width; setFont(ctx, L, px); m2 = ctx.measureText(text); }
+    // Per-layer size (hero.yaml `scale`), e.g. the inflated chrome letters bulge past their outline and need room.
+    if (L.scale !== 1) { px *= L.scale; setFont(ctx, L, px); m2 = ctx.measureText(text); }
     const x = (line.x + line.w / 2) * scale - m2.width / 2;
     const y = (line.y + line.h / 2) * scale + (m2.actualBoundingBoxAscent - m2.actualBoundingBoxDescent) / 2;
     if (outline) { ctx.lineWidth = Math.max(1.5 * scale, px * 0.018); ctx.strokeStyle = color; ctx.lineJoin = 'round'; ctx.strokeText(text, x, y); }

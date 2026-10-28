@@ -12,6 +12,7 @@
 # case:   upper | none
 # ink / paper: text and background colour of the layer
 # outline: true draws only the letter outlines
+# scale:  size of the name on this layer (1 = fills the line). The chrome bubbles bulge past their outline, so it is smaller.
 
 # How much movement over the name it takes to dive one layer, as a share of the screen width.
 # Any direction counts, including back-and-forth scrubbing. 0.45 = a bit under half the screen.
@@ -27,7 +28,7 @@ autoplay:
 
 layers:
   - { id: serif,        label: Serif,        kind: flat,   font: serif,   weight: 400, italic: true,  case: none,  ink: "#0B0B0B", paper: "#FFFFFF" }
-  - { id: chrome,       label: Chrome,       kind: chrome, font: display, weight: 800, stretch: 87.5, case: upper, paper: "#0B0B0B" }
+  - { id: chrome,       label: Chrome,       kind: chrome, font: display, weight: 800, stretch: 87.5, case: upper, paper: "#0B0B0B", scale: 0.86 }
   - { id: grotesk,      label: Grotesk,      kind: flat,   font: display, weight: 800, stretch: 87.5, case: upper, ink: "#0B0B0B", paper: "#FFFFFF" }
   - { id: blocks,       label: Blocks,       kind: blocks, font: display, weight: 800, stretch: 87.5, case: upper, ink: "#0B0B0B", paper: "#E6E5E1" }
   - { id: pixel,        label: Pixel,        kind: flat,   font: pixel,   weight: 600, case: upper, ink: "#FFFFFF", paper: "#0B0B0B" }
