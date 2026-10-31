@@ -47,6 +47,19 @@ const siteSchema = z.object({
     logoDot: z.boolean().default(true),        // "Torsten Young." with an accent full stop
     headingEcho: z.boolean().default(true),    // accent outline copy behind section headings (hidden with motion off)
   }).default({ accent: '#5B4CFF', accentCursor: true, logoDot: true, headingEcho: true }),
+  // Interactive extras, each switchable. Anything with motion also stops when the visitor turns motion off.
+  interactive: z.object({
+    blueprint: z.boolean().default(true),   // "Blueprint" switch in the footer: rulers, grid, dimensions
+    tiltCards: z.boolean().default(true),   // cards tilt toward the pointer with an accent outline behind
+    record: z.boolean().default(true),      // drag the Listening record to spin it
+    magnetic: z.boolean().default(true),    // main buttons lean toward the pointer
+    depth: z.boolean().default(true),       // headings and numbers drift at different speeds on scroll
+    sheen: z.boolean().default(true),       // a faint light follows the pointer across the page
+    pageTilt: z.boolean().default(true),    // pages tilt in 3D as they change
+    wind: z.boolean().default(true),        // marquee words lean with scroll speed
+    githubCity: z.boolean().default(true),  // "3D" switch on the GitHub calendar
+    signature: z.boolean().default(true),   // handwritten name drawn in the contact section
+  }).default({ blueprint: true, tiltCards: true, record: true, magnetic: true, depth: true, sheen: true, pageTilt: true, wind: true, githubCity: true, signature: true }),
   typography: z.object({
     numbers: z.enum(['serif', 'outline']).default('serif'),
     headings: z.enum(['display', 'serif', 'outline']).default('display'),
@@ -105,6 +118,7 @@ const sectionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('projects'), limit: z.number().default(4), ...sectionBase }),
   z.object({ type: z.literal('experience'), ...sectionBase }),
   z.object({ type: z.literal('activities'), blocks: z.array(z.object({ id: z.string(), size: z.union([z.literal(1), z.literal(2), z.literal(4)]).default(1) })), ...sectionBase }),
+  z.object({ type: z.literal('places'), ...sectionBase }),
   z.object({ type: z.literal('contact'), ...sectionBase }),
 ]);
 const homeSchema = z.object({ sections: z.array(sectionSchema) });

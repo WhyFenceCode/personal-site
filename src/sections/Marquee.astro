@@ -15,7 +15,7 @@ const { tone, items = ['Interface design', 'Front-end', 'Motion', 'Accessibility
   .marquee { overflow: hidden; border-block: 1px solid var(--line); padding-block: 22px; position: relative; }
   .marquee-track { display: flex; width: max-content; animation: slide 38s linear infinite; }
   .marquee:hover .marquee-track, .marquee:global(.paused) .marquee-track { animation-play-state: paused; }
-  .marquee-track span { font-family: var(--font-display); font-weight: 800; font-stretch: 75%; text-transform: uppercase; font-size: clamp(40px, 6vw, 88px); line-height: 1; padding-right: .5em; display: inline-flex; align-items: center; gap: .5em; white-space: nowrap; }
+  .marquee-track span { transform: skewX(var(--lean, 0deg)); font-family: var(--font-display); font-weight: 800; font-stretch: 75%; text-transform: uppercase; font-size: clamp(40px, 6vw, 88px); line-height: 1; padding-right: .5em; display: inline-flex; align-items: center; gap: .5em; white-space: nowrap; }
   .marquee-track span::after { content: ""; width: .28em; height: .28em; background: currentColor; }
   .marquee-track span:nth-child(even) { -webkit-text-stroke: 1.5px currentColor; color: transparent; }
   @keyframes slide { to { transform: translateX(-50%); } }

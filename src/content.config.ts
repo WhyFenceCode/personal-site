@@ -22,6 +22,7 @@ const projects = defineCollection({
     cover: image().optional(),              // falls back to a `pnpm shots` screenshot, then to placeholder art
     live: z.url().optional(),      // the live site: "Visit the site" button, screenshot cover, live preview
     preview: z.boolean().default(true),     // false = never offer the interactive live preview
+    model: z.string().optional(),           // a 3D model to spin, e.g. /models/foil.glb (file in public/models/); see docs/guides/3d-models.md
     client: z.string().optional(),
     services: z.array(z.string()).default([]),
     metrics: z.array(z.object({ value: z.union([z.string(), z.number()]), label: z.string() })).default([]),

@@ -1,0 +1,58 @@
+---
+/* Your name as a handwritten signature that writes itself in, letter by letter: each letter's outline is traced
+   as an SVG stroke, then fills in, before the next one starts; an accent flourish underlines it last.
+   The letter shapes are taken from the script font at build time (opentype.js), so the page ships plain SVG paths.
+   Starts when it scrolls into view (scripts/extras.ts). Switch off with site.yaml interactive.signature. */
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import opentype from 'opentype.js';
+import { site } from '../../lib/config';
+
+interface Props { size?: 'xl' | 'large' | 'medium' }
+const { size = 'large' } = Astro.props;
+
+const require = createRequire(import.meta.url);
+const file = require.resolve('@fontsource/mrs-saint-delafield/files/mrs-saint-delafield-latin-400-normal.woff');
+const buf = readFileSync(file);
+const font = opentype.parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
+const FS = 200;
+// One path per letter (spaces have none), in writing order.
+const glyphs = font.getPaths(site.name, 0, FS, FS).map((p) => p.toPathData(2)).filter((d) => d.length > 0);
+const bb = font.getPath(site.name, 0, FS, FS).getBoundingBox();
+const pad = 12;
+const vb = [bb.x1 - pad, bb.y1 - pad, bb.x2 - bb.x1 + pad * 2, bb.y2 - bb.y1 + pad * 2].map((n) => Math.round(n));
+const STEP = 0.2; // seconds between letters
+---
+{site.interactive.signature && (
+  <div class:list={['sig', size]} data-signature aria-hidden="true" style={`--n:${glyphs.length};--step:${STEP}s`}>
+    <svg class="sig-name" viewBox={vb.join(' ')}>
+      {glyphs.map((d, i) => <path d={d} pathLength="1" style={`--i:${i}`} />)}
+    </svg>
+    <svg class="sig-line" viewBox="0 0 400 24" preserveAspectRatio="none"><path d="M4 16 C 90 4, 180 22, 270 12 S 370 6, 396 9" pathLength="1" /></svg>
+  </div>
+)}
+
+<style>
+  .sig { position: relative; display: inline-block; justify-self: start; padding: .1em 0 .2em; }
+  .sig-name { display: block; height: 1em; width: auto; overflow: visible; }  /* sizes below are in vw so the name (about 4em wide) always fits the screen */
+  .large .sig-name { font-size: clamp(80px, 10vw, 170px); }
+  .medium .sig-name { font-size: clamp(62px, 7vw, 110px); }
+  .xl .sig-name { font-size: clamp(120px, 19vw, 300px); }
+  /* Each letter: the outline is drawn as a stroke, then the fill fades in behind it. */
+  .sig-name path { fill: currentColor; fill-opacity: 0; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round;
+    stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .sig:global(.in) .sig-name path { animation: sig-draw .55s cubic-bezier(.5, .1, .3, 1) forwards, sig-fill .35s ease forwards;
+    animation-delay: calc(var(--i) * var(--step)), calc(var(--i) * var(--step) + .4s); }
+  @keyframes sig-draw { to { stroke-dashoffset: 0; } }
+  @keyframes sig-fill { to { fill-opacity: 1; stroke-opacity: 0; } }
+  .sig-line { position: absolute; left: .3em; bottom: .2em; width: calc(96% - .3em); height: 16px; overflow: visible; }  /* an SVG ignores left+right, so set the width */
+  .medium .sig-line { height: 12px; }
+  .xl .sig-line { height: 22px; }
+  .xl .sig-line path { stroke-width: 3; }
+  .sig-line path { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .sig:global(.in) .sig-line path { animation: sig-draw .9s cubic-bezier(.6, .1, .3, 1) forwards; animation-delay: calc(var(--n) * var(--step) + .5s); }
+  /* Motion off: show it finished. */
+  :global(html.no-motion) .sig path { animation: none !important; stroke-dashoffset: 0; fill-opacity: 1; stroke-opacity: 0; }
+  :global(html.no-motion) .sig-line path { stroke-opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .sig path { animation: none !important; stroke-dashoffset: 0; fill-opacity: 1; stroke-opacity: 0; } .sig-line path { stroke-opacity: 1; } }
+</style>

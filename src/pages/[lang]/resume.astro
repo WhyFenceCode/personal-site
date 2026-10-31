@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import HeadingText from '../../components/ui/HeadingText.astro';
+import Signature from '../../components/ui/Signature.astro';
 import ExperienceRows from '../../components/ExperienceRows.astro';
 import Timeline from '../../components/resume/Timeline';
 import { experienceFor, educationFor, yearValue, endValue, yearLabel, isCertification, certDates, credentialUrl } from '../../lib/content';
@@ -85,8 +86,9 @@ const range = {
         </ul></div>
       ))}
     </div>
-    <div class="resume-actions">
-      {pdf && <a class="btn" href={pdf} download>{t(lang, 'cta.download')} ↓</a>}
+    {pdf && <div class="resume-actions"><a class="btn" href={pdf} download>{t(lang, 'cta.download')} ↓</a></div>}
+    <div class="resume-sign">
+      <Signature size="xl" />
       <a class="btn btn-ghost" href={href(lang, 'contact')}>{t(lang, 'nav.contact')}</a>
     </div>
   </section>
@@ -139,4 +141,5 @@ const range = {
   .skills ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
   .skills li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
   .resume-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 64px; }
+  .resume-sign { margin-top: clamp(40px, 5vw, 72px); display: grid; justify-items: start; gap: clamp(20px, 3vw, 36px); }
 </style>

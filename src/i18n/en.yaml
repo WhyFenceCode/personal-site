@@ -42,6 +42,7 @@ sections:
   projects: { eyebrow: Selected work, title: Projects }
   experience: { eyebrow: Career, title: Experience }
   activities: { eyebrow: Off the clock, title: Hobbies }
+  places: { eyebrow: Been there, title: Places, note: "{n} places · {c} countries", hint: Drag to spin, list: Places }
   contact: { eyebrow: Contact, title: "Let's talk." }
 
 activities:
@@ -91,6 +92,7 @@ work:
     nested: "You're looking at this site inside its own preview, so it stops here instead of nesting forever. Open {host} in its own tab to explore it."
     outside: "Continue loads {host}, an outside website, here in this page. It will see your visit and may set its own cookies; its own privacy policy applies."
     alt: Screenshot of
+  modelHint: Drag to spin
 
 resume:
   lead: Drag the timeline, or use the arrow keys, to see what I was doing each year.

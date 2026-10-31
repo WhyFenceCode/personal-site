@@ -42,12 +42,19 @@ const B8 = (() => {
 
 export const artNames = Object.keys(ART);
 
+/** Fine noise over the whole canvas, so the gradients don't band into visible steps. */
+function grain(c: Ctx, w: number, h: number, amount = 7) {
+  const img = c.getImageData(0, 0, w, h), d = img.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - 0.5) * amount; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  c.putImageData(img, 0, 0);
+}
+
 export function paintArt(cv: HTMLCanvasElement, name: string, dither = false) {
   const c = cv.getContext('2d', { willReadFrequently: dither }); if (!c) return;
   const w = cv.width, h = cv.height;
   c.fillStyle = '#D6D6D6'; c.fillRect(0, 0, w, h);
   (ART[name] ?? ART.orbit)(c, w, h);
-  if (!dither) return;
+  if (!dither) { grain(c, w, h); return; }
   const img = c.getImageData(0, 0, w, h), d = img.data;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     // Stretch the tones so near-white becomes clean paper instead of a grid of stray dots.

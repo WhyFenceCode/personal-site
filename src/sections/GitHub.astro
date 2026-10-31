@@ -1,6 +1,7 @@
 ---
 /* Commit tracker: contribution calendar, streaks, active repos and recent pushes (fetched at build time). */
 import Section from '../components/ui/Section.astro';
+import GitHubCity from '../components/GitHubCity';
 import { getGithub } from '../lib/github';
 import { site, type Cta } from '../lib/config';
 import { t, type Lang } from '../lib/i18n';
@@ -31,7 +32,10 @@ const profile = site.github.username ? `https://github.com/${site.github.usernam
         ))}
       </div>
     </div>
-    <figcaption class="gh-read mono muted" aria-hidden="true"><span data-gh-read>Hover a day</span><span class="gh-legend">Less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> More</span></figcaption>
+    {site.interactive.githubCity && <GitHubCity client:idle weeks={gh.weeks} label={`3D view of ${gh.total} contributions in the last year`} />}
+    <figcaption class="gh-read mono muted"><span data-gh-read aria-hidden="true">Hover a day</span>
+      <span class="gh-legend" aria-hidden="true">Less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> More</span>
+      {site.interactive.githubCity && <button type="button" class="gh-3d mono" data-gh-3d aria-pressed="false">3D</button>}</figcaption>
   </figure>
 
   <div class="gh-cols">
@@ -64,6 +68,13 @@ const profile = site.github.username ? `https://github.com/${site.github.usernam
     document.querySelectorAll<HTMLElement>('[data-gh-cal]').forEach((cal) => {
       const read = cal.querySelector<HTMLElement>('[data-gh-read]')!;
       const fmt = new Intl.DateTimeFormat(document.documentElement.lang, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+      // "3D" switches between the flat calendar and the 3D city (components/GitHubCity.tsx).
+      const btn = cal.querySelector<HTMLButtonElement>('[data-gh-3d]');
+      btn?.addEventListener('click', () => {
+        const on = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', String(on)); cal.classList.toggle('city-on', on);
+        dispatchEvent(new CustomEvent('gh-city', { detail: on }));
+      });
       cal.addEventListener('pointerover', (e) => {
         const c = (e.target as HTMLElement).closest<HTMLElement>('[data-d]'); if (!c) return;
         const n = Number(c.dataset.c);
@@ -110,4 +121,8 @@ const profile = site.github.username ? `https://github.com/${site.github.usernam
   .gh-repo { font-family: var(--font-display); font-weight: 700; font-stretch: 85%; font-size: 24px; text-transform: uppercase; }
   .gh-pushes .mono, .gh-repos .mono { text-transform: none; letter-spacing: .04em; font-size: 12px; }
   @media (max-width: 760px) { .gh-cols { grid-template-columns: minmax(0, 1fr); gap: 32px; } .gh-stats { gap: 12px; } .gh-stats .mono { font-size: 10px; } }
+  .gh-3d { margin-left: 12px; background: none; color: inherit; border: 1.5px solid currentColor; border-radius: 999px; padding: 4px 10px; cursor: pointer; font-size: 11px; }
+  .gh-3d[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .city-on .gh-scroll { display: none; }
+  .gh-city :global(canvas) { display: block; width: 100%; }
 </style>

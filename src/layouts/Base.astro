@@ -68,6 +68,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     data-transitions={String(site.features.pageTransitions)}
     data-ring={String(site.features.cursorRing)}
     data-accent-cursor={String(site.theme.accentCursor)}
+    data-ix={Object.entries(site.interactive).filter(([, on]) => on).map(([k]) => k).join(' ')}
     data-loader={String(site.features.loader)}
   >
     <a class="skip-link" href="#main">{t(lang, 'nav.skip')}</a>
@@ -78,6 +79,26 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
       <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" pathLength="1" /></svg>
     </button>
     <div class="sr-only" aria-live="polite" id="announcer" transition:persist></div>
+    {site.interactive.sheen && <div id="sheen" aria-hidden="true" transition:persist></div>}
+    {site.interactive.blueprint && (
+      <button type="button" class="bp-hint mono" data-bp-hint hidden transition:persist>
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1 11V1h10M1 4h2M1 7h2M4 1v2M7 1v2" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        Press <kbd>B</kbd> for the blueprint
+      </button>
+    )}
+    {site.interactive.blueprint && (
+      <div id="bp" aria-hidden="true" transition:persist>
+        <div class="bp-ruler bp-top" data-bp-top></div><div class="bp-ruler bp-left" data-bp-left></div>
+        <div class="bp-cross"></div><span class="bp-read mono" data-bp-read></span>
+        <div class="bp-dims mono" data-bp-dims></div>
+        <dl class="bp-title mono">
+          <div><dt>Drawn by</dt><dd>{site.name}</dd></div>
+          <div><dt>Sheet</dt><dd data-bp-sheet>HOME</dd></div>
+          <div><dt>Scale</dt><dd>1 : 1 px</dd></div>
+          <div><dt>Date</dt><dd>{new Date().toISOString().slice(0, 10)}</dd></div>
+        </dl>
+      </div>
+    )}
     <div id="peek" aria-hidden="true" transition:persist><canvas width="300" height="225"></canvas><img alt="" hidden /></div>
     {showBanner && <Banner lang={lang} />}
     <script is:inline>

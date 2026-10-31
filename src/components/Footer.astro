@@ -39,6 +39,7 @@ const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []),
     <span class="flex flex-wrap items-center gap-4">
       {site.analytics.provider !== 'none' && site.analytics.consent && <button class="text-btn mono" type="button" data-open-cookies>{t(lang, 'footer.cookies')}</button>}
       <button class="text-btn mono" type="button" data-motion-toggle>Motion: on</button>
+      {site.interactive.blueprint && <button class="text-btn mono" type="button" data-blueprint-toggle aria-pressed="false">Blueprint: off</button>}
       <LangSwitch lang={lang} />
     </span>
   </div>
@@ -46,11 +47,11 @@ const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []),
 
 <style>
   .site-footer { position: relative; isolation: isolate; overflow: hidden; padding-top: clamp(56px, 8vw, 96px); padding-bottom: max(20px, env(safe-area-inset-bottom, 0px)); }
-  .resume-cta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 24px; text-decoration: none; border: 1.5px solid var(--fg); border-radius: 8px; padding: clamp(24px, 4vw, 48px); margin-bottom: clamp(56px, 8vw, 96px); transition: background .4s var(--ease), color .4s var(--ease); }
+  .resume-cta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 24px; text-decoration: none; border: 1.5px solid var(--fg); border-radius: 8px; padding: clamp(20px, 3vw, 34px); margin-bottom: clamp(48px, 6vw, 80px); transition: background .4s var(--ease), color .4s var(--ease); }
   .resume-cta .eyebrow { grid-column: 1 / -1; }
-  .rc-title { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: clamp(36px, 6vw, 88px); line-height: .9; letter-spacing: -.02em; max-width: 14ch; }
+  .rc-title { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: clamp(30px, 4.2vw, 60px); line-height: .9; letter-spacing: -.02em; max-width: 16ch; }
   .rc-body { grid-column: 1; max-width: 46ch; }
-  .rc-go { grid-column: 2; grid-row: 2 / 4; align-self: center; width: clamp(64px, 8vw, 96px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); transition: transform .5s var(--ease), background .3s, color .3s; }
+  .rc-go { grid-column: 2; grid-row: 2 / 4; align-self: center; width: clamp(52px, 6vw, 72px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); transition: transform .5s var(--ease), background .3s, color .3s; }
   /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
   @media (hover: hover) { .resume-cta:hover, .resume-cta:focus-visible { background: var(--fg); color: var(--bg); } }
   @media (hover: hover) { .resume-cta:hover .muted { color: inherit; opacity: .7; } }

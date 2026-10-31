@@ -42,6 +42,7 @@ sections:
   projects: { eyebrow: Ausgewählte Arbeiten, title: Projekte }
   experience: { eyebrow: Laufbahn, title: Erfahrung }
   activities: { eyebrow: Nach Feierabend, title: Hobbys }
+  places: { eyebrow: Unterwegs gewesen, title: Orte, note: "{n} Orte · {c} Länder", hint: Ziehen zum Drehen, list: Orte }
   contact: { eyebrow: Kontakt, title: Schreib mir. }
 
 activities:
@@ -91,6 +92,7 @@ work:
     nested: "Du siehst diese Seite in ihrer eigenen Vorschau, deshalb endet sie hier statt sich endlos zu verschachteln. Öffne {host} in einem eigenen Tab."
     outside: "Weiter lädt {host}, eine externe Website, hier in diese Seite. Sie sieht deinen Besuch und kann eigene Cookies setzen; es gilt ihre eigene Datenschutzerklärung."
     alt: Screenshot von
+  modelHint: Ziehen zum Drehen
 
 resume:
   lead: Zieh an der Zeitleiste oder nutze die Pfeiltasten, um zu sehen, was ich in jedem Jahr gemacht habe.

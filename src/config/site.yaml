@@ -53,6 +53,20 @@ theme:
   logoDot: true             # an accent full stop after your name in the header and footer
   headingEcho: true         # an accent outline copy behind section headings, drifting with the pointer (off with motion off)
 
+# Interactive extras. Set any to false to switch it off. Anything that moves also stops when a visitor turns
+# motion off (footer) or has reduced motion set on their device.
+interactive:
+  blueprint: true           # "Blueprint" switch in the footer: rulers, grid lines and dimensions over the page
+  tiltCards: true           # cards tilt toward the pointer, with an accent outline drifting behind them
+  record: true              # drag the Listening record to spin it
+  magnetic: true            # main buttons lean toward the pointer
+  depth: true               # headings and numbers drift at slightly different speeds as you scroll
+  sheen: false              # a faint blue-violet light follows the pointer across the page
+  pageTilt: true            # pages tilt in 3D as they change
+  wind: false               # marquee words lean with how fast you scroll
+  githubCity: false         # "3D" switch on the GitHub calendar
+  signature: true           # your name drawn as a signature in the contact section
+
 typography:
   numbers: outline
   headings: display

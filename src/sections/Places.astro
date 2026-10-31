@@ -1,0 +1,50 @@
+---
+/* Places: a globe made of small dots that you drag to spin. Countries you've been to are a darker shade (hover
+   for a card), each place is a larger, lighter dot, and the one you click turns accent. The dots are worked out
+   here at build time; the globe itself is drawn in the browser (components/places/Globe.tsx). */
+import { geoContains, geoBounds } from 'd3-geo';
+import { feature } from 'topojson-client';
+import world from 'world-atlas/countries-110m.json';
+import Section from '../components/ui/Section.astro';
+import Globe from '../components/places/Globe';
+import { places as loadPlaces } from '../lib/lists';
+import { activities, type Cta } from '../lib/config';
+import { t, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; tone: 'light' | 'dark'; cta?: Cta }
+const { lang, tone, cta } = Astro.props;
+const list = await loadPlaces();
+
+const countries = (feature(world as any, (world as any).objects.countries) as any).features.filter((f: any) => f.id !== '010');
+const bounds = countries.map((f: any) => geoBounds(f));
+const inBox = (i: number, lng: number, lat: number) => {
+  const [[w, s], [e, n]] = bounds[i];
+  return lat >= s && lat <= n && (w <= e ? lng >= w && lng <= e : lng >= w || lng <= e);
+};
+const countryAt = (lng: number, lat: number) => {
+  for (let i = 0; i < countries.length; i++) if (inBox(i, lng, lat) && geoContains(countries[i], [lng, lat])) return i;
+  return -1;
+};
+
+// A dot every ~2.2°, spaced evenly along each latitude so the poles aren't crowded.
+const STEP = 2.2;
+const dots: [number, number, number][] = [];
+for (let lat = -58; lat <= 82; lat += STEP) {
+  const step = STEP / Math.max(0.2, Math.cos((lat * Math.PI) / 180));
+  for (let lng = -180; lng < 180; lng += step) {
+    const c = countryAt(lng, lat);
+    if (c >= 0) dots.push([+lng.toFixed(2), +lat.toFixed(2), c]);
+  }
+}
+
+const pins = list.map((p) => ({ city: p.city, name: p.name, year: p.year ?? '', note: p.note ?? '', lng: p.lng, lat: p.lat, country: countryAt(p.lng, p.lat) }));
+const visited = [...new Set(pins.map((p) => p.country).filter((c) => c >= 0))];
+const names = countries.map((f: any) => f.properties.name as string);
+---
+{list.length > 0 && (
+  <Section lang={lang} id="places" tone={tone} eyebrow={t(lang, 'sections.places.eyebrow')} title={activities.places?.title ?? t(lang, 'sections.places.title')}
+    count={String(list.length).padStart(2, '0')} note={t(lang, 'sections.places.note', { n: list.length, c: visited.length })} cta={cta}>
+    <Globe client:visible dots={dots} visited={visited} names={names} pins={pins}
+      labels={{ hint: t(lang, 'sections.places.hint'), places: t(lang, 'sections.places.list') }} />
+  </Section>
+)}

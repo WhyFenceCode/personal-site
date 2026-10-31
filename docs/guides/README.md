@@ -17,7 +17,7 @@ and, where there is one, how to connect a live source.
 | Languages | `activities.yaml` | none | [languages-and-uses.md](languages-and-uses.md) |
 | Uses (optional) | `activities.yaml` | none | [languages-and-uses.md](languages-and-uses.md) |
 
-**Going live:** [deploy-cloudflare.md](deploy-cloudflare.md). **Weekly reminders:** [reminders.md](reminders.md).
+**Going live:** [deploy-cloudflare.md](deploy-cloudflare.md). **Weekly reminders:** [reminders.md](reminders.md). **3D models on project pages:** [3d-models.md](3d-models.md).
 
 **Anything with a live source only refreshes when the site is rebuilt.** Set up a scheduled rebuild once
 your host is chosen: [scheduled-rebuilds.md](scheduled-rebuilds.md).

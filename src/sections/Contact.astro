@@ -1,5 +1,6 @@
 ---
 import ContactButton from '../components/ui/ContactButton.astro';
+import Signature from '../components/ui/Signature.astro';
 import { site } from '../lib/config';
 import { t, href, type Lang } from '../lib/i18n';
 
@@ -20,11 +21,13 @@ const { lang, tone } = Astro.props;
       <ContactButton lang={lang} label={t(lang, 'cta.email')} to={`mailto:${site.email}`} />
       <a class="link" href={href(lang, 'resume')}>{t(lang, 'cta.viewResume')}</a>
     </div>
+    <Signature />
   </div>
 </section>
 
 <style>
-  .contact { display: grid; gap: 32px; }
+  .contact { display: grid; gap: clamp(32px, 4vw, 52px); padding-block: clamp(24px, 4vw, 64px); }
+  .contact-actions { margin-bottom: clamp(8px, 2vw, 24px); }
   .big { font-family: var(--font-display); font-weight: 800; font-stretch: 75%; text-transform: uppercase; letter-spacing: -.02em; line-height: .82; font-size: clamp(76px, 18vw, 300px); margin: 0; }
   .mail { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
   .addr { font-size: clamp(22px, 3vw, 40px); letter-spacing: -.02em; user-select: all; overflow-wrap: anywhere; }

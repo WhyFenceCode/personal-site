@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import BrowserFrame from '../../../components/BrowserFrame.astro';
+import ProjectModel from '../../../components/ProjectModel';
 import { projectsFor, slugOf } from '../../../lib/content';
 import { coverFor, tabletFor, canFrame } from '../../../lib/projects';
 import { site } from '../../../lib/config';
@@ -50,6 +51,7 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
 
     {/* The big window only for a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
     {(cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} tablet={tablet} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
+    {d.model && <ProjectModel client:visible src={d.model} title={d.title} hint={t(lang, 'work.modelHint')} />}
 
     <div class="case-body">
       <aside class="facts">
@@ -81,6 +83,8 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
 
 <style>
   .case { padding-bottom: clamp(64px, 8vw, 120px); }
+  .case :global(.model) { margin: clamp(32px, 4vw, 56px) 0 0; display: grid; gap: 10px; }
+  .case :global(.model-stage canvas) { display: block; width: 100%; border-radius: 10px; }
   .case-head { padding-top: clamp(24px, 5vw, 72px); padding-bottom: 40px; display: grid; gap: 20px; }
   .crumbs { display: flex; justify-content: space-between; gap: 16px; }
   .crumbs a { text-decoration: none; }

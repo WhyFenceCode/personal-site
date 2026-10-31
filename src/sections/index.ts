@@ -10,6 +10,7 @@ import GitHub from './GitHub.astro';
 import Projects from './Projects.astro';
 import Experience from './Experience.astro';
 import Activities from './Activities.astro';
+import Places from './Places.astro';
 import Contact from './Contact.astro';
 
 import { educationFor, isCertification } from '../lib/content';
@@ -28,5 +29,6 @@ export const SECTIONS = {
   projects: Projects,
   experience: Experience,
   activities: Activities,
+  places: Places,
   contact: Contact,
 } as const;
