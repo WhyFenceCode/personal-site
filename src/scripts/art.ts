@@ -45,7 +45,7 @@ export const artNames = Object.keys(ART);
 export function paintArt(cv: HTMLCanvasElement, name: string, dither = false) {
   const c = cv.getContext('2d', { willReadFrequently: dither }); if (!c) return;
   const w = cv.width, h = cv.height;
-  c.fillStyle = '#EDEDED'; c.fillRect(0, 0, w, h);
+  c.fillStyle = '#D6D6D6'; c.fillRect(0, 0, w, h);
   (ART[name] ?? ART.orbit)(c, w, h);
   if (!dither) return;
   const img = c.getImageData(0, 0, w, h), d = img.data;

@@ -241,7 +241,10 @@ function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props)
   function stage(L: Layer) {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(L.paper); scene.environment = env;
-    const key = new THREE.PointLight(0xffffff, 4, 0, 0);
+    // The light that follows the pointer takes the site's accent colour (site.yaml theme.accent).
+    // Strength per layer: strong on the chrome (it's all reflection), soft on the matte blocks.
+    const glow = ({ chrome: 9, blocks: 2.2 } as Record<string, number>)[L.kind] ?? 5;
+    const key = new THREE.PointLight(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ffffff'), glow, 0, 0);
     const group = new THREE.Group();
     scene.add(key, group);
     const rt = new THREE.WebGLRenderTarget(Math.round(W * dpr), Math.round(H * dpr), { samples: touch ? 0 : 4 });
@@ -371,8 +374,8 @@ function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props)
   function buildBlocks(L: Layer): Built {
     const st = stage(L);
     const light = new THREE.Color(L.paper).getHSL({ h: 0, s: 0, l: 0 }).l > 0.5;
-    const body = light ? '#FBFBFA' : '#1B1B1B';
-    const sideTone = light ? '#E4E3E0' : '#121212';   // sides a shade off the face so each block's edges read
+    const body = light ? '#F0F0F0' : '#1F1F1F';
+    const sideTone = light ? '#CDCDCD' : '#181818';   // sides a shade off the face so each block's edges read
     const blocks: { mesh: THREE.Mesh; x: number; y: number; size: number; rx: number; ry: number; rz: number; ph: number }[] = [];
     const disposers: (() => void)[] = [];
     const side = new THREE.MeshPhysicalMaterial({ color: sideTone, roughness: 0.55, clearcoat: 0.25, clearcoatRoughness: 0.4, envMapIntensity: 0.7 });

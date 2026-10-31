@@ -44,6 +44,45 @@ function syncBanner() {
 syncBanner();
 document.addEventListener('astro:after-swap', syncBanner);
 
+/* ---------- Section headings ----------
+   The accent bar under each big heading slides in when it scrolls into view and back out when it leaves.
+   The outline echo behind it drifts against the pointer; it's hidden whenever motion is off. */
+let headingIO: IntersectionObserver | null = null;
+function initHeadings() {
+  headingIO?.disconnect();
+  headingIO = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('in', e.isIntersecting)), { threshold: 0.6 });
+  $$('.h2').forEach((h) => headingIO!.observe(h));
+}
+document.addEventListener('astro:page-load', initHeadings);
+const syncEcho = () => document.documentElement.classList.toggle('echo-off', !motionOn());
+syncEcho(); onMotion(syncEcho);
+document.addEventListener('astro:after-swap', syncEcho);
+let echoRaf = 0;
+addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'mouse' || echoRaf || !motionOn()) return;
+  echoRaf = requestAnimationFrame(() => {
+    echoRaf = 0;
+    const r = document.documentElement.style;
+    r.setProperty('--echo-x', `${(0.05 - ((e.clientX / innerWidth) - 0.5) * 0.16).toFixed(3)}em`);
+    r.setProperty('--echo-y', `${(0.05 - ((e.clientY / innerHeight) - 0.5) * 0.14).toFixed(3)}em`);
+  });
+}, { passive: true });
+
+/* ---------- Logo full stop ----------
+   The header inverts against the page, which would invert the accent, so the accent full stop is a separate
+   element placed over the invisible "." at the end of the brand name. */
+function placeBrandDot() {
+  const dot = $('[data-brand-dot]'), gap = $('.site-header .brand-gap');
+  if (!dot || !gap) return;
+  const r = gap.getBoundingClientRect();
+  dot.style.transform = `translate(${r.left}px, ${r.top}px)`;
+  dot.style.opacity = r.width ? '1' : '0';
+}
+addEventListener('resize', placeBrandDot);
+addEventListener('scroll', placeBrandDot, { passive: true });
+document.fonts?.ready.then(placeBrandDot);
+document.addEventListener('astro:page-load', placeBrandDot);
+
 /* ---------- Cursor dot (persists across pages) ----------
    Sits exactly on the pointer (no lag, so pointing stays precise) and grows over anything clickable.
    The system cursor is only hidden once the dot is tracking a real mouse (class ring-live), and CSS keeps it
@@ -60,6 +99,7 @@ if (document.body.dataset.ring === 'true') {
     const el = e.target as Element;
     if (el.closest?.('iframe')) { hide(); return; }
     rsT = el.closest?.('a, button, select, label, [role="tab"], input, [data-ring]') ? 1 : 0.3;
+    ring.classList.toggle('accent', rsT === 1 && document.body.dataset.accentCursor === 'true');
   });
   root.addEventListener('pointerleave', hide);
   addEventListener('blur', hide);

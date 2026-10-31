@@ -1,5 +1,6 @@
 ---
 /* Shared frame for every home section: tone band, eyebrow, big title and a CTA to a deeper page. */
+import HeadingText from './HeadingText.astro';
 import { t, href, type Lang } from '../../lib/i18n';
 import type { Cta } from '../../lib/config';
 
@@ -12,7 +13,7 @@ const external = cta && /^https?:/.test(cta.to);
     <div class="sec-head">
       <div>
         <div class="eyebrow mono">{eyebrow}</div>
-        <h2 class="h2" id={`${id}-title`}>{title}{count !== undefined && <span class="count">({count})</span>}</h2>
+        <h2 class="h2" id={`${id}-title`}><HeadingText text={title} />{count !== undefined && <span class="count">({count})</span>}</h2>
       </div>
       {note && <p class="mono muted sec-note">{note}</p>}
     </div>
@@ -33,7 +34,7 @@ const external = cta && /^https?:/.test(cta.to);
   .sec-head .eyebrow { margin-bottom: 18px; }
   .sec-note { max-width: 32ch; text-align: right; margin: 0; }
   .sec-cta { margin-top: clamp(32px, 4vw, 56px); display: flex; justify-content: flex-end; }
-  .sec-cta-link { display: inline-flex; align-items: center; gap: 18px; text-decoration: none; font-family: var(--font-display); font-weight: 700; font-stretch: 85%; text-transform: uppercase; font-size: clamp(22px, 2.6vw, 34px); letter-spacing: -.01em; border-bottom: 2px solid currentColor; padding-bottom: 6px; }
+  .sec-cta-link { display: inline-flex; align-items: center; gap: 18px; text-decoration: none; font-family: var(--font-display); font-weight: 700; font-stretch: 85%; text-transform: uppercase; font-size: clamp(22px, 2.6vw, 34px); letter-spacing: -.01em; --ul: 2px; padding-bottom: 8px; }
   .sec-cta-arrow { display: inline-grid; place-items: center; transition: transform .5s var(--ease); }
   .sec-cta-link:hover .sec-cta-arrow, .sec-cta-link:focus-visible .sec-cta-arrow { transform: translateX(8px); }
   @media (max-width: 760px) { .sec-head { grid-template-columns: minmax(0, 1fr); } .sec-note { text-align: left; } .sec-cta { justify-content: flex-start; } }

@@ -21,6 +21,8 @@ for (const p of data.places) {
   if (c) { visited.add(c.properties.name); countryOf.set(p, c.properties.name); }
 }
 const pins = data.places.map((p, i) => { const [x, y] = projection([p.lng, p.lat]) ?? [0, 0]; return { p, i, x, y }; });
+// The most recent place (latest year; first listed wins a tie) gets the accent.
+const newest = data.places.reduce((best, p, i) => (Number(p.year ?? 0) > Number(data.places[best]?.year ?? 0) ? i : best), 0);
 const aria = (p: Place) => [p.name, p.year, p.note].filter(Boolean).join(', ');
 ---
 {/* The map always uses the light palette, even in a dark section: grey land on white reads best. */}
@@ -29,7 +31,7 @@ const aria = (p: Place) => [p.name, p.year, p.note].filter(Boolean).join(', ');
     <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-label={`Map of ${data.places.length} places in ${visited.size} countries`}>
       <g class="land" aria-hidden="true">{countries.map((f: any) => <path d={path(f) ?? ''} class:list={{ visited: visited.has(f.properties.name) }} />)}</g>
       <g class="pins">{pins.map(({ p, i, x, y }) => (
-        <g class="pin" transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`} tabindex="0" role="button" aria-label={aria(p)} data-pin={i}
+        <g class:list={["pin", { newest: i === newest }]} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`} tabindex="0" role="button" aria-label={aria(p)} data-pin={i}
           data-card-title={p.city} data-card-sub={countryOf.get(p) ?? p.name.split(',').slice(1).join(',').trim()} data-card-meta={[p.year, p.note].filter(Boolean).join(' · ')}>
           <circle r="16" class="hit" /><circle r="7" class="halo" /><circle r="4.5" class="core" />
         </g>
@@ -61,6 +63,7 @@ const aria = (p: Place) => [p.name, p.year, p.note].filter(Boolean).join(', ');
   .land path.visited { fill: color-mix(in srgb, var(--fg) 34%, var(--bg)); }
   .pin { cursor: pointer; outline: none; }
   .pin .hit { fill: transparent; }
+  .pin.newest .core { fill: var(--accent); }
   .pin .halo { fill: var(--bg); transition: r .25s var(--ease); }
   .pin .core { fill: var(--fg); transition: r .25s var(--ease); }
   .pin:hover .halo, .pin:focus-visible .halo, .pin:global(.lit) .halo, .pin[aria-pressed="true"] .halo { r: 11px; }

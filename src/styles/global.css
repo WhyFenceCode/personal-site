@@ -7,14 +7,15 @@
   --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
   --font-mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
   --color-ink: #0B0B0B;
-  --color-paper: #FFFFFF;
-  --color-chalk: #F2F1EE;
+  --color-paper: #E6E6E6;
+  --color-chalk: #F2F2F2;
   --ease-out-soft: cubic-bezier(.2, .7, .1, 1);
 }
 
 /* The page is light and dark at once: each section sets its own tone. */
 :root {
-  --bg: #FFFFFF; --fg: #0B0B0B; --muted: #5E5E5E; --line: #E3E3E3;
+  /* Light sections sit at ~90% brightness (#E6E6E6) rather than pure white, easier on the eyes. */
+  --bg: #E6E6E6; --fg: #0B0B0B; --muted: #555555; --line: #CBCBCB;
   --gutter: max(16px, env(safe-area-inset-left, 0px));
   --gutter-r: max(16px, env(safe-area-inset-right, 0px));
   --header-h: 64px;
@@ -22,8 +23,9 @@
   color-scheme: light;
 }
 @media (min-width: 720px) { :root { --gutter: max(28px, env(safe-area-inset-left, 0px)); --gutter-r: max(28px, env(safe-area-inset-right, 0px)); } }
-.tone-dark { --bg: #0B0B0B; --fg: #FFFFFF; --muted: #9E9E9E; --line: #262626; background: var(--bg); color: var(--fg); }
-.tone-light { --bg: #FFFFFF; --fg: #0B0B0B; --muted: #5E5E5E; --line: #E3E3E3; background: var(--bg); color: var(--fg); }
+/* Dark sections: a soft near-black rather than pure black. */
+.tone-dark { --bg: #161616; --fg: #FFFFFF; --muted: #A0A0A0; --line: #2E2E2E; background: var(--bg); color: var(--fg); }
+.tone-light { --bg: #E6E6E6; --fg: #0B0B0B; --muted: #555555; --line: #CBCBCB; background: var(--bg); color: var(--fg); }
 
 @layer base {
   html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -35,9 +37,9 @@
   ::-webkit-scrollbar-thumb:hover { background: rgb(128 128 128 / .85); }
   body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { color: inherit; }
-  :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 3px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
   /* Selected text: a mid-grey wash that shows on both light and dark sections, text keeps its colour. */
-  ::selection { background: rgb(128 128 128 / .38); color: inherit; }
+  ::selection { background: color-mix(in srgb, var(--accent) 34%, transparent); color: inherit; }
   [hidden] { display: none !important; }
   code { font-family: var(--font-mono); font-size: .9em; }
 }
@@ -51,13 +53,28 @@
   .num { font-family: var(--font-display); font-weight: 700; font-stretch: 85%; font-variant-numeric: tabular-nums; letter-spacing: 0; }
   .muted { color: var(--muted); }
   .display { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; letter-spacing: -.02em; line-height: .84; text-transform: uppercase; }
+  /* Underlined links: a line in the text colour, with the accent drawing over it from left to right on hover. */
+  :is(.link, .sec-cta-link, .foot-mail a, .prose-site a, .foot-cols a) { text-decoration: none;
+    background-image: linear-gradient(var(--accent), var(--accent)), linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat; background-position: 0 100%, 0 100%; background-size: 0% var(--ul, 1.5px), var(--ul-base, 100%) var(--ul, 1.5px);
+    transition: background-size .5s var(--ease); }
+  :is(.link, .sec-cta-link, .foot-mail a, .prose-site a, .foot-cols a):is(:hover, :focus-visible) { background-size: 100% var(--ul, 1.5px), var(--ul-base, 100%) var(--ul, 1.5px); }
+  .foot-cols a { --ul-base: 0%; }   /* footer nav: no line until hovered */
   .eyebrow { display: inline-flex; align-items: center; gap: 10px; }
-  .eyebrow::before { content: ""; width: 8px; height: 8px; background: currentColor; flex: none; }
+  .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--accent); flex: none; }
   .fit { display: inline-block; white-space: nowrap; }
   .h2 { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: clamp(44px, 7vw, 112px); letter-spacing: -.02em; line-height: .86; margin: 0; text-wrap: balance; }
+  /* Section heading extras (see HeadingText.astro). */
+  .h2-t { position: relative; display: inline-block; isolation: isolate; }
+  .h2-t::after { content: ""; position: absolute; left: 0; bottom: -.14em; width: 1.4em; height: .085em; background: var(--accent);
+    transform: scaleX(0); transform-origin: right; transition: transform .8s var(--ease); }
+  .h2.in .h2-t::after { transform: scaleX(1); transform-origin: left; }
+  .h2-echo { position: absolute; inset: 0; z-index: -1; color: transparent; -webkit-text-stroke: max(1.25px, .012em) var(--accent); pointer-events: none;
+    transform: translate(var(--echo-x, .05em), var(--echo-y, .05em)); transition: transform .5s var(--ease); display: none; }
+  :root[data-echo="true"]:not(.echo-off) .h2-echo { display: block; }
   .h2 .count { font-family: var(--font-display); font-weight: 600; font-stretch: 85%; font-size: .3em; vertical-align: top; margin-left: .2em; }
   .section { padding-block: clamp(64px, 8vw, 120px); }
-  .link { text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 1px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+  .link { text-decoration: none; padding-bottom: 2px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
   .sr-only-focusable:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* Buttons */

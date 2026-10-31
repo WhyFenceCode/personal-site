@@ -12,7 +12,7 @@ const nav = [
 ];
 ---
 <header class="site-header wrap">
-  <a class="brand" href={href(lang, 'home')}>{site.name}</a>
+  <a class="brand" href={href(lang, 'home')}>{site.name}{site.theme.logoDot && <span class="brand-gap" aria-hidden="true">.</span>}</a>
   <nav class="hnav" aria-label="Main">
     {nav.map((n) => (
       <a href={href(lang, n.key)} class:list={['hnav-link', { 'is-resume': n.key === 'resume' }]} aria-current={page === n.key ? 'page' : undefined}>
@@ -25,10 +25,13 @@ const nav = [
     <span>{t(lang, 'nav.menu')}</span><span class="grip" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
   </button>
 </header>
+{/* The header inverts against the page (mix-blend-mode: difference), which would invert the accent too, so the
+    full stop is drawn outside it, over the invisible placeholder in the brand. Positioned by site.ts. */}
+{site.theme.logoDot && <span class="brand-dot" aria-hidden="true" data-brand-dot>.</span>}
 
 <div class="menu tone-dark wrap" id="menu" role="dialog" aria-modal="true" aria-label={t(lang, 'nav.menu')} hidden>
   <div class="menu-top">
-    <span class="brand">{site.name}</span>
+    <span class="brand">{site.name}{site.theme.logoDot && <span class="dot" aria-hidden="true">.</span>}</span>
     <button class="menu-btn" type="button" id="menu-close"><span>{t(lang, 'nav.close')}</span><span class="grip" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
   </div>
   <nav aria-label="Menu"><ul>
@@ -42,6 +45,9 @@ const nav = [
 <style>
   .site-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #fff; mix-blend-mode: difference; pointer-events: none; }
   .site-header > * { pointer-events: auto; }
+  .brand-gap { visibility: hidden; }
+  .brand .dot { color: var(--accent); }
+  .brand-dot { position: fixed; left: 0; top: 0; z-index: 51; pointer-events: none; color: var(--accent); font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; font-size: 20px; letter-spacing: -.01em; opacity: 0; }
   .brand { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; font-size: 20px; letter-spacing: -.01em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
   .hnav { display: flex; align-items: center; gap: 6px; }
   .hnav-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; padding: 9px 14px; border-radius: 999px; transition: background .3s, color .3s; }

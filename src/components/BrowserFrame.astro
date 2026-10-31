@@ -112,9 +112,9 @@ const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
   .url i { width: 6px; height: 6px; border-radius: 50%; background: var(--fg); }
   .bar-end { justify-self: end; }
   .state { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; }
-  .state i { width: 6px; height: 6px; border-radius: 50%; background: var(--fg); animation: pulse 2s ease-in-out infinite; }
+  .state i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .25; } }
-  .view { position: relative; aspect-ratio: 16 / 10; max-width: 100%; overflow: hidden; background: #EDEDED; }
+  .view { position: relative; aspect-ratio: 16 / 10; max-width: 100%; overflow: hidden; background: #D6D6D6; }
   /* Phones: a portrait, tablet-shaped screen (3:4), still never taller than the space under the header. */
   @media (max-width: 700px) {
     .frame { width: min(100%, calc((100svh - var(--header-h, 64px) - var(--banner-h, 0px) - 48px - 48px) * .75)); }

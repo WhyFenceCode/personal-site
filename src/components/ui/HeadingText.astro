@@ -1,0 +1,8 @@
+---
+/* The text of a big section heading, with the accent extras (styles in global.css):
+   - an underline bar that slides in when the heading scrolls into view and out when it leaves (site.ts),
+   - an accent outline "echo" offset behind it that drifts with the pointer (site.yaml theme.headingEcho). */
+interface Props { text: string }
+const { text } = Astro.props;
+---
+<span class="h2-t"><span class="h2-echo" aria-hidden="true">{text}</span><span class="h2-text">{text}</span></span>

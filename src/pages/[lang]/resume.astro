@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
+import HeadingText from '../../components/ui/HeadingText.astro';
 import ExperienceRows from '../../components/ExperienceRows.astro';
 import Timeline from '../../components/resume/Timeline';
 import { experienceFor, educationFor, yearValue, endValue, yearLabel, isCertification, certDates, credentialUrl } from '../../lib/content';
@@ -37,7 +38,7 @@ const range = {
 
   <section class="section wrap" aria-labelledby="edu-title" style="margin-top:40px">
     <div class="eyebrow mono">{t(lang, 'sections.education.eyebrow')}</div>
-    <h2 class="h2" id="edu-title" style="margin:18px 0 48px">{t(lang, 'resume.education')}</h2>
+    <h2 class="h2" id="edu-title" style="margin:18px 0 48px"><HeadingText text={t(lang, 'resume.education')} /></h2>
     <ul class="edu-list">
       {edu.map((e) => (
         <li class:list={{ featured: e.data.featured }}>
@@ -70,13 +71,13 @@ const range = {
   <section class="tone-dark" aria-labelledby="roles-title">
     <div class="section wrap">
       <div class="eyebrow mono">{t(lang, 'sections.experience.eyebrow')}</div>
-      <h2 class="h2" id="roles-title" style="margin:18px 0 48px">{t(lang, 'resume.roles')}</h2>
+      <h2 class="h2" id="roles-title" style="margin:18px 0 48px"><HeadingText text={t(lang, 'resume.roles')} /></h2>
       <ExperienceRows lang={lang} prefix="resume" />
     </div>
   </section>
 
   <section class="section wrap" aria-labelledby="skills-title">
-    <div class="sec-row"><div><div class="eyebrow mono">Toolkit</div><h2 class="h2" id="skills-title" style="margin-top:18px">{t(lang, 'resume.skills')}</h2></div><span class="mono muted">{t(lang, 'resume.skillsNote')}</span></div>
+    <div class="sec-row"><div><div class="eyebrow mono">Toolkit</div><h2 class="h2" id="skills-title" style="margin-top:18px"><HeadingText text={t(lang, 'resume.skills')} /></h2></div><span class="mono muted">{t(lang, 'resume.skillsNote')}</span></div>
     <div class="skills">
       {resume.skills.map((g) => (
         <div><h3 class="mono muted">{g.group}</h3><ul>
@@ -108,7 +109,7 @@ const range = {
   :global(.tl-bar.edu) { background: repeating-linear-gradient(90deg, var(--line) 0 4px, transparent 4px 7px); }
   :global(.tl-bar.on) { background: var(--fg); }
   :global(.tl-bar.edu.on) { background: repeating-linear-gradient(90deg, var(--fg) 0 4px, transparent 4px 7px); }
-  :global(.tl-cursor) { position: absolute; top: -6px; bottom: -6px; width: 1.5px; background: var(--fg); pointer-events: none; transition: left .25s var(--ease); }
+  :global(.tl-cursor) { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--accent); pointer-events: none; transition: left .25s var(--ease); }
   :global(.tl-scrub) { grid-column: 2; padding-top: 16px; }
   :global(.tl-scrub input) { width: 100%; accent-color: #0B0B0B; height: 28px; }
   :global(.tl-ticks) { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .06em; color: var(--muted); }

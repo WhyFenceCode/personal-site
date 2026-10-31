@@ -14,7 +14,7 @@ const steps = t(lang, 'loader.steps') as string[];
 
 <style>
   #loader, .ld-ui { display: none; }
-  :global(html.intro) #loader { display: block; position: fixed; inset: 0; z-index: 88; background: #fff; }
+  :global(html.intro) #loader { display: block; position: fixed; inset: 0; z-index: 88; background: #E6E6E6; }
   :global(html.intro) .ld-ui { display: grid; position: fixed; inset: 0; z-index: 95; pointer-events: none; color: #fff; mix-blend-mode: difference; grid-template-rows: var(--header-h) 1fr auto; padding-top: env(safe-area-inset-top, 0px); padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)); }
   .ld-ui { --fg: #fff; }
   .ld-top { display: flex; justify-content: space-between; align-items: center; }

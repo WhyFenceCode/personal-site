@@ -7,7 +7,7 @@ const { title, metaLeft, metaRight, lead, id = 'page-title' } = Astro.props;
   {(metaLeft || metaRight || Astro.slots.has('meta')) && (
     <div class="meta mono muted"><span>{metaLeft}</span><span><slot name="meta">{metaRight}</slot></span></div>
   )}
-  <h1 class="page-title display" id={id} tabindex="-1"><span class="fit">{title}</span></h1>
+  <h1 class="page-title display" id={id} tabindex="-1"><span class="fit" data-text={title}>{title}</span></h1>
   {lead && <p class="lead">{lead}</p>}
   <slot />
 </div>
@@ -16,5 +16,12 @@ const { title, metaLeft, metaRight, lead, id = 'page-title' } = Astro.props;
   .page-head { padding-top: clamp(16px, 4vw, 48px); padding-bottom: 32px; display: grid; gap: 20px; border-bottom: 1.5px solid var(--fg); }
   .meta { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .page-title { margin: 0; }
+  /* An accent ring a few pixels outside the letters: a wide accent stroke underneath, a background-coloured
+     stroke on top of it to open the gap, then the title itself. */
+  .page-title .fit { position: relative; isolation: isolate; }
+  .page-title .fit::before, .page-title .fit::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; }
+  .page-title .fit::before { z-index: -2; color: var(--accent); -webkit-text-stroke: calc(2 * (var(--ring-gap) + var(--ring-w))) var(--accent); }
+  .page-title .fit::after { z-index: -1; color: var(--bg); -webkit-text-stroke: calc(2 * var(--ring-gap)) var(--bg); }
+  .page-title { --ring-gap: clamp(3px, .03em, 7px); --ring-w: clamp(1.5px, .012em, 3px); }
   .lead { font-size: clamp(20px, 2.2vw, 30px); letter-spacing: -.02em; line-height: 1.25; max-width: 34ch; margin: 0; font-weight: 500; }
 </style>

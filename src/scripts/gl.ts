@@ -138,6 +138,7 @@ export function makeGL(cv: HTMLCanvasElement, frag: string) {
     gl,
     set1: (n: string, v: number) => gl.uniform1f(u(n), v),
     set2: (n: string, a: number, b: number) => gl.uniform2f(u(n), a, b),
+    set3: (n: string, a: number, b: number, c: number) => gl.uniform3f(u(n), a, b, c),
     draw() { gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); },
   };
 }

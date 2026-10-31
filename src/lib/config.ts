@@ -40,6 +40,13 @@ const siteSchema = z.object({
     url: z.string().default(''),
     dismissible: z.boolean().default(true),
   }).default({ enabled: false, pages: 'home', text: '', label: '', url: '', dismissible: true }),
+  // The one accent colour, used sparingly: the 3D mouse light, live markers, focus rings, selection, GitHub peaks.
+  theme: z.object({
+    accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#5B4CFF'),
+    accentCursor: z.boolean().default(true),   // cursor dot turns accent over links and buttons
+    logoDot: z.boolean().default(true),        // "Torsten Young." with an accent full stop
+    headingEcho: z.boolean().default(true),    // accent outline copy behind section headings (hidden with motion off)
+  }).default({ accent: '#5B4CFF', accentCursor: true, logoDot: true, headingEcho: true }),
   typography: z.object({
     numbers: z.enum(['serif', 'outline']).default('serif'),
     headings: z.enum(['display', 'serif', 'outline']).default('display'),

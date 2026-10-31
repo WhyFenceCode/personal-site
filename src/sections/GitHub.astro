@@ -9,6 +9,7 @@ interface Props { lang: Lang; tone: 'light' | 'dark'; weeks?: number; cta?: Cta 
 const { lang, tone, weeks = 53, cta } = Astro.props;
 const gh = await getGithub(site.github.username, weeks);
 const fmt = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' });
+const today = new Date().toISOString().slice(0, 10);
 const rel = (iso: string) => { const d = Math.round((Date.now() - +new Date(iso)) / 864e5); return d <= 0 ? 'today' : d === 1 ? '1 day ago' : `${d} days ago`; };
 const months = gh.weeks.map((w, i) => { const d = w.find((x) => x.date); if (!d) return ''; const m = new Date(d.date).getUTCMonth(); const prev = gh.weeks[i - 1]?.find((x) => x.date); return !prev || new Date(prev.date).getUTCMonth() !== m ? new Intl.DateTimeFormat(lang, { month: 'short', timeZone: 'UTC' }).format(new Date(d.date)) : ''; });
 const profile = site.github.username ? `https://github.com/${site.github.username}` : undefined;
@@ -26,7 +27,7 @@ const profile = site.github.username ? `https://github.com/${site.github.usernam
       <div class="gh-months mono" aria-hidden="true" style={`grid-template-columns: repeat(${gh.weeks.length}, minmax(var(--cell-min), 1fr))`}>{months.map((m) => <span>{m}</span>)}</div>
       <div class="gh-grid" role="img" aria-label={`${gh.total} contributions in the last year. Current streak ${gh.streak} days, longest ${gh.longest} days.`} style={`grid-template-columns: repeat(${gh.weeks.length}, minmax(var(--cell-min), 1fr))`}>
         {gh.weeks.map((w) => (
-          <div class="gh-week">{w.map((d) => d.level < 0 ? <i class="gh-empty"></i> : <i class={`l${d.level}`} data-d={d.date} data-c={d.count}></i>)}</div>
+          <div class="gh-week">{w.map((d) => d.level < 0 ? <i class="gh-empty"></i> : <i class={`l${d.level}${d.date === today ? ' today' : ''}`} data-d={d.date} data-c={d.count}></i>)}</div>
         ))}
       </div>
     </div>
@@ -95,7 +96,8 @@ const profile = site.github.username ? `https://github.com/${site.github.usernam
   .l1 { background: color-mix(in srgb, var(--fg) 30%, var(--bg)); }
   .l2 { background: color-mix(in srgb, var(--fg) 55%, var(--bg)); }
   .l3 { background: color-mix(in srgb, var(--fg) 78%, var(--bg)); }
-  .l4 { background: var(--fg); }
+  .l4 { background: var(--accent); }
+  .gh-week i.today { outline: 1.5px solid var(--accent); outline-offset: 1px; }
   .gh-grid i[data-d]:hover { outline: 1.5px solid var(--fg); outline-offset: 1px; }
   .gh-read { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
   .gh-legend { display: inline-flex; align-items: center; gap: 4px; }

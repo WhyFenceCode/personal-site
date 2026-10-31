@@ -66,7 +66,7 @@ const years = projects.map((p) => p.data.year);
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px 24px; }
   @media (max-width: 720px) { .grid { grid-template-columns: minmax(0, 1fr); } }
   .card { text-decoration: none; display: grid; gap: 14px; align-content: start; }
-  .thumb { position: relative; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; border-radius: 4px; background: #EDEDED; }
+  .thumb { position: relative; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; border-radius: 4px; background: #D6D6D6; }
   .thumb canvas, .thumb :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; transition: opacity .7s var(--ease), transform 1.2s var(--ease); }
   .dith { image-rendering: pixelated; }
   .smooth { opacity: 0; }

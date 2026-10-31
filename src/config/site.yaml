@@ -45,6 +45,14 @@ banner:
 # Type choices.
 #   numbers:  serif | outline           big numbers: education years, stats, loader
 #   headings: display | serif | outline section and page titles
+# One accent colour, used sparingly (3D mouse light, live markers, focus rings, text selection, GitHub peaks).
+# Pick it with private/brandkit/index.html. Must be a 6-digit hex.
+theme:
+  accent: "#5B4CFF"         # blue-violet
+  accentCursor: false       # the cursor dot turns accent over links and buttons
+  logoDot: true             # an accent full stop after your name in the header and footer
+  headingEcho: true         # an accent outline copy behind section headings, drifting with the pointer (off with motion off)
+
 typography:
   numbers: outline
   headings: display

@@ -50,17 +50,14 @@ const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []),
   .resume-cta .eyebrow { grid-column: 1 / -1; }
   .rc-title { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: clamp(36px, 6vw, 88px); line-height: .9; letter-spacing: -.02em; max-width: 14ch; }
   .rc-body { grid-column: 1; max-width: 46ch; }
-  .rc-go { grid-column: 2; grid-row: 2 / 4; align-self: center; width: clamp(64px, 8vw, 96px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); transition: transform .5s var(--ease); }
+  .rc-go { grid-column: 2; grid-row: 2 / 4; align-self: center; width: clamp(64px, 8vw, 96px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); transition: transform .5s var(--ease), background .3s, color .3s; }
   /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
   @media (hover: hover) { .resume-cta:hover, .resume-cta:focus-visible { background: var(--fg); color: var(--bg); } }
   @media (hover: hover) { .resume-cta:hover .muted { color: inherit; opacity: .7; } }
-  @media (hover: hover) { .resume-cta:hover .rc-go { background: var(--bg); color: var(--fg); transform: rotate(-45deg); } }
+  @media (hover: hover) { .resume-cta:hover .rc-go { background: var(--accent); color: #fff; transform: rotate(-45deg); } }
   .foot-cols { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
   .foot-cols ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
-  .foot-cols a { text-decoration: none; }
-  .foot-cols a:hover { text-decoration: underline; text-underline-offset: 3px; }
-  .foot-mail a { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: .18em; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); transition: text-decoration-color .3s; }
-  .foot-mail a:hover { text-decoration-color: currentColor; }
+  .foot-mail a { padding-bottom: 3px; }
   .foot-mail { font-size: clamp(20px, 2.3vw, 30px); letter-spacing: -.02em; margin: 10px 0 0; font-weight: 500; overflow-wrap: anywhere; }
   /* Lighter than the hero: same family, medium weight, a little wider. */
   .foot-mark { isolation: isolate; overflow: hidden; margin: 72px 0 20px; font-family: var(--font-display); font-weight: 500; font-stretch: 92%; letter-spacing: -.04em; line-height: .84; text-transform: uppercase; position: relative; }

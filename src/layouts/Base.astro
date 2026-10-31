@@ -29,7 +29,7 @@ const portraitOk = site.portrait.enabled && existsSync(`public${site.portrait.sr
 const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
 ---
 <!doctype html>
-<html lang={lang} data-page={page} data-numbers={site.typography.numbers} data-headings={site.typography.headings}>
+<html lang={lang} data-page={page} data-numbers={site.typography.numbers} data-headings={site.typography.headings} data-echo={String(site.theme.headingEcho)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -41,7 +41,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     <meta property="og:description" content={desc} />
     <meta property="og:type" content="website" />
     {portraitOk && <meta property="og:image" content={new URL(site.portrait.src, Astro.site ?? site.url).href} />}
-    <meta name="theme-color" content="#0B0B0B" />
+    <meta name="theme-color" content="#161616" />
+    <style is:inline set:html={`:root{--accent:${site.theme.accent}}`} />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -66,6 +67,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
   <body
     data-transitions={String(site.features.pageTransitions)}
     data-ring={String(site.features.cursorRing)}
+    data-accent-cursor={String(site.theme.accentCursor)}
     data-loader={String(site.features.loader)}
   >
     <a class="skip-link" href="#main">{t(lang, 'nav.skip')}</a>
@@ -108,6 +110,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
      (forced colours) or increased-contrast modes, where the system cursor stays. */
   #ring { position: fixed; left: 0; top: 0; z-index: 120; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; background: #fff; mix-blend-mode: difference; pointer-events: none; transform: translate3d(-100px, -100px, 0) scale(.3); opacity: 0; transition: opacity .2s; }
   html.has-ring #ring.on { opacity: 1; }
+  /* Over something clickable the dot can turn solid accent (site.yaml theme.accentCursor) instead of inverting. */
+  #ring.accent { background: var(--accent); mix-blend-mode: normal; }
   @media (forced-colors: none) and (prefers-contrast: no-preference) { html.has-ring.ring-live, html.has-ring.ring-live * { cursor: none !important; } }
   @media (forced-colors: active), (prefers-contrast: more) { #ring { display: none; } }
   @media (forced-colors: active) { #flood { display: none; } }
