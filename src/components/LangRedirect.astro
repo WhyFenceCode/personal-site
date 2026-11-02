@@ -1,0 +1,59 @@
+---
+/* Sends a visitor from an address without a language to the same address in their language: saved choice, then
+   browser language, then the default. Keeps any ?query and #hash.
+   - On its own page (the root, /): a tiny page that redirects; without JS, a meta refresh uses the default.
+   - With `inline` (the 404 page): just the script. Any /something whose first part isn't a language becomes
+     /<lang>/something, so torstenyoung.com/build, /resume and so on all work (an unknown language code, like /de/
+     while the site is English only, is swapped); a real miss under a language
+     (/en/nope) stays on the 404. */
+import { languages, defaultLang } from '../lib/i18n';
+
+interface Props { inline?: boolean }
+const { inline = false } = Astro.props;
+---
+{inline ? (
+  <script is:inline define:vars={{ languages, defaultLang }}>
+    (function () {
+      var seg = location.pathname.split('/')[1] || '';
+      if (languages.indexOf(seg) > -1) return;
+      var pick = defaultLang;
+      try {
+        var saved = localStorage.getItem('site.lang');
+        if (saved && languages.indexOf(saved) > -1) pick = saved;
+        else {
+          var prefs = navigator.languages || [navigator.language];
+          for (var i = 0; i < prefs.length; i++) { var c = (prefs[i] || '').slice(0, 2).toLowerCase(); if (languages.indexOf(c) > -1) { pick = c; break; } }
+        }
+      } catch (e) {}
+      // A language code that isn't on the site (/de/… while only English is) is swapped rather than kept.
+      var rest = /^[a-z]{2}$/.test(seg) ? location.pathname.slice(seg.length + 1) : location.pathname;
+      location.replace('/' + pick + rest + location.search + location.hash);
+    })();
+  </script>
+) : (
+  <html lang={defaultLang}>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Redirecting…</title>
+      <meta name="robots" content="noindex, follow" />
+      <meta http-equiv="refresh" content={`1; url=/${defaultLang}/`} />
+      <link rel="canonical" href={`/${defaultLang}/`} />
+      <script is:inline define:vars={{ languages, defaultLang }}>
+        var pick = defaultLang;
+        try {
+          var saved = localStorage.getItem('site.lang');
+          if (saved && languages.indexOf(saved) > -1) pick = saved;
+          else {
+            var prefs = navigator.languages || [navigator.language];
+            for (var i = 0; i < prefs.length; i++) { var c = (prefs[i] || '').slice(0, 2).toLowerCase(); if (languages.indexOf(c) > -1) { pick = c; break; } }
+          }
+        } catch (e) {}
+        location.replace('/' + pick + '/' + location.search + location.hash);
+      </script>
+    </head>
+    <body style="font-family: system-ui, sans-serif; padding: 24px;">
+      <p>{languages.map((l) => <a href={`/${l}/`} style="margin-right: 12px">{l.toUpperCase()}</a>)}</p>
+    </body>
+  </html>
+)}

@@ -80,10 +80,12 @@
 
   /* "Watch it build" hint on the home page (desktop): bottom left, above the name block's bottom bar, until you scroll. */
   .build-hint { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(max(18px, env(safe-area-inset-bottom, 0px)) + 84px); z-index: 47;
-    display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; border: 0; background: var(--accent);
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); background: #161616;
     color: #fff; box-shadow: 0 10px 26px -12px rgb(0 0 0 / .45); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; opacity: .85;
-    transition: opacity .4s, transform .4s var(--ease); }
-  .build-hint:hover { opacity: 1; }
+    transition: opacity .4s, transform .4s var(--ease), border-color .3s; }
+  .build-hint:hover { opacity: 1; border-color: var(--accent); }
+  /* The accent as a touch: the key and a thin edge. */
+  .build-hint kbd { color: var(--accent); font-weight: 700; }
   .build-hint-w { opacity: .75; }
   .build-hint.gone, html.intro .build-hint { opacity: 0; transform: translateY(12px); pointer-events: none; }
   @media (hover: none), (pointer: coarse) { .build-hint { display: none; } }
