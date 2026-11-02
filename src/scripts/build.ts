@@ -96,13 +96,31 @@ function textOf(el: HTMLElement): Typed[] | null {
     acceptNode: (n) => {
       const p = n.parentElement;
       if (!p || p.closest('[aria-hidden="true"]:not([data-bld-type]), script, style, .sr-only, svg, astro-island, .gh-cal, .tl') || !n.textContent?.trim()) return NodeFilter.FILTER_REJECT;
-      const cs = getComputedStyle(p);
-      return cs.visibility === 'hidden' || +cs.opacity < 0.1 || !p.getClientRects().length ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      return seen(n as Text, el) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
     },
   });
   for (let n = walk.nextNode(); n; n = walk.nextNode()) out.push({ node: n as Text, full: (n as Text).data, draft: n.parentElement?.dataset.bldDraft || undefined });
   const len = out.reduce((s, t) => s + t.full.length, 0);
   return len > 0 && len <= 4000 ? out : null;
+}
+
+/** Whether a text node can actually be seen on the page: not hidden or faded out by anything between it and its
+ *  piece (the piece itself is still invisible, waiting to be built), and not clipped away by a parent, like a closed
+ *  panel or the off-screen part of a scroller. Text that can't be seen is left as it is, never typed. */
+function seen(n: Text, piece: HTMLElement) {
+  const range = document.createRange(); range.selectNodeContents(n);
+  const r = range.getBoundingClientRect();
+  if (r.width < 1 || r.height < 1) return false;
+  for (let a = n.parentElement; a; a = a.parentElement) {
+    const cs = getComputedStyle(a);
+    if (a !== piece && piece.contains(a) && (cs.visibility === 'hidden' || +cs.opacity < 0.1 || cs.display === 'none')) return false;
+    if (a === document.body) break;
+    if (cs.overflowX !== 'visible' || cs.overflowY !== 'visible' || cs.clipPath !== 'none') {
+      const q = a.getBoundingClientRect();
+      if (r.bottom <= q.top + 1 || r.top >= q.bottom - 1 || r.right <= q.left + 1 || r.left >= q.right - 1) return false;
+    }
+  }
+  return true;
 }
 
 /** A piece's own background colour, if it has a solid one. */
