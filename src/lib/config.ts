@@ -17,7 +17,7 @@ const siteSchema = z.object({
   name: z.string(),
   email: z.string(),
   url: z.string(),
-  location: z.object({ city: z.string(), region: z.string().default(''), country: z.string().default(''), timezone: z.string().default('auto') }),
+  location: z.object({ city: z.string(), previous: z.string().default(''), region: z.string().default(''), country: z.string().default(''), timezone: z.string().default('auto') }),
   languages: z.array(z.string()).min(1),
   socials: z.array(link).default([]),
   github: z.object({ username: z.string().default('') }).default({ username: '' }),

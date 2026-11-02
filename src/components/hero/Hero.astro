@@ -23,7 +23,7 @@ const labelCh = Math.max(...hero.layers.map((l) => `${t(lang, 'hero.layer')} 00/
       </div>
     </div>
     <div class="hero-side mono">
-      <span>{site.location.city}</span>
+      <span data-bld-draft={site.location.previous || undefined}>{site.location.city}</span>
       <time class="num" data-clock={timezone}>--:--</time>
     </div>
   </div>

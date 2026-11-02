@@ -104,14 +104,20 @@
   /* A word the typist has selected to retype. */
   .bld-sel { position: absolute; border-radius: 2px; background: color-mix(in srgb, var(--accent) 32%, transparent); opacity: 0; transition: opacity .12s; }
   .bld-sel.on { opacity: 1; }
+  /* Untyped text: invisible, but holding its space. */
+  bld-g { visibility: hidden; }
+  .bld-crowd i.click b { scale: .55; }
+  /* The hero's name is drawn on its canvas: it fades in once its box is done. */
+  html.building .hero-gl { transition: opacity 1.4s var(--ease); }
+  html.building [data-hero]:not(.name-in) .hero-gl { opacity: 0; }
   .bld-crowd { position: fixed; inset: 0; z-index: 96; pointer-events: none; --cur: var(--accent); }
   .bld-crowd.calm { --cur: color-mix(in srgb, var(--accent) 50%, #a0a0a0); }
   .bld-crowd i { position: absolute; left: 0; top: 0; will-change: transform; transition: opacity 1s; }
   /* A dot, centred on its point; a plain vertical bar while typing. */
-  .bld-crowd b { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--cur); transition: background 1.2s, width .2s, height .2s, border-radius .2s, left .2s, top .2s; }
+  .bld-crowd b { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--cur); transition: background 1.2s, width .2s, height .2s, border-radius .2s, left .2s, top .2s, scale .15s; }
   .bld-crowd i.typing b { left: -1.5px; top: -11px; width: 3px; height: 22px; border-radius: 1px; }
   .bld-crowd.leaving i { opacity: 0; }
-  .bld.typing [aria-hidden="true"] { visibility: hidden; }
+  .bld.typing [aria-hidden="true"]:not([data-bld-type]) { visibility: hidden; }
   .bld-crowd.leaving i { opacity: 0; }
   kbd { font-family: var(--font-mono); font-size: .9em; padding: 0 .4em; border: 1px solid currentColor; border-radius: 3px; }
 

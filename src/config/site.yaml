@@ -7,6 +7,7 @@ url: https://torstenyoung.com
 
 location:
   city: Kingston
+  previous: Vancouver              # the build page types this first, then corrects it to the city
   region: "Ontario"                # province or state, e.g. Ontario. Helps the city lookup.
   country: Canada
   timezone: auto           # auto = worked out from the city when the site builds. Or set one, e.g. America/Toronto

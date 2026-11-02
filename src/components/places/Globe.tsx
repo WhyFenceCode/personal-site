@@ -85,7 +85,8 @@ export default function Globe({ dots, visited, names, pins, labels }: Props) {
 
     const loop = (now: number) => {
       raf = 0; if (!alive) return;
-      if (asm === -1 && !document.documentElement.classList.contains('building')) assemble(); // the build ended without us
+      // Also start if the cue was missed: the build ended, or our piece is already finished.
+      if (asm === -1 && (!document.documentElement.classList.contains('building') || !host.closest('.bld:not(.built)'))) assemble();
       const dt = Math.min(50, now - last); last = now;
       if (target) {
         rot[0] += ((target[0] - rot[0] + 540) % 360 - 180) * 0.12; rot[1] += (target[1] - rot[1]) * 0.12;
