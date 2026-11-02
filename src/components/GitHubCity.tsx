@@ -35,7 +35,7 @@ export default function GitHubCity({ weeks, label }: Props) {
 
     const scene = new THREE.Scene();
     const css = getComputedStyle(el);
-    const fg = new THREE.Color(css.color), accent = new THREE.Color(css.getPropertyValue('--accent').trim() || '#5B4CFF');
+    const fg = new THREE.Color(css.color), accent = new THREE.Color(css.getPropertyValue('--accent').trim() || '#7E76D0');
     const bg = new THREE.Color(getComputedStyle(el.closest('.home-section') ?? document.body).backgroundColor);
     const days = weeks.flatMap((w, x) => w.map((d, y) => ({ ...d, x, y }))).filter((d) => d.level >= 0);
     const max = Math.max(1, ...days.map((d) => d.count));

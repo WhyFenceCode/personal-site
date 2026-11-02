@@ -64,8 +64,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
           if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !d.classList.contains('no-motion')) d.classList.add('intro');
         }
         if (window.__bannerClosed) d.classList.add('banner-hidden');
-        // /interact: hide the page before first paint; the cursors build it in (scripts/build.ts).
-        if (d.dataset.page === 'interact' && !d.classList.contains('no-motion') && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('building');
+        // /build: hide the page before first paint; the cursors build it in (scripts/build.ts).
+        if (d.dataset.page === 'build' && !d.classList.contains('no-motion') && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('building');
       } catch (e) {}
     </script>
     <noscript>
@@ -109,9 +109,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     <div class="sr-only" aria-live="polite" id="announcer" transition:persist></div>
     {site.interactive.sheen && <div id="sheen" aria-hidden="true" transition:persist></div>}
     {site.interactive.build && page === 'home' && (
-      <a class="build-hint mono" href={`/${lang}/interact/`} data-build-hint data-astro-reload>
+      <a class="build-hint mono" href={`/${lang}/build/`} data-build-hint data-astro-reload>
         <svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1v11l3-3 2 4.5 2-1-2-4.4H10z" fill="currentColor"/></svg>
-        <span>{t(lang, 'build.hint')}</span> <kbd>⇧ B</kbd>
+        <span>{t(lang, 'build.hint')}</span> <kbd>⇧ B</kbd> <span class="build-hint-w">· {t(lang, 'build.motion')}</span>
       </a>
     )}
     <div id="peek" aria-hidden="true" transition:persist><canvas width="300" height="225"></canvas><img alt="" hidden /></div>

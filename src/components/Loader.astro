@@ -6,6 +6,12 @@ const { lang } = Astro.props;
 const steps = t(lang, 'loader.steps') as string[];
 ---
 <div id="loader" aria-hidden="true"></div>
+{site.interactive.build && (
+  <a class="ld-build" href={`/${lang}/build/`} data-ld-build data-astro-reload hidden>
+    <span class="ld-build-t">{t(lang, 'build.callout')} <kbd>⇧ B</kbd></span>
+    <span class="ld-build-w mono">{t(lang, 'build.motion')}</span>
+  </a>
+)}
 <div class="ld-ui wrap" id="ld-ui" role="status" aria-label="Loading" data-steps={JSON.stringify(steps)}>
   <div class="ld-top"><span class="ld-brand">{site.name}</span><button class="ld-skip mono" type="button" id="ld-skip">{t(lang, 'loader.skip')}</button></div>
   <div></div>
@@ -21,5 +27,15 @@ const steps = t(lang, 'loader.steps') as string[];
   .ld-brand { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; font-size: 20px; text-transform: uppercase; }
   .ld-bottom { display: flex; justify-content: space-between; align-items: end; gap: 16px; }
   .ld-count { font-size: clamp(120px, 24vw, 380px); line-height: .8; font-variant-numeric: tabular-nums; }
+  /* "Watch it build" callout, over the loader's ink (no blending, so the accent stays the accent). */
+  .ld-build { display: none; }
+  :global(html.intro) .ld-build:not([hidden]) { position: fixed; right: var(--gutter-r); bottom: max(16px, env(safe-area-inset-bottom, 0px)); z-index: 97; display: grid; justify-items: end; gap: 6px;
+    padding: 12px 20px; border-radius: 16px; background: var(--accent); color: #fff; text-decoration: none; box-shadow: 0 16px 40px -18px rgb(0 0 0 / .5);
+    animation: ld-in .6s .4s cubic-bezier(.2, .7, .1, 1) both; }
+  .ld-build-t { font-size: 15px; display: inline-flex; gap: 8px; align-items: center; }
+  .ld-build-w { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; opacity: .8; }
+  @keyframes ld-in { from { opacity: 0; transform: translateY(10px); } }
+  /* It takes the place of the loading-step text in the bottom-right corner. */
+  :global(html.ld-callout) #ld-log { visibility: hidden; }
   .ld-skip { pointer-events: auto; background: none; color: inherit; border: 1.5px solid currentColor; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
 </style>

@@ -26,7 +26,7 @@ export default function ProjectModel({ src, title, hint }: Props) {
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     const cam = new THREE.PerspectiveCamera(30, 1, 0.01, 1000);
-    const rim = new THREE.PointLight(new THREE.Color(getComputedStyle(el).getPropertyValue('--accent').trim() || '#5B4CFF'), 40, 0, 1.5);
+    const rim = new THREE.PointLight(new THREE.Color(getComputedStyle(el).getPropertyValue('--accent').trim() || '#7E76D0'), 40, 0, 1.5);
     scene.add(rim);
     const pivot = new THREE.Group(); scene.add(pivot);
 

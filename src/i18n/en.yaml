@@ -7,6 +7,8 @@ meta:
 build:
   title: Built live
   hint: Watch it build
+  callout: Watch the site build itself
+  motion: High motion
 
 nav:
   home: Home

@@ -37,7 +37,7 @@ export default function Globe({ dots, visited, names, pins, labels }: Props) {
       canvas.width = W * d; canvas.height = H * d; canvas.style.height = `${H}px`;
       ctx.setTransform(d, 0, 0, d, 0, 0);
       const cs = getComputedStyle(host), fg = rgb(cs.color), bg = rgb(getComputedStyle(host.closest('.home-section') ?? document.body).backgroundColor);
-      colors = { land: mix(fg, bg, 0.3), visited: mix(fg, bg, 0.88), pin: mix(fg, bg, 0.55), accent: cs.getPropertyValue('--accent').trim() || '#5B4CFF', halo: `rgb(${bg.join(',')})` };
+      colors = { land: mix(fg, bg, 0.3), visited: mix(fg, bg, 0.88), pin: mix(fg, bg, 0.55), accent: cs.getPropertyValue('--accent').trim() || '#7E76D0', halo: `rgb(${bg.join(',')})` };
       draw();
     };
 

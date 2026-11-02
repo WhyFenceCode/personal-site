@@ -1,7 +1,7 @@
 ---
 /* The home page, built live: after the loader, a crowd of cursors draws each piece in as wireframes and fills it,
-   scrolling down as they go. Scroll yourself and the rest swipes in, the cursors fly off and the address becomes
-   the home page's. Opened with Shift+B or Cmd/Ctrl+B, or the hint on the home page (scripts/build.ts). */
+   scrolling down as they go, typing text in letter by letter. Scroll yourself and the rest swipes in, the cursors
+   fly off and the address becomes the home page's. Opened with Shift+B or Cmd/Ctrl+B, or the hint on the home page (scripts/build.ts). */
 import Base from '../../layouts/Base.astro';
 import HomeBody from '../../components/HomeBody.astro';
 import { langStaticPaths, t } from '../../lib/i18n';
@@ -9,6 +9,6 @@ import { langStaticPaths, t } from '../../lib/i18n';
 export const getStaticPaths = langStaticPaths;
 const { lang } = Astro.params as { lang: string };
 ---
-<Base lang={lang} page="interact" title={t(lang, 'build.title')}>
+<Base lang={lang} page="build" title={t(lang, 'build.title')}>
   <HomeBody lang={lang} />
 </Base>

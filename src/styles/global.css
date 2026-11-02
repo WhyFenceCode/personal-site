@@ -78,25 +78,37 @@
     -webkit-mask-image: radial-gradient(380px circle at var(--sx, 50%) var(--sy, 50%), #000, transparent 70%); mask-image: radial-gradient(380px circle at var(--sx, 50%) var(--sy, 50%), #000, transparent 70%); }
   #sheen.on { opacity: 1; }
 
-  /* "Watch it build" hint on the home page (desktop): bottom left, until you scroll. */
-  .build-hint { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(18px, env(safe-area-inset-bottom, 0px)); z-index: 47;
-    display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; border: 1px dashed var(--accent); background: rgb(230 230 230 / .97);
-    color: var(--accent); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; opacity: .85;
+  /* "Watch it build" hint on the home page (desktop): bottom left, above the name block's bottom bar, until you scroll. */
+  .build-hint { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(max(18px, env(safe-area-inset-bottom, 0px)) + 84px); z-index: 47;
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; border: 0; background: var(--accent);
+    color: #fff; box-shadow: 0 10px 26px -12px rgb(0 0 0 / .45); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; opacity: .85;
     transition: opacity .4s, transform .4s var(--ease); }
   .build-hint:hover { opacity: 1; }
+  .build-hint-w { opacity: .75; }
   .build-hint.gone, html.intro .build-hint { opacity: 0; transform: translateY(12px); pointer-events: none; }
   @media (hover: none), (pointer: coarse) { .build-hint { display: none; } }
   /* /interact build (scripts/build.ts). Before the script tags the pieces, everything waits hidden. */
   html.building:not(.bld-ready) :is(main, #footer, .site-header) { opacity: 0; }
-  .bld { opacity: 0; translate: 0 18px; pointer-events: none; transition: opacity .6s var(--ease), translate .7s var(--ease); }
-  .bld.built { opacity: 1; translate: none; pointer-events: auto; }
-  .bld-wires { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 48; pointer-events: none; }
-  .bld-wire { position: absolute; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 9%, transparent);
-    clip-path: inset(0 calc((1 - var(--k, 0)) * 100%) calc((1 - var(--k, 0)) * 100%) 0); transition: opacity .6s; }
-  .bld-wire span { position: absolute; left: -1px; top: -18px; padding: 2px 6px; font-size: 9px; letter-spacing: .06em; background: var(--accent); color: #fff; white-space: nowrap; }
+  /* Opacity only, so a piece sits exactly inside its box (no slide offset to throw the measuring off). */
+  .bld { opacity: 0; pointer-events: none; transition: opacity .6s var(--ease); }
+  .bld.built { opacity: 1; pointer-events: auto; }
+  /* Figma-style boxes in a muted tint of the accent: thin frame, square corner handles, name above, size below. */
+  .bld-wires { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 48; pointer-events: none; --bw: color-mix(in srgb, var(--accent) 45%, #9a9a9a); }
+  .bld-wire { position: absolute; transition: opacity .6s; }
+  .bw-frame { position: absolute; left: 0; top: 0; width: calc(var(--k, 0) * 100%); height: calc(var(--k, 0) * 100%); border: 1px solid var(--bw); background: color-mix(in srgb, var(--bw) 7%, transparent); }
+  .bw-frame i { position: absolute; width: 7px; height: 7px; background: #fff; border: 1px solid var(--bw); }
+  .bw-frame .tl { left: -4px; top: -4px; } .bw-frame .tr { right: -4px; top: -4px; } .bw-frame .bl { left: -4px; bottom: -4px; } .bw-frame .br { right: -4px; bottom: -4px; }
+  .bw-name { position: absolute; left: -1px; bottom: calc(100% + 6px); font-size: 9px; letter-spacing: .06em; color: var(--bw); white-space: nowrap; }
+  .bw-size { position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); padding: 2px 6px; border-radius: 3px; font-size: 9px; letter-spacing: .04em; background: var(--bw); color: #fff; white-space: nowrap; }
   .bld-wire.fade { opacity: 0; }
-  .bld-crowd { position: fixed; inset: 0; z-index: 96; pointer-events: none; }
-  .bld-crowd i { position: absolute; left: 0; top: 0; margin: -2px 0 0 -2px; filter: drop-shadow(0 3px 6px rgb(0 0 0 / .35)); transition: opacity 1s; }
+  .bld-crowd { position: fixed; inset: 0; z-index: 96; pointer-events: none; --cur: var(--accent); }
+  .bld-crowd.calm { --cur: color-mix(in srgb, var(--accent) 50%, #a0a0a0); }
+  .bld-crowd i { position: absolute; left: 0; top: 0; will-change: transform; transition: opacity 1s; }
+  /* A dot, centred on its point; a plain vertical bar while typing. */
+  .bld-crowd b { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--cur); transition: background 1.2s, width .2s, height .2s, border-radius .2s, left .2s, top .2s; }
+  .bld-crowd i.typing b { left: -1px; top: -11px; width: 2px; height: 22px; border-radius: 1px; }
+  .bld-crowd.leaving i { opacity: 0; }
+  .bld.typing [aria-hidden="true"] { visibility: hidden; }
   .bld-crowd.leaving i { opacity: 0; }
   kbd { font-family: var(--font-mono); font-size: .9em; padding: 0 .4em; border: 1px solid currentColor; border-radius: 3px; }
 

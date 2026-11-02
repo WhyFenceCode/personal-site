@@ -7,6 +7,8 @@ meta:
 build:
   title: Live gebaut
   hint: Beim Bauen zusehen
+  callout: Zusehen, wie sich die Seite baut
+  motion: Viel Bewegung
 
 nav:
   home: Start

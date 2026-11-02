@@ -64,7 +64,7 @@ const DEPTH: [string, number][] = [['.h2', 0.14], ['.eyebrow', 0.24], ['.stat', 
 let depthRaf = 0;
 function depth() {
   depthRaf = 0;
-  const live = on('depth') && motionOn();
+  const live = on('depth') && motionOn() && !document.documentElement.classList.contains('building');
   for (const [sel, k] of DEPTH) for (const el of $$(sel)) {
     // Not inside cards (they tilt, and their contents would slide over each other) or the loader.
     if (el.closest('#loader, .resume-cta, .tile, .card')) { el.style.translate = ''; continue; }
