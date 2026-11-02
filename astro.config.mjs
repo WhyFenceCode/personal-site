@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { readFileSync } from 'node:fs';
 import { parse } from 'yaml';
@@ -10,7 +11,16 @@ const site = parse(readFileSync(new URL('./src/config/site.yaml', import.meta.ur
 
 export default defineConfig({
   site: site.url,
-  integrations: [react()],
+  integrations: [
+    react(),
+    // /sitemap-index.xml, linked from robots.txt. The root language redirect and the 404 aren't real pages.
+    sitemap({
+      filter: (page) => new URL(page).pathname !== '/' && !new URL(page).pathname.startsWith('/404'),
+      i18n: site.languages.length > 1
+        ? { defaultLocale: site.languages[0], locales: Object.fromEntries(site.languages.map((/** @type {string} */ l) => [l, l])) }
+        : undefined,
+    }),
+  ],
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   devToolbar: { enabled: false },
   // {{email}}, {{owner}}, {{address}}… in Markdown are filled from site.yaml at build time.

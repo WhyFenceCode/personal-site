@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import { defaultLang, t, href } from '../lib/i18n';
 const lang = defaultLang;
 ---
-<Base lang={lang} title="404">
+<Base lang={lang} title="404" noindex>
   <div class="wrap nf">
     <p class="stat code">404</p>
     <h1 class="display"><span class="fit">{t(lang, 'notFound.title')}</span></h1>

@@ -18,8 +18,8 @@ import { site } from '../lib/config';
 import { analyticsScript } from '../lib/analytics';
 import { languages, t, switchPath, type Lang } from '../lib/i18n';
 
-interface Props { lang: Lang; title?: string; description?: string; page?: string }
-const { lang, title, description, page = '' } = Astro.props;
+interface Props { lang: Lang; title?: string; description?: string; page?: string; noindex?: boolean }
+const { lang, title, description, page = '', noindex = false } = Astro.props;
 const fullTitle = `${site.name} | ${title ?? t(lang, 'nav.home')}`;
 const desc = description ?? t(lang, 'meta.description');
 const analytics = analyticsScript();
@@ -35,7 +35,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
+    {/* Index and show in search, but don't train on it (noai/noimageai and TDMRep; robots.txt says the same). */}
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, noai, noimageai'} />
+    <meta name="tdm-reservation" content="1" />
     <link rel="canonical" href={canonical} />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+    <link rel="alternate" type="text/markdown" title="llms.txt" href="/llms.txt" />
     {languages.map((l) => <link rel="alternate" hreflang={l} href={new URL(switchPath(Astro.url.pathname, l), Astro.site ?? site.url).href} />)}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={desc} />
@@ -61,6 +66,26 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
         if (window.__bannerClosed) d.classList.add('banner-hidden');
       } catch (e) {}
     </script>
+    <noscript>
+      {/* Without JavaScript (crawlers, script blockers): size the wordmarks with CSS instead of measuring them,
+          open the collapsible rows, show the main nav on phones, and hide controls that only work with scripts. */}
+      <style is:inline>
+        .fit { font-size: clamp(40px, 9vw, 168px) !important; white-space: normal !important; }
+        .hero-line.line-full, .foot-mark .fit { font-size: 15vw !important; }
+        .hero-line.line-word { font-size: 25vw !important; }
+        .page-title .fit { font-size: 18vw !important; }
+        .row-panel { grid-template-rows: 1fr !important; } .row-btn .pm { display: none !important; }
+        .smooth { opacity: 1 !important; }
+        @media (max-width: 860px) {
+          .site-header .hnav { display: flex !important; gap: 0 !important; }
+          .site-header .hnav-link { padding: 6px 5px !important; font-size: 10px !important; letter-spacing: .06em !important; box-shadow: none !important; }
+          .site-header .hnav-link .sq, .site-header .hnav-link.is-contact { display: none !important; }
+        }
+        .menu-btn, #progress, #ring, #flood, .hero-hint, .dive-meter, .layer-label, .hero-side time,
+        [data-layer-next], [data-motion-toggle], [data-blueprint-toggle], [data-banner-close], [data-copy],
+        [data-gh-3d], [data-marquee-pause], [data-filter], [data-open-cookies] { display: none !important; }
+      </style>
+    </noscript>
     {analytics && !needsConsent && <script is:inline defer src={analytics.src} {...analytics.attrs}></script>}
     <ClientRouter fallback="none" />
   </head>
