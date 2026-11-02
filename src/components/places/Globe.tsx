@@ -3,6 +3,7 @@
  * - Land dots are a light grey; countries you've been to are darker, and hovering one shows a card.
  * - Each place is a larger dot in a lighter shade; clicking one (on the globe or in the list) turns it accent
  *   and turns the globe to face it.
+ * - On the build page the dots fly in from around it once the cursors have finished its box (the `bld:assemble` event).
  */
 import { useEffect, useRef, useState } from 'react';
 import { geoOrthographic, geoDistance } from 'd3-geo';
@@ -29,6 +30,11 @@ export default function Globe({ dots, visited, names, pins, labels }: Props) {
     const proj = geoOrthographic().clipAngle(90);
     let rot: [number, number] = [-pins[0]?.lng || 75, -(pins[0]?.lat ?? 30) * 0.6];
     let vel = 0, dragging = false, last = performance.now(), raf = 0, alive = true, inView = true, target: [number, number] | null = null;
+    // Build page: wait (drawing nothing) until the cursors finish this piece, then fly the dots in.
+    let asm: number | null = document.documentElement.classList.contains('building') && !host.closest('.built') ? -1 : null;
+    const seeds = dots.map(() => [Math.random() * Math.PI * 2, 1.15 + Math.random() * 0.9, Math.random() * 800]);
+    const assemble = () => { if (asm === -1) { asm = performance.now(); kick(); } };
+    host.addEventListener('bld:assemble', assemble);
     let W = 0, H = 0, R = 0, colors = { land: '', visited: '', pin: '', accent: '', halo: '' };
 
     const size = () => {
@@ -45,15 +51,29 @@ export default function Globe({ dots, visited, names, pins, labels }: Props) {
     function draw() {
       proj.scale(R).translate([W / 2, H / 2]).rotate([rot[0], rot[1], 0]);
       ctx.clearRect(0, 0, W, H);
+      if (asm === -1) return;
+      const since = asm === null ? Infinity : performance.now() - asm;
+      if (since > 1900) asm = null;
+      const ease = (k: number) => 1 - Math.pow(1 - Math.max(0, Math.min(1, k)), 3);
       // A faint outline of the sphere.
+      ctx.globalAlpha = ease(since / 1200);
       ctx.beginPath(); ctx.arc(W / 2, H / 2, R, 0, Math.PI * 2); ctx.strokeStyle = colors.land; ctx.lineWidth = 1; ctx.stroke();
+      ctx.globalAlpha = 1;
       const r = Math.max(1.2, R / 175);
-      for (const [lng, lat, c] of dots) {
-        if (!visible(lng, lat)) continue;
-        const p = proj([lng, lat]); if (!p) continue;
+      dots.forEach(([lng, lat, c], i) => {
+        if (!visible(lng, lat)) return;
+        let p = proj([lng, lat]); if (!p) return;
+        if (since < 1900) {
+          // Flying in: from a scattered spot around the globe to its place, each dot a little after the last.
+          const [a, d, delay] = seeds[i], e = ease((since - delay) / 1000);
+          if (e <= 0) return;
+          const sx = W / 2 + Math.cos(a) * R * d, sy = H / 2 + Math.sin(a) * R * d;
+          p = [sx + (p[0] - sx) * e, sy + (p[1] - sy) * e];
+        }
         ctx.fillStyle = isVisited.has(c) ? colors.visited : colors.land;
         ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, Math.PI * 2); ctx.fill();
-      }
+      });
+      if (since < 1700) return; // the places land last
       pins.forEach((pin, i) => {
         if (!visible(pin.lng, pin.lat)) return;
         const p = proj([pin.lng, pin.lat]); if (!p) return;
@@ -65,6 +85,7 @@ export default function Globe({ dots, visited, names, pins, labels }: Props) {
 
     const loop = (now: number) => {
       raf = 0; if (!alive) return;
+      if (asm === -1 && !document.documentElement.classList.contains('building')) assemble(); // the build ended without us
       const dt = Math.min(50, now - last); last = now;
       if (target) {
         rot[0] += ((target[0] - rot[0] + 540) % 360 - 180) * 0.12; rot[1] += (target[1] - rot[1]) * 0.12;
@@ -74,7 +95,7 @@ export default function Globe({ dots, visited, names, pins, labels }: Props) {
         rot[0] += vel + (motionOn() && Math.abs(vel) < 0.02 ? dt * 0.004 : 0);
       }
       draw();
-      if (inView && (motionOn() || target || Math.abs(vel) > 0.01 || dragging)) raf = requestAnimationFrame(loop);
+      if (inView && (motionOn() || asm !== null || target || Math.abs(vel) > 0.01 || dragging)) raf = requestAnimationFrame(loop);
     };
     const kick = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(loop); } };
 
@@ -125,7 +146,7 @@ export default function Globe({ dots, visited, names, pins, labels }: Props) {
     const off = onMotion(kick);
     size(); kick();
     return () => {
-      alive = false; cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); off();
+      alive = false; cancelAnimationFrame(raf); ro.disconnect(); host.removeEventListener('bld:assemble', assemble); io.disconnect(); off();
       canvas.removeEventListener('pointerdown', down); canvas.removeEventListener('pointermove', move); canvas.removeEventListener('pointerup', up);
       canvas.removeEventListener('pointercancel', up); canvas.removeEventListener('pointerleave', leave);
     };
@@ -134,7 +155,7 @@ export default function Globe({ dots, visited, names, pins, labels }: Props) {
   useEffect(() => { api.current?.redraw(); }, [sel]);
 
   return (
-    <div className="globe" ref={wrap}>
+    <div className="globe" ref={wrap} data-assemble>
       <div className="globe-stage">
         <canvas ref={cv} className="globe-cv" role="img" aria-label={`Globe of ${pins.length} places`} />
         {hover && (

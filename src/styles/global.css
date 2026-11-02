@@ -101,12 +101,15 @@
   .bw-name { position: absolute; left: -1px; bottom: calc(100% + 6px); font-size: 9px; letter-spacing: .06em; color: var(--bw); white-space: nowrap; }
   .bw-size { position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); padding: 2px 6px; border-radius: 3px; font-size: 9px; letter-spacing: .04em; background: var(--bw); color: #fff; white-space: nowrap; }
   .bld-wire.fade { opacity: 0; }
+  /* A word the typist has selected to retype. */
+  .bld-sel { position: absolute; border-radius: 2px; background: color-mix(in srgb, var(--accent) 32%, transparent); opacity: 0; transition: opacity .12s; }
+  .bld-sel.on { opacity: 1; }
   .bld-crowd { position: fixed; inset: 0; z-index: 96; pointer-events: none; --cur: var(--accent); }
   .bld-crowd.calm { --cur: color-mix(in srgb, var(--accent) 50%, #a0a0a0); }
   .bld-crowd i { position: absolute; left: 0; top: 0; will-change: transform; transition: opacity 1s; }
   /* A dot, centred on its point; a plain vertical bar while typing. */
   .bld-crowd b { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--cur); transition: background 1.2s, width .2s, height .2s, border-radius .2s, left .2s, top .2s; }
-  .bld-crowd i.typing b { left: -1px; top: -11px; width: 2px; height: 22px; border-radius: 1px; }
+  .bld-crowd i.typing b { left: -1.5px; top: -11px; width: 3px; height: 22px; border-radius: 1px; }
   .bld-crowd.leaving i { opacity: 0; }
   .bld.typing [aria-hidden="true"] { visibility: hidden; }
   .bld-crowd.leaving i { opacity: 0; }

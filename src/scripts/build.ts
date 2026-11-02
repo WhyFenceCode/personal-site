@@ -11,9 +11,11 @@
  *   becomes the home page's. The same happens when they finish.
  * - With motion off, /build is just the home page.
  *
- * The work goes top down, in waves: everything in the upper two thirds of the screen is built, then the page glides
- * (one eased move) to the next piece. A full ring of cursors circles the loader; after that there are only as many
- * as there is work for: idle ones leave by the nearest edge, and new ones fly in when more is waiting.
+ * The work goes top down: the whole first screen is built at once, then the page scrolls continuously, building
+ * each piece once it's in the upper two thirds of the screen and slowing when the work falls behind. Text is typed
+ * like a person would (uneven speed, typos fixed with backspace, a word selected and retyped). A full ring of
+ * cursors circles the loader; after the top there are only as many as there is work for: idle ones leave by the
+ * nearest edge, and new ones fly in when more is waiting.
  *
  * Kept light for slower devices: fewer cursors on small or low-core screens, block positions measured once (and on
  * resize) instead of every frame, transforms only, no filters, and the caret only measured when text changes.
@@ -44,17 +46,20 @@ if (on() && root.classList.contains('intro') && root.dataset.page !== 'build' &&
 /* ---------- The build ---------- */
 type Typed = { node: Text; full: string };
 type Block = { el: HTMLElement; top: number; h: number; text: Typed[] | null; wire?: HTMLElement; done: boolean; busy: boolean };
+/** A typist's state: which text node, how far into it, any wrong letters on the end, a word it has selected to redo. */
+type Typer = { ti: number; pos: number; junk: string; typo: number; sel: number; lastSel: number; mul: number; acc: number; human: boolean; rate: number; box?: HTMLElement; caret: number; cx: number; cy: number };
 type Job =
-  | { kind: 'block'; b: Block; phase: 'fly' | 'drag' | 'type'; t0: number; dur: number; x0: number; y0: number; w: number; h: number; ti: number; tc: number; rate: number; caret: number; cx: number; cy: number }
+  | { kind: 'block'; b: Block; phase: 'fly' | 'drag' | 'type'; t0: number; dur: number; x0: number; y0: number; w: number; h: number; ty: Typer }
   | { kind: 'sweep'; phase: 'fly' | 'swipe'; t0: number; x0: number; x1: number; y: number; host: HTMLElement };
 type Cur = { el: HTMLElement; x: number; y: number; vx: number; vy: number; tx: number; ty: number; job: Job | null; idle: number; out: boolean; i: number };
 
-// How many cursors: a full ring around the loader, then as many as there is work for, up to a cap.
+// How many cursors: a full ring around the loader (which all build the top of the page), then as many as there is
+// work for, up to a cap.
 const cores = navigator.hardwareConcurrency || 4;
 const small = innerWidth < 700, mid = innerWidth < 1100 || cores <= 4;
 const RING = small ? 6 : mid ? 10 : 14;
 const CAP = small ? 3 : mid ? 5 : 8;
-const ZONE = 0.66;      // pieces are only built in the upper two thirds of the screen
+const ZONE = 0.66;      // below the top, pieces are only built in the upper two thirds of the screen
 const CURSOR = '<b></b>';
 
 /** The text inside a piece, to be typed in (skipping decorative copies and screen-reader-only text). */
@@ -73,8 +78,11 @@ function textOf(el: HTMLElement): Typed[] | null {
  *  its contents (a grid's items one by one) and its link, then the footer's parts. */
 function blocks(): HTMLElement[] {
   const out: HTMLElement[] = [];
-  const add = (el: Element | null) => { if (el instanceof HTMLElement && el.offsetHeight > 4) out.push(el); };
+  // React islands are wrapped in a box-less <astro-island>, so the piece is what's inside it.
+  const unwrap = (el: Element | null) => (el?.tagName === 'ASTRO-ISLAND' ? el.firstElementChild : el);
+  const add = (el: Element | null) => { el = unwrap(el); if (el instanceof HTMLElement && el.offsetHeight > 4) out.push(el); };
   const spread = (el: Element) => {
+    if (el.tagName === 'ASTRO-ISLAND') return add(el);
     const d = getComputedStyle(el).display;
     if ((d.includes('grid') || d.includes('flex')) && el.children.length >= 2 && el.children.length <= 24) [...el.children].forEach(add);
     else add(el);
@@ -93,10 +101,71 @@ function blocks(): HTMLElement[] {
 
 const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
+/* ---------- Typing like a person ---------- */
+const ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+/** A key next to this one (for typos), keeping the case. */
+function near(ch: string) {
+  const lo = ch.toLowerCase();
+  for (const r of ROWS) {
+    const i = r.indexOf(lo);
+    if (i >= 0) { const n = r[Math.max(0, Math.min(r.length - 1, i + (Math.random() < 0.5 ? -1 : 1)))]; return ch === lo ? n : n.toUpperCase(); }
+  }
+  return ch;
+}
+
+function typer(text: Typed[]): Typer {
+  const chars = text.reduce((s, t) => s + t.full.length, 0);
+  // Short text is typed like a person (uneven speed, typos, second thoughts); long text just goes quickly.
+  return { ti: 0, pos: 0, junk: '', typo: 0, sel: -1, lastSel: -99, mul: 1, acc: 0, human: chars < 700, rate: Math.max(34, chars / 2.4), caret: -1, cx: 0, cy: 0 };
+}
+
+/** One keystroke (a letter, a backspace, a selection…); returns how long until the next, in ms. */
+function stroke(ty: Typer, text: Typed[], layer: HTMLElement): number {
+  const t = text[ty.ti];
+  const put = () => { t.node.data = t.full.slice(0, ty.pos) + ty.junk; };
+  const per = 1000 / ty.rate, jitter = () => (per * (0.55 + Math.random() * 0.9)) / ty.mul;
+  // A selected word goes in one stroke, then gets typed again.
+  if (ty.sel >= 0) { ty.pos = ty.sel; ty.sel = -1; put(); ty.box?.classList.remove('on'); return 120 + Math.random() * 120; }
+  // Typing a typo: a neighbouring key, then carrying on for a letter or two before noticing.
+  if (ty.typo > 0) {
+    ty.junk += ty.junk ? (t.full[ty.pos + ty.junk.length] ?? '') : near(t.full[ty.pos]);
+    put();
+    return --ty.typo ? jitter() : 220 + Math.random() * 320;
+  }
+  if (ty.junk) { ty.junk = ty.junk.slice(0, -1); put(); return ty.junk ? 40 + Math.random() * 40 : 110 + Math.random() * 120; }
+  if (ty.pos >= t.full.length) { ty.ti++; return 0; }
+  const ch = t.full[ty.pos];
+  if (ty.human) {
+    if (/[a-z]/i.test(ch) && Math.random() < 0.016) { ty.typo = 1 + Math.floor(Math.random() * 3); return 0; }
+    // Second thoughts: select the word just typed, then retype it.
+    if (ch === ' ' && ty.pos > ty.lastSel + 24 && Math.random() < 0.07) {
+      const from = t.full.lastIndexOf(' ', ty.pos - 1) + 1;
+      if (ty.pos - from >= 4) {
+        const range = document.createRange(); range.setStart(t.node, from); range.setEnd(t.node, ty.pos);
+        const r = range.getBoundingClientRect();
+        if (r.width) {
+          if (!ty.box) { ty.box = document.createElement('div'); ty.box.className = 'bld-sel'; layer.appendChild(ty.box); }
+          Object.assign(ty.box.style, { left: `${r.left}px`, top: `${r.top + scrollY}px`, width: `${r.width}px`, height: `${r.height}px` });
+          ty.box.classList.add('on'); ty.sel = from; ty.lastSel = ty.pos;
+          return 380 + Math.random() * 420;
+        }
+      }
+    }
+    if (ch === ' ' && Math.random() < 0.3) ty.mul = 0.5 + Math.random() * 1.1; // speed drifts from word to word
+  }
+  ty.pos++; put();
+  let wait = jitter();
+  if (ty.human && /[.,;:!?]/.test(ch)) wait += 80 + Math.random() * 200;
+  if (ty.human && ch === ' ' && Math.random() < 0.06) wait += 200 + Math.random() * 450; // a pause to think
+  return wait;
+}
+
 function start() {
   const list: Block[] = blocks().map((el) => { el.classList.add('bld'); return { el, top: 0, h: 0, text: textOf(el), done: false, busy: false }; });
   const measure = () => list.forEach((b) => { const r = b.el.getBoundingClientRect(); b.top = r.top + scrollY; b.h = r.height; });
   measure(); addEventListener('resize', measure);
+  // The top: everything on the first screen, built all at once before the page starts moving.
+  const top = new Set(list.filter((b) => b.top < innerHeight * 0.95));
   root.classList.add('bld-ready');
 
   const wires = document.createElement('div'); wires.className = 'bld-wires'; document.body.appendChild(wires);
@@ -109,6 +178,11 @@ function start() {
     const c: Cur = { el, x, y, vx: 0, vy: 0, tx: x, ty: y, job: null, idle: 0, out: false, i: made++ };
     curs.push(c); return c;
   }
+  /** Just off the screen edge nearest a piece, so a new cursor doesn't have far to come. */
+  const nearEdge = (b: Block): [number, number] => {
+    const r = b.el.getBoundingClientRect(), y = Math.max(20, Math.min(innerHeight - 20, r.top + (Math.random() - 0.5) * 240));
+    return [r.left + r.width / 2 < innerWidth / 2 ? -30 : innerWidth + 30, y];
+  };
   const offEdge = (): [number, number] => {
     const side = Math.floor(Math.random() * 4), r = Math.random();
     return side === 0 ? [-30, innerHeight * r] : side === 1 ? [innerWidth + 30, innerHeight * r] : side === 2 ? [innerWidth * r, -30] : [innerWidth * r, innerHeight + 30];
@@ -122,17 +196,18 @@ function start() {
   addEventListener('site:intro-done', () => { crowd.classList.add('calm'); if (phase === 'intro') { phase = 'build'; if (wantsOut) leave(); } }, { once: true });
   if (phase === 'build') crowd.classList.add('calm');
 
-  // Scrolling: one eased glide at a time, and only between waves of work (never while a piece is being made).
-  let glide: { from: number; to: number; t0: number; dur: number } | null = null;
-  let progScroll = Math.round(scrollY), lastFrame = performance.now(), raf = 0;
+  // Scrolling: once the top is built the page moves continuously, easing off when the work falls behind.
+  let pos = scrollY, vel = 0, lastFrame = performance.now(), raf = 0;
   const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
+  const topDone = () => [...top].every((b) => b.done);
   const name = (el: HTMLElement) => (typeof el.className === 'string' && el.className.split(' ')[0]) || el.tagName.toLowerCase();
 
-  /** The next piece in reading order, if it's inside the build zone (upper two thirds of the screen). */
+  /** The next piece in reading order, if it can be started: on the top, anything; below, inside the zone. */
   function nextPiece(): Block | null {
     const b = list.find((x) => !x.done && !x.busy);
     if (!b) return null;
-    return b.top < scrollY + innerHeight * ZONE && b.top + Math.min(b.h, 60) > scrollY - 40 ? b : null;
+    if (top.has(b)) return b;
+    return topDone() && (b.top < scrollY + innerHeight * ZONE || scrollY >= maxScroll() - 2) ? b : null;
   }
 
   function startBlock(c: Cur, b: Block) {
@@ -141,9 +216,8 @@ function start() {
     Object.assign(wire.style, { left: `${r.left}px`, top: `${r.top + scrollY}px`, width: `${r.width}px`, height: `${r.height}px` });
     wire.innerHTML = `<div class="bw-frame"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i><span class="bw-name mono">${name(b.el)}</span><span class="bw-size mono">0 × 0</span></div>`;
     wires.appendChild(wire); b.wire = wire; b.busy = true;
-    const chars = b.text?.reduce((s, t) => s + t.full.length, 0) ?? 0;
-    c.job = { kind: 'block', b, phase: 'fly', t0: 0, dur: Math.max(700, Math.min(1500, 550 + Math.sqrt(r.width * r.height) * 1.4)),
-      x0: r.left, y0: r.top + scrollY, w: r.width, h: r.height, ti: 0, tc: 0, rate: Math.max(40, chars / 2.2), caret: -1, cx: r.left, cy: r.top + scrollY };
+    c.job = { kind: 'block', b, phase: 'fly', t0: 0, dur: Math.max(800, Math.min(1600, 600 + Math.sqrt(r.width * r.height) * 1.4)),
+      x0: r.left, y0: r.top + scrollY, w: r.width, h: r.height, ty: typer(b.text ?? []) };
     c.idle = 0;
   }
 
@@ -151,12 +225,16 @@ function start() {
   function finishBlock(b: Block, delay = 0) {
     b.done = true; b.busy = false;
     b.text?.forEach((t) => { t.node.data = t.full; });
-    setTimeout(() => { b.el.classList.add('built'); b.el.classList.remove('typing'); b.wire?.classList.add('fade'); setTimeout(() => b.wire?.remove(), 700); }, delay);
+    setTimeout(() => {
+      b.el.classList.add('built'); b.el.classList.remove('typing'); b.wire?.classList.add('fade'); setTimeout(() => b.wire?.remove(), 700);
+      // Pieces that put themselves together (the globe's dots) start now.
+      [b.el, ...b.el.querySelectorAll('[data-assemble]')].forEach((el) => { if (el.matches('[data-assemble]')) el.dispatchEvent(new Event('bld:assemble')); });
+    }, delay);
   }
 
   function frame(now: number) {
     raf = 0;
-    const dt = Math.min(40, now - lastFrame) / 16.67; lastFrame = now;
+    const ms = Math.min(40, now - lastFrame), dt = ms / 16.67; lastFrame = now;
 
     if (phase === 'intro') {
       const p = Math.min(1, (now - t0) / 2100), e = 1 - Math.pow(1 - p, 3), base = Math.min(innerWidth, innerHeight) * 0.26;
@@ -165,52 +243,48 @@ function start() {
         c.tx = innerWidth / 2 + Math.cos(a) * r; c.ty = innerHeight / 2 + Math.sin(a) * r;
       });
     } else if (phase === 'build') {
-      // 1. Glide the page, if a glide is running.
-      if (glide) {
-        const k = Math.min(1, (now - glide.t0) / glide.dur);
-        scrollTo({ top: glide.from + (glide.to - glide.from) * ease(k), behavior: 'instant' }); progScroll = Math.round(scrollY);
-        if (k >= 1) glide = null;
-      }
-      // 2. Hand out work: the first free cursor swipes the name; then pieces in order, inside the zone.
-      const working = curs.filter((c) => c.job && !c.out).length;
-      if (!glide) {
-        for (const c of curs) {
-          if (c.out || c.job) continue;
-          const hero = $<HTMLElement>('[data-hero]'), title = hero && $<HTMLElement>('h1', hero);
-          if (!swept && hero && title) {
-            swept = true;
-            const r = title.getBoundingClientRect(), W = hero.getBoundingClientRect().width, mid = r.left + r.width / 2, span = W * 0.55;
-            c.job = { kind: 'sweep', phase: 'fly', t0: 0, x0: mid - span / 2, x1: mid + span / 2, y: r.top + r.height / 2 + scrollY, host: hero };
-            continue;
-          }
-          const b = nextPiece(); if (!b) break;
-          startBlock(c, b);
+      const onTop = !topDone();
+      // 1. Hand out work: the first free cursor swipes the name; then pieces in order.
+      for (const c of curs) {
+        if (c.out || c.job) continue;
+        const hero = $<HTMLElement>('[data-hero]'), title = hero && $<HTMLElement>('h1', hero);
+        if (!swept && hero && title) {
+          swept = true;
+          const r = title.getBoundingClientRect(), W = hero.getBoundingClientRect().width, mid = r.left + r.width / 2, span = W * 0.55;
+          c.job = { kind: 'sweep', phase: 'fly', t0: 0, x0: mid - span / 2, x1: mid + span / 2, y: r.top + r.height / 2 + scrollY, host: hero };
+          continue;
         }
-        // More work in the zone than hands: bring a cursor in from an edge.
-        if (nextPiece() && curs.filter((c) => !c.out).length < CAP) { const [x, y] = offEdge(); startBlock(spawn(x, y), nextPiece()!); }
+        const b = nextPiece(); if (!b) break;
+        startBlock(c, b);
       }
-      // 3. Nothing left in the zone and everyone's finished: glide down to the next piece (or wrap up).
-      const pending = list.find((b) => !b.done);
-      if (!pending && curs.every((c) => !c.job)) leave();
-      else if (pending && !glide && working === 0 && !nextPiece() && !pending.busy) {
-        const to = Math.max(0, Math.min(maxScroll(), pending.top - innerHeight * 0.16));
-        if (to > scrollY + 2) glide = { from: scrollY, to, t0: now, dur: Math.max(500, Math.min(1100, 380 + (to - scrollY) * 0.7)) };
+      // More work than hands: bring cursors in from the edges (the whole ring may build the top).
+      for (let b = nextPiece(); b && curs.filter((c) => !c.out).length < (onTop ? Math.max(CAP, RING) : CAP); b = nextPiece()) { const [x, y] = nearEdge(b); startBlock(spawn(x, y), b); }
+
+      // 2. Scroll: after the top, keep gliding down, slowing as the oldest unfinished piece nears the top of the screen.
+      const lag = list.find((b) => !b.done);
+      if (!lag && curs.every((c) => !c.job)) leave();
+      else if (!onTop) {
+        let want = 0;
+        if (lag) { const rel = (lag.top - scrollY) / innerHeight; want = rel > ZONE ? 240 : rel < 0.1 ? 0 : 90 * Math.min(1, (rel - 0.1) / 0.3); }
+        vel += (want - vel) * Math.min(1, 0.035 * dt);
+        if (vel > 0.3 && pos < maxScroll()) { pos = Math.min(maxScroll(), pos + (vel * ms) / 1000); scrollTo({ top: pos, behavior: 'instant' }); }
       }
-      // 4. Move each cursor along its job.
+
+      // 3. Move each cursor along its job.
       for (const c of curs) {
         const j = c.job;
         c.el.classList.toggle('typing', j?.kind === 'block' && j.phase === 'type');
         if (!j) {
           // Idle: drift for a moment, then leave by the nearest edge if nothing comes up (none hang about).
           c.idle += dt;
-          if (c.idle > 40 && !glide && !c.out) { c.out = true; const [x, y] = offEdge(); c.tx = x; c.ty = y; }
+          if (c.idle > 110 && !c.out) { c.out = true; const [x, y] = offEdge(); c.tx = x; c.ty = y; }
           if (!c.out) { c.tx = c.x + Math.sin(now / 500 + c.i) * 2; c.ty = c.y + Math.cos(now / 600 + c.i) * 2; }
           continue;
         }
         if (j.kind === 'sweep') {
           if (j.phase === 'fly') { c.tx = j.x0; c.ty = j.y - scrollY; if (Math.hypot(c.x - c.tx, c.y - c.ty) < 16) { j.phase = 'swipe'; j.t0 = now; } }
           else {
-            const k = Math.min(1, (now - j.t0) / 1300), e = ease(k);
+            const k = Math.min(1, (now - j.t0) / 1400), e = ease(k);
             c.tx = c.x = j.x0 + (j.x1 - j.x0) * e; c.ty = c.y = j.y - scrollY - Math.sin(e * Math.PI) * 18; c.vx = c.vy = 0;
             // The hero reads this like a real pointer: the ink follows and the swipe dives a layer.
             j.host.dispatchEvent(new PointerEvent('pointermove', { clientX: c.x, clientY: c.y, pointerType: 'pen', bubbles: true }));
@@ -223,7 +297,7 @@ function start() {
         }
         if (j.phase === 'fly') {
           c.tx = j.x0; c.ty = j.y0 - scrollY;
-          if (Math.hypot(c.x - c.tx, c.y - c.ty) < 10) { j.phase = 'drag'; j.t0 = now; }
+          if (Math.hypot(c.x - c.tx, c.y - c.ty) < 12) { j.phase = 'drag'; j.t0 = now; }
         } else if (j.phase === 'drag') {
           // The cursor sits exactly on the frame's growing corner, and the size label counts up underneath.
           const k = Math.min(1, (now - j.t0) / j.dur), e = ease(k);
@@ -235,40 +309,39 @@ function start() {
               // Empty the text, show the piece, and switch to the text cursor.
               j.b.text.forEach((t) => { t.node.data = ''; });
               j.b.el.classList.add('built', 'typing');
-              j.phase = 'type'; j.t0 = now;
+              j.phase = 'type'; j.ty.cx = j.x0; j.ty.cy = j.y0 + 12;
             } else { finishBlock(j.b); c.job = null; }
           }
         } else {
-          // Type a few letters per frame, then put the text cursor at the end of what's typed.
-          const text = j.b.text!;
-          let budget = j.rate * (dt / 60) + j.tc; j.tc = budget % 1; budget = Math.floor(budget);
-          while (budget > 0 && j.ti < text.length) {
-            const t = text[j.ti], n = Math.min(t.full.length - t.node.data.length, budget);
-            t.node.data = t.full.slice(0, t.node.data.length + n); budget -= n;
-            if (t.node.data.length >= t.full.length) j.ti++;
-          }
-          const t = text[Math.min(j.ti, text.length - 1)];
-          // Measuring the caret forces layout, so only do it when the typed text actually changed.
-          const key = j.ti * 100000 + t.node.data.length;
-          if (t.node.data.length && key !== j.caret) {
-            j.caret = key;
+          const text = j.b.text!, ty = j.ty;
+          ty.acc += ms;
+          for (let n = 0; ty.acc > 0 && ty.ti < text.length && n < 400; n++) ty.acc -= stroke(ty, text, wires);
+          // Put the text cursor after the last letter, measuring only when the text changed (it forces layout).
+          const t = text[Math.min(ty.ti, text.length - 1)];
+          const key = ty.ti * 100000 + t.node.data.length;
+          if (t.node.data.length && key !== ty.caret) {
+            ty.caret = key;
             const range = document.createRange(); range.setStart(t.node, t.node.data.length - 1); range.setEnd(t.node, t.node.data.length);
             const rect = range.getBoundingClientRect();
-            if (rect.height) { j.cx = rect.right + 2; j.cy = rect.top + rect.height / 2 + scrollY; }
+            if (rect.height) { ty.cx = rect.right + 2; ty.cy = rect.top + rect.height / 2 + scrollY; }
           }
-          c.tx = j.cx; c.ty = j.cy - scrollY; // kept in page coordinates, so it stays put if the page moves
-          if (j.ti >= text.length) { finishBlock(j.b); c.job = null; }
+          c.tx = ty.cx; c.ty = ty.cy - scrollY; // kept in page coordinates, so it stays put while the page moves
+          if (ty.ti >= text.length) { ty.box?.remove(); finishBlock(j.b); c.job = null; }
         }
       }
     } else {
       curs.forEach((c) => { if (!c.out) { c.out = true; const a = Math.atan2(c.y - innerHeight / 2, c.x - innerWidth / 2) || c.i; c.tx = c.x + Math.cos(a) * innerWidth; c.ty = c.y + Math.sin(a) * innerWidth; } });
     }
 
-    // Springy movement (except where a job places a cursor exactly), and remove cursors once they're off screen.
+    // Unhurried, springy movement (except where a job places a cursor exactly); cursors are removed once off screen.
     for (const c of curs) {
       const typing = c.el.classList.contains('typing');
-      const stiff = c.out ? 0.05 : phase === 'intro' ? 0.18 : typing ? 0.24 : 0.07;
-      c.vx = (c.vx + (c.tx - c.x) * stiff * dt) * 0.74; c.vy = (c.vy + (c.ty - c.y) * stiff * dt) * 0.74;
+      const stiff = phase === 'intro' ? 0.18 : typing ? 0.22 : 0.04;
+      const damp = phase === 'intro' || typing ? 0.74 : 0.82;
+      c.vx = (c.vx + (c.tx - c.x) * stiff * dt) * damp; c.vy = (c.vy + (c.ty - c.y) * stiff * dt) * damp;
+      // A speed limit, so long trips are a glide rather than a dart.
+      const sp = Math.hypot(c.vx, c.vy), lim = phase === 'intro' ? 40 : 13;
+      if (sp > lim) { c.vx *= lim / sp; c.vy *= lim / sp; }
       c.x += c.vx * dt; c.y += c.vy * dt;
       c.el.style.transform = `translate3d(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px, 0)`;
     }
@@ -281,9 +354,10 @@ function start() {
   // The visitor takes over: anything they do to scroll ends the build.
   let left = false;
   function leave() {
-    if (left) return; left = true; phase = 'leave'; glide = null;
+    if (left) return; left = true; phase = 'leave';
     let n = 0;
     for (const b of list) if (!b.done || b.el.classList.contains('typing')) finishBlock(b, Math.min(900, n++ * 35));
+    wires.querySelectorAll('.bld-sel').forEach((el) => el.remove());
     crowd.classList.add('leaving');
     goHome();
     setTimeout(() => {
@@ -297,7 +371,8 @@ function start() {
   addEventListener('wheel', userScroll, { passive: true });
   addEventListener('touchmove', userScroll, { passive: true });
   addEventListener('keydown', (e) => { if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'End', 'Home'].includes(e.key)) userScroll(); });
-  addEventListener('scroll', () => { if (phase === 'build' && Math.abs(Math.round(scrollY) - progScroll) > 8) leave(); }, { passive: true });
+  // Our own scrolling keeps `pos`; a scroll that lands somewhere else came from the visitor (scrollbar, find, …).
+  addEventListener('scroll', () => { if (phase === 'build' && Math.abs(scrollY - pos) > 8) leave(); }, { passive: true });
 }
 
 /** Swap the address to the home page without reloading (keeping the router's own history state). */
