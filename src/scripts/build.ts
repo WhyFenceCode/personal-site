@@ -34,12 +34,15 @@ const home = () => `/${lang()}/`;
 const root = document.documentElement;
 
 /* ---------- Shortcut and home hint ---------- */
-addEventListener('keydown', (e) => {
-  if (!on() || e.key.toLowerCase() !== 'b' || e.altKey || e.repeat || !(e.shiftKey || e.metaKey || e.ctrlKey)) return;
+// Listened for while capturing, so no other handler can swallow it; matched by key or physical key (any layout).
+// Pressed inside the site's own embed (a project preview), it opens the build in the page around it.
+document.addEventListener('keydown', (e) => {
+  if (!on() || (e.key.toLowerCase() !== 'b' && e.code !== 'KeyB') || e.altKey || e.repeat || !(e.shiftKey || e.metaKey || e.ctrlKey)) return;
   if ((e.target as HTMLElement).closest?.('input, textarea, select, [contenteditable="true"]')) return;
   e.preventDefault();
-  location.assign(`/${lang()}/build/`);
-});
+  const url = `/${lang()}/build/`;
+  try { (window.top ?? window).location.assign(url); } catch { location.assign(url); }
+}, true);
 addEventListener('scroll', () => { if (scrollY > 40) $('[data-build-hint]')?.classList.add('gone'); }, { passive: true });
 // During the loader, desktop visitors (with a mouse) get a callout to try the build instead.
 if (on() && root.classList.contains('intro') && root.dataset.page !== 'build' && matchMedia('(hover: hover) and (pointer: fine)').matches) {
@@ -62,11 +65,11 @@ type Block = {
   key: boolean;                // a showpiece (globe, calendar, timeline…), worth a longer pause
 };
 /** A typist's state: which text node, how far into it, any wrong letters on the end, a word it has selected to redo. */
-type Typer = { ti: number; pos: number; junk: string; typo: number; sel: number; lastSel: number; drafted: number; draftLeft: string; mul: number; acc: number; rate: number; box?: HTMLElement; caret: number; cx: number; cy: number };
+type Typer = { ti: number; pos: number; junk: string; typo: number; sel: number; since: number; pool?: string[]; drafted: number; draftLeft: string; mul: number; acc: number; rate: number; box?: HTMLElement; caret: number; cx: number; cy: number };
 type Job =
   | { kind: 'block'; b: Block; phase: 'fly' | 'drag' | 'type'; t0: number; dur: number; x0: number; y0: number; w: number; h: number; due: number; t1: number; top: boolean; ty: Typer }
   | { kind: 'sweep'; phase: 'fly' | 'swipe'; t0: number; x0: number; x1: number; y: number; host: HTMLElement };
-type Cur = { el: HTMLElement; x: number; y: number; vx: number; vy: number; tx: number; ty: number; job: Job | null; idle: number; out: boolean; i: number };
+type Cur = { el: HTMLElement; x: number; y: number; vx: number; vy: number; tx: number; ty: number; job: Job | null; idle: number; out: boolean; used: boolean; i: number };
 
 // How many cursors: a full ring around the loader (which all build the top of the page), then as many as there is
 // work for, up to a cap.
@@ -75,23 +78,28 @@ const small = innerWidth < 700, mid = innerWidth < 1100 || cores <= 4;
 const RING = small ? 6 : mid ? 10 : 14;
 const CAP = small ? 3 : mid ? 5 : 8;
 const ZONE = 0.66;      // below the top, pieces start around the upper two thirds of the screen (it sets the pace)
-const STEP = 1;         // scroll speed while building, in px per frame (whole pixels scroll evenly)
+const STEP = 1.4;       // scroll speed while building, in px per 60th of a second (about 84px/s)
 const CURSOR = '<b></b>';
 const SHOW = '.globe, .gh-cal, .tl, [data-frame], astro-island, canvas'; // showpieces: the scroll pauses after them
 
-/** The text inside a piece, to be typed in (skipping decorative copies and screen-reader-only text, except decorative
- *  text marked `data-bld-type`, like the marquee's words). React islands
- *  are never typed into: their text must match what they hydrate with. */
+/** The text inside a piece, to be typed in: all of it, around any pictures and embeds, skipping decorative copies and
+ *  screen-reader-only text (except decorative text marked `data-bld-type`, like the marquee's words). React islands
+ *  are never typed into (their text must match what they hydrate with), nor are the calendar and timeline, which
+ *  lay themselves out from their text. */
 function textOf(el: HTMLElement): Typed[] | null {
-  const skip = '.globe, .gh-cal, .tl, [data-frame], astro-island';
-  if (el.matches(skip) || el.querySelector(skip) || el.parentElement?.tagName === 'ASTRO-ISLAND') return null;
+  if (el.matches('astro-island') || el.parentElement?.tagName === 'ASTRO-ISLAND') return null;
   const out: Typed[] = [];
   const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
-    acceptNode: (n) => (n.parentElement?.closest('[aria-hidden="true"]:not([data-bld-type]), script, style, .sr-only, svg') || !n.textContent?.trim() ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+    acceptNode: (n) => {
+      const p = n.parentElement;
+      if (!p || p.closest('[aria-hidden="true"]:not([data-bld-type]), script, style, .sr-only, svg, astro-island, .gh-cal, .tl') || !n.textContent?.trim()) return NodeFilter.FILTER_REJECT;
+      const cs = getComputedStyle(p);
+      return cs.visibility === 'hidden' || +cs.opacity < 0.1 || !p.getClientRects().length ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+    },
   });
   for (let n = walk.nextNode(); n; n = walk.nextNode()) out.push({ node: n as Text, full: (n as Text).data, draft: n.parentElement?.dataset.bldDraft || undefined });
   const len = out.reduce((s, t) => s + t.full.length, 0);
-  return len > 0 && len <= 2400 ? out : null;
+  return len > 0 && len <= 4000 ? out : null;
 }
 
 /** A piece's own background colour, if it has a solid one. */
@@ -110,7 +118,8 @@ function blocks(): HTMLElement[] {
   const spread = (el: Element) => {
     if (el.tagName === 'ASTRO-ISLAND') return add(el);
     const d = getComputedStyle(el).display;
-    if ((d.includes('grid') || d.includes('flex')) && el.children.length >= 2 && el.children.length <= 24) [...el.children].forEach(add);
+    const kids = [...el.children], alike = kids.length >= 2 && kids.every((k) => k.tagName === kids[0].tagName && (k as HTMLElement).offsetHeight > 20);
+    if (((d.includes('grid') || d.includes('flex')) || alike) && kids.length >= 2 && kids.length <= 24) kids.forEach(add);
     else add(el);
   };
   $$('.site-header > *').forEach(add);
@@ -139,7 +148,17 @@ function near(ch: string) {
   return ch;
 }
 
-const typer = (): Typer => ({ ti: 0, pos: 0, junk: '', typo: 0, sel: -1, lastSel: -99, drafted: -1, draftLeft: '', mul: 1, acc: 0, rate: 20, caret: -1, cx: 0, cy: 0 });
+const SPARE = ['simple', 'quick', 'really', 'better', 'great', 'first', 'small', 'about', 'little', 'together'];
+/** A different word to type by mistake in place of `word`, in its case: another word from the same piece if there is
+ *  one, otherwise a stock one. Never the word itself. */
+function wrongWord(word: string, pool: string[]) {
+  const lo = word.toLowerCase(), ok = (w: string) => w.toLowerCase() !== lo && !lo.startsWith(w.toLowerCase().slice(0, 3));
+  const own = pool.filter(ok), from = own.length >= 3 ? own : SPARE.filter(ok);
+  const w = from[Math.floor(Math.random() * from.length)].toLowerCase();
+  return word === word.toUpperCase() ? w.toUpperCase() : word[0] === word[0].toUpperCase() ? w[0].toUpperCase() + w.slice(1) : w;
+}
+
+const typer = (): Typer => ({ ti: 0, pos: 0, junk: '', typo: 0, sel: -1, since: 0, drafted: -1, draftLeft: '', mul: 1, acc: 0, rate: 20, caret: -1, cx: 0, cy: 0 });
 
 /** Highlights characters [from, to) of a text node, like a drag-selection. */
 function select(ty: Typer, node: Text, from: number, to: number, layer: HTMLElement) {
@@ -160,7 +179,8 @@ function stroke(ty: Typer, text: Typed[], layer: HTMLElement): number {
   const per = 1000 / ty.rate, jitter = () => (per * (0.55 + Math.random() * 0.9)) / ty.mul;
   // A selection is deleted in one stroke (after a moment with it highlighted), then the text is typed again.
   if (ty.sel >= 0) { ty.pos = ty.sel; ty.sel = -1; ty.junk = ''; put(); ty.box?.classList.remove('on'); return 160 + Math.random() * 160; }
-  // A first draft: type it, select it, think, delete it, then type the real text (e.g. the old city, then the new one).
+  // A first draft: type it, select it, think, delete it, then type the real text (the old city, then the new one;
+  // the wrong word, then the right one).
   if (t.draft && ty.drafted !== ty.ti && ty.pos === 0 && !ty.junk) { ty.drafted = ty.ti; ty.draftLeft = t.draft; }
   if (ty.draftLeft) {
     ty.junk += ty.draftLeft[0]; ty.draftLeft = ty.draftLeft.slice(1); put();
@@ -178,15 +198,17 @@ function stroke(ty: Typer, text: Typed[], layer: HTMLElement): number {
   if (ty.pos >= t.full.length) { ty.ti++; return 0; }
   const ch = t.full[ty.pos];
   if (human) {
-    if (/[a-z]/i.test(ch) && Math.random() < 0.016) { ty.typo = 1 + Math.floor(Math.random() * 3); return 0; }
-    // Second thoughts: select the word just typed, then retype it.
-    if (ch === ' ' && ty.pos > ty.lastSel + 30 && Math.random() < 0.08) {
-      const from = t.full.lastIndexOf(' ', ty.pos - 1) + 1;
-      if (ty.pos - from >= 4 && select(ty, t.node, from, ty.pos, layer)) { ty.sel = from; ty.lastSel = ty.pos; return 850 + Math.random() * 450; }
+    // Second thoughts: at the start of a word, now and then type a different one first (then select it and fix it).
+    const word = (ty.pos === 0 || /[\s(\-/]/.test(t.full[ty.pos - 1])) && t.full.slice(ty.pos).match(/^[A-Za-z']{4,}/)?.[0];
+    if (word && ty.since > 22 && Math.random() < 0.14) {
+      ty.pool ??= text.flatMap((x) => x.full.match(/[A-Za-z]{4,}/g) ?? []);
+      ty.since = 0; ty.draftLeft = wrongWord(word, ty.pool);
+      return 0;
     }
+    if (/[a-z]/i.test(ch) && Math.random() < 0.016) { ty.typo = 1 + Math.floor(Math.random() * 3); return 0; }
     if (ch === ' ' && Math.random() < 0.3) ty.mul = 0.6 + Math.random() * 0.9; // speed drifts from word to word
   }
-  ty.pos++; put();
+  ty.pos++; ty.since++; put();
   let wait = jitter();
   if (human && /[.,;:!?]/.test(ch)) wait += 80 + Math.random() * 200;
   if (human && ch === ' ' && Math.random() < 0.06) wait += 200 + Math.random() * 450; // a pause to think
@@ -242,7 +264,7 @@ function start() {
   /** A new cursor, starting at (x, y): the ring on load, or just off a screen edge when one joins later. */
   function spawn(x: number, y: number) {
     const el = document.createElement('i'); el.innerHTML = CURSOR; crowd.appendChild(el);
-    const c: Cur = { el, x, y, vx: 0, vy: 0, tx: x, ty: y, job: null, idle: 0, out: false, i: made++ };
+    const c: Cur = { el, x, y, vx: 0, vy: 0, tx: x, ty: y, job: null, idle: 0, out: false, used: false, i: made++ };
     curs.push(c); return c;
   }
   /** Just off the screen edge nearest a piece, so a new cursor doesn't have far to come. */
@@ -267,7 +289,7 @@ function start() {
   let pos = scrollY, vel = 0, avgMs = 16.7, lastFrame = performance.now(), raf = 0;
   const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
   const topDone = () => [...top].every((b) => b.done);
-  const moving = (now: number) => typeof swipe === 'number' && now - swipe > 600;
+  const moving = (now: number) => typeof swipe === 'number' && now - swipe > 450;
   const name = (el: HTMLElement) => (typeof el.className === 'string' && el.className.split(' ')[0]) || el.tagName.toLowerCase();
 
   /** The next piece in reading order, if it can be started: on the top, anything; below, inside the zone. */
@@ -286,16 +308,16 @@ function start() {
     return Math.min(maxScroll(), Math.max(next, b.top - innerHeight * 0.42));
   }
   /** Milliseconds until the page gets there, at the building pace. */
-  const msUntil = (y: number) => Math.max(700, (y - scrollY) / STEP * avgMs);
+  const msUntil = (y: number) => Math.max(700, ((y - scrollY) / STEP) * 16.67);
 
   function startBlock(c: Cur, b: Block, now: number) {
     const r = b.el.getBoundingClientRect();
     // Hold its size while its text is emptied and retyped, so nothing around it moves (and every box stays true).
     b.el.style.minWidth = `${r.width}px`; b.el.style.minHeight = `${r.height}px`;
     b.busy = true;
-    const isTop = top.has(b), due = dueAt(b), budget = isTop ? 4500 : msUntil(due);
+    const isTop = top.has(b), due = dueAt(b), budget = isTop ? 3800 : msUntil(due);
     c.job = { kind: 'block', b, phase: 'fly', t0: now, dur: Math.max(600, Math.min(1400, budget * 0.25)), x0: r.left, y0: r.top + scrollY, w: r.width, h: r.height, due, t1: 0, top: isTop, ty: typer() };
-    c.idle = 0;
+    c.idle = 0; c.used = true;
   }
 
   /** The box appears where the cursor clicks: its top-left corner, then it's dragged out. */
@@ -312,8 +334,8 @@ function start() {
     b.text?.forEach((t) => { t.node.data = t.full; if (t.wrap) { t.wrap.replaceWith(t.node); t.wrap = t.ghost = undefined; } });
     if (phase === 'build' && !top.has(b)) {
       const now = performance.now();
-      if (b.key) hold = Math.max(hold, now + 1700);
-      if (b.sec && list.every((x) => x.sec !== b.sec || x.done)) hold = Math.max(hold, now + 800);
+      if (b.key) hold = Math.max(hold, now + 1400);
+      if (b.sec && list.every((x) => x.sec !== b.sec || x.done)) hold = Math.max(hold, now + 650);
     }
     setTimeout(() => {
       // The name is drawn by the hero's canvas, so it fades in rather than being typed.
@@ -384,14 +406,16 @@ function start() {
         let want = STEP;
         if (lag) {
           const rel = (lag.top - scrollY) / innerHeight;
-          if (rel > lag.zone && !lag.busy) want = STEP * 3;
+          if (rel > lag.zone && !lag.busy) want = STEP * 4;
           else if (rel < 0.35) want = STEP * Math.max(0, (rel - 0.08) / 0.27);
         }
         if (now < hold) want = 0;
         vel += (want - vel) * Math.min(1, (now < hold ? 0.08 : 0.03) * dt);
+        pos = Math.min(pos, maxScroll());
         if (pos < maxScroll()) {
           pos = Math.min(maxScroll(), pos + vel * dt);
-          scrollTo({ top: Math.round(pos), behavior: 'instant' });
+          const dpr = devicePixelRatio || 1;
+          scrollTo({ top: Math.round(pos * dpr) / dpr, behavior: 'instant' }); // whole device pixels: even steps
         }
       }
 
@@ -402,7 +426,7 @@ function start() {
         if (!j) {
           // Idle: drift for a moment, then leave by the nearest edge if nothing comes up (none hang about).
           c.idle += dt;
-          if (c.idle > 110 && !c.out) { c.out = true; const [x, y] = offEdge(); c.tx = x; c.ty = y; }
+          if ((c.idle > 24 || !c.used) && !c.out) { c.out = true; const [x, y] = offEdge(); c.tx = x; c.ty = y; }
           if (!c.out) { c.tx = c.x + Math.sin(now / 500 + c.i) * 2; c.ty = c.y + Math.cos(now / 600 + c.i) * 2; }
           continue;
         }
@@ -450,7 +474,7 @@ function start() {
           }
         } else {
           // Paced to finish on time: as slow as a person when there's time, quicker (and tidier) when there isn't.
-          const text = j.b.text!, ty = j.ty, rest = j.top ? Math.max(500, j.t1 - now) : msUntil(j.due);
+          const text = j.b.text!, ty = j.ty, rest = j.top ? Math.max(500, j.t1 - now) : Math.max(msUntil(j.due), Math.min(3500, left(ty, text) * 45));
           ty.rate = Math.max(9, Math.min(600, (left(ty, text) / (rest / 1000)) * 1.35));
           ty.acc += ms;
           for (let n = 0; ty.acc > 0 && ty.ti < text.length && n < 400; n++) ty.acc -= stroke(ty, text, wires);
@@ -469,7 +493,7 @@ function start() {
       const damp = phase === 'intro' || typing ? 0.74 : 0.82;
       c.vx = (c.vx + (c.tx - c.x) * stiff * dt) * damp; c.vy = (c.vy + (c.ty - c.y) * stiff * dt) * damp;
       // A speed limit, so long trips are a glide rather than a dart.
-      const sp = Math.hypot(c.vx, c.vy), lim = phase === 'intro' ? 40 : 13;
+      const sp = Math.hypot(c.vx, c.vy), lim = phase === 'intro' ? 40 : c.out ? 26 : 13; // leaving: quick, so none linger
       if (sp > lim) { c.vx *= lim / sp; c.vy *= lim / sp; }
       c.x += c.vx * dt; c.y += c.vy * dt;
       c.el.style.transform = `translate3d(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px, 0)`;
@@ -512,7 +536,8 @@ function start() {
   addEventListener('touchmove', userScroll, { passive: true });
   addEventListener('keydown', (e) => { if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'End', 'Home'].includes(e.key)) userScroll(); });
   // Our own scrolling keeps `pos`; a scroll that lands somewhere else came from the visitor (scrollbar, find, …).
-  addEventListener('scroll', () => { if (phase === 'build' && Math.abs(scrollY - pos) > 8) leave(); }, { passive: true });
+  // (The page can get shorter as pieces let go of their held size, which pulls the scroll up: that's not the visitor.)
+  addEventListener('scroll', () => { if (phase === 'build' && Math.abs(scrollY - Math.min(pos, maxScroll())) > 8) leave(); }, { passive: true });
 }
 
 /** Swap the address to the home page without reloading (keeping the router's own history state). */

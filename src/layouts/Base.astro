@@ -64,6 +64,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
           if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !d.classList.contains('no-motion')) d.classList.add('intro');
         }
         if (window.__bannerClosed) d.classList.add('banner-hidden');
+        // A reload starts at the top (or at its #anchor), not back where the page was: the browser would restore the
+        // old position, and so would the router (from history.state, before its first paint), so both are told not to.
+        var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+        if (nav && nav.type === 'reload') {
+          history.scrollRestoration = 'manual';
+          if (history.state) history.replaceState(Object.assign({}, history.state, { scrollX: 0, scrollY: 0 }), '');
+        }
         // /build: hide the page before first paint; the cursors build it in (scripts/build.ts).
         if (d.dataset.page === 'build' && !d.classList.contains('no-motion') && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('building');
       } catch (e) {}
