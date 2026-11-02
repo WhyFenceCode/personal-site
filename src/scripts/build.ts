@@ -65,7 +65,7 @@ type Block = {
   key: boolean;                // a showpiece (globe, calendar, timeline…), worth a longer pause
 };
 /** A typist's state: which text node, how far into it, any wrong letters on the end, a word it has selected to redo. */
-type Typer = { ti: number; pos: number; junk: string; typo: number; sel: number; since: number; pool?: string[]; drafted: number; draftLeft: string; mul: number; acc: number; rate: number; box?: HTMLElement; caret: number; cx: number; cy: number };
+type Typer = { ti: number; pos: number; junk: string; typo: number; sel: number; since: number; pool?: string[]; drafted: number; draftLeft: string; mul: number; acc: number; rate: number; box?: HTMLElement; caret: number; cx: number; cy: number; ready: boolean };
 type Job =
   | { kind: 'block'; b: Block; phase: 'fly' | 'drag' | 'type'; t0: number; dur: number; x0: number; y0: number; w: number; h: number; due: number; t1: number; top: boolean; ty: Typer }
   | { kind: 'sweep'; phase: 'fly' | 'swipe'; t0: number; x0: number; x1: number; y: number; host: HTMLElement };
@@ -80,6 +80,9 @@ const CAP = small ? 3 : mid ? 5 : 8;
 const ZONE = 0.66;      // below the top, pieces start around the upper two thirds of the screen (it sets the pace)
 const STEP = 1.4;       // scroll speed while building, in px per 60th of a second (about 84px/s)
 const CURSOR = '<b></b>';
+/** Pieces where only one part is typed (selector of the piece → selector of the part); the rest fades in as it's
+ *  typed. The project index's rows: the title is typed, the details fade in. */
+const ONLY: [string, string][] = [['.index > a', '.t']];
 const SHOW = '.globe, .gh-cal, .tl, [data-frame], astro-island, canvas'; // showpieces: the scroll pauses after them
 
 /** The text inside a piece, to be typed in: all of it, around any pictures and embeds, skipping decorative copies and
@@ -158,7 +161,7 @@ function wrongWord(word: string, pool: string[]) {
   return word === word.toUpperCase() ? w.toUpperCase() : word[0] === word[0].toUpperCase() ? w[0].toUpperCase() + w.slice(1) : w;
 }
 
-const typer = (): Typer => ({ ti: 0, pos: 0, junk: '', typo: 0, sel: -1, since: 0, drafted: -1, draftLeft: '', mul: 1, acc: 0, rate: 20, caret: -1, cx: 0, cy: 0 });
+const typer = (): Typer => ({ ti: 0, pos: 0, junk: '', typo: 0, sel: -1, since: 0, drafted: -1, draftLeft: '', mul: 1, acc: 0, rate: 20, caret: -1, cx: 0, cy: 0, ready: false });
 
 /** Highlights characters [from, to) of a text node, like a drag-selection. */
 function select(ty: Typer, node: Text, from: number, to: number, layer: HTMLElement) {
@@ -174,7 +177,7 @@ function select(ty: Typer, node: Text, from: number, to: number, layer: HTMLElem
 /** One keystroke (a letter, a backspace, a selection…); returns how long until the next, in ms.
  *  At a person's pace there are typos and second thoughts; when it has to hurry, it just types. */
 function stroke(ty: Typer, text: Typed[], layer: HTMLElement): number {
-  const t = text[ty.ti], human = ty.rate < 45;
+  const t = text[ty.ti], human = ty.rate < 70;
   const put = () => { t.node.data = t.full.slice(0, ty.pos) + ty.junk; if (t.ghost) t.ghost.data = t.full.slice(ty.pos); };
   const per = 1000 / ty.rate, jitter = () => (per * (0.55 + Math.random() * 0.9)) / ty.mul;
   // A selection is deleted in one stroke (after a moment with it highlighted), then the text is typed again.
@@ -200,7 +203,7 @@ function stroke(ty: Typer, text: Typed[], layer: HTMLElement): number {
   if (human) {
     // Second thoughts: at the start of a word, now and then type a different one first (then select it and fix it).
     const word = (ty.pos === 0 || /[\s(\-/]/.test(t.full[ty.pos - 1])) && t.full.slice(ty.pos).match(/^[A-Za-z']{4,}/)?.[0];
-    if (word && ty.since > 22 && Math.random() < 0.14) {
+    if (word && ty.since > 10 && Math.random() < 0.3) {
       ty.pool ??= text.flatMap((x) => x.full.match(/[A-Za-z]{4,}/g) ?? []);
       ty.since = 0; ty.draftLeft = wrongWord(word, ty.pool);
       return 0;
@@ -248,7 +251,9 @@ function start() {
   const list: Block[] = blocks().map((el) => {
     el.classList.add('bld');
     const key = !!(el.matches(SHOW) || el.querySelector(SHOW) || el.parentElement?.tagName === 'ASTRO-ISLAND');
-    return { el, top: 0, text: textOf(el), done: false, busy: false, css: el.getAttribute('style'), fill: fillOf(el), color: getComputedStyle(el).color,
+    const only = ONLY.find(([m]) => el.matches(m))?.[1], part = only ? el.querySelector<HTMLElement>(only) : el;
+    if (only && part) { el.classList.add('bld-part'); part.setAttribute('data-bld-root', ''); }
+    return { el, top: 0, text: part ? textOf(part) : null, done: false, busy: false, css: el.getAttribute('style'), fill: fillOf(el), color: getComputedStyle(el).color,
       zone: ZONE + (Math.random() - 0.5) * 0.24, sec: el.closest('main > *, #footer'), key };
   });
   const measure = () => list.forEach((b) => { if (!b.busy) b.top = b.el.getBoundingClientRect().top + scrollY; });
@@ -282,7 +287,9 @@ function start() {
   // The name swipe comes once the top is built, in a pause before the page starts moving.
   let swipe: 'wait' | 'busy' | number = 'wait';
   // A scroll during the loader is remembered: the page then appears whole as soon as the loader opens.
-  addEventListener('site:intro-done', () => { crowd.classList.add('calm'); if (phase === 'intro') { phase = 'build'; if (wantsOut) leave(); } }, { once: true });
+  // The cursors get to work as the loader starts to open (the intro class goes), not once its reveal is over.
+  const opened = () => { crowd.classList.add('calm'); if (phase === 'intro') { phase = 'build'; if (wantsOut) leave(); } };
+  addEventListener('site:intro-done', opened, { once: true });
   if (phase === 'build') crowd.classList.add('calm');
 
   // Scrolling: whole pixels per frame (even steps), easing off only if the work falls behind.
@@ -352,6 +359,7 @@ function start() {
     const ms = Math.min(40, now - lastFrame), dt = ms / 16.67; lastFrame = now;
     avgMs += (ms - avgMs) * 0.05;
 
+    if (phase === 'intro' && !root.classList.contains('intro')) opened();
     if (phase === 'intro') {
       const p = Math.min(1, (now - t0) / 2100), e = 1 - Math.pow(1 - p, 3), base = Math.min(innerWidth, innerHeight) * 0.26;
       curs.forEach((c, k) => {
@@ -369,11 +377,16 @@ function start() {
         if (j.phase !== 'type') continue;
         const text = j.b.text!, ty = j.ty, t = text[Math.min(ty.ti, text.length - 1)];
         const key = ty.ti * 100000 + t.node.data.length;
-        if (t.node.data.length && key !== ty.caret) {
+        if (key !== ty.caret) {
+          // After the last typed letter; with nothing typed yet, where the first letter will go (the start of its
+          // invisible placeholder).
+          const range = document.createRange();
+          if (t.node.data.length) { range.setStart(t.node, t.node.data.length - 1); range.setEnd(t.node, t.node.data.length); }
+          else if (t.ghost?.data.length) { range.setStart(t.ghost, 0); range.setEnd(t.ghost, 1); }
+          else continue;
           ty.caret = key;
-          const range = document.createRange(); range.setStart(t.node, t.node.data.length - 1); range.setEnd(t.node, t.node.data.length);
-          const rect = range.getBoundingClientRect();
-          if (rect.height) { ty.cx = rect.right + 2; ty.cy = rect.top + rect.height / 2 + scrollY; }
+          const rect = range.getBoundingClientRect(), x = t.node.data.length ? rect.right + 2 : rect.left;
+          if (rect.height) { ty.cx = x; ty.cy = rect.top + rect.height / 2 + scrollY; }
         }
       }
 
@@ -422,7 +435,7 @@ function start() {
       // 4. Move each cursor along its job.
       for (const c of curs) {
         const j = c.job;
-        c.el.classList.toggle('typing', j?.kind === 'block' && j.phase === 'type');
+        c.el.classList.toggle('typing', j?.kind === 'block' && j.phase === 'type' && j.ty.ready);
         if (!j) {
           // Idle: drift for a moment, then leave by the nearest edge if nothing comes up (none hang about).
           c.idle += dt;
@@ -476,9 +489,15 @@ function start() {
           // Paced to finish on time: as slow as a person when there's time, quicker (and tidier) when there isn't.
           const text = j.b.text!, ty = j.ty, rest = j.top ? Math.max(500, j.t1 - now) : Math.max(msUntil(j.due), Math.min(3500, left(ty, text) * 45));
           ty.rate = Math.max(9, Math.min(600, (left(ty, text) / (rest / 1000)) * 1.35));
+          c.tx = ty.cx; c.ty = ty.cy - scrollY; // kept in page coordinates, so it stays put while the page moves
+          // Nothing is typed until the cursor has travelled from the box's corner to where the text starts and
+          // turned into the text bar (then a short beat, as a person would).
+          if (!ty.ready) {
+            if (Math.hypot(c.x - c.tx, c.y - c.ty) < 3) { ty.ready = true; ty.acc = -160; }
+            continue;
+          }
           ty.acc += ms;
           for (let n = 0; ty.acc > 0 && ty.ti < text.length && n < 400; n++) ty.acc -= stroke(ty, text, wires);
-          c.tx = ty.cx; c.ty = ty.cy - scrollY; // kept in page coordinates, so it stays put while the page moves
           if (ty.ti >= text.length) { ty.box?.remove(); finishBlock(j.b); c.job = null; }
         }
       }

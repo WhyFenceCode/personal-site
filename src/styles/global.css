@@ -106,6 +106,9 @@
   .bld-sel.on { opacity: 1; }
   /* Untyped text: invisible, but holding its space. */
   bld-g { visibility: hidden; }
+  /* Pieces where only one part is typed (a project row's title): the rest fades in once it's done. */
+  .bld-part > * { transition: opacity .9s var(--ease); }
+  .bld-part.typing > :not([data-bld-root]) { opacity: 0; }
   .bld-crowd i.click b { scale: .55; }
   /* The hero's name is drawn on its canvas: it fades in once its box is done. */
   html.building .hero-gl { transition: opacity 1.4s var(--ease); }
