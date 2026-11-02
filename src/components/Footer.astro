@@ -39,7 +39,6 @@ const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []),
     <span class="flex flex-wrap items-center gap-4">
       {site.analytics.provider !== 'none' && site.analytics.consent && <button class="text-btn mono" type="button" data-open-cookies>{t(lang, 'footer.cookies')}</button>}
       <button class="text-btn mono" type="button" data-motion-toggle>Motion: on</button>
-      {site.interactive.blueprint && <button class="text-btn mono" type="button" data-blueprint-toggle aria-pressed="false">Blueprint: off</button>}
       <LangSwitch lang={lang} />
     </span>
   </div>

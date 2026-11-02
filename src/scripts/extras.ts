@@ -2,7 +2,6 @@
  * Interactive extras, each switched on in site.yaml → interactive (listed in <body data-ix>).
  * Everything that moves also stops when motion is off (footer toggle, or reduced motion on the device).
  *
- *   blueprint  rulers, grid, crosshair and dimensions over the page (footer "Blueprint" switch)
  *   tiltCards  cards tilt toward the pointer, an accent outline drifting behind them
  *   record     drag the Listening record to spin it, with momentum
  *   magnetic   main buttons lean toward the pointer
@@ -22,59 +21,6 @@ const store = { get: (k: string) => { try { return localStorage.getItem(k); } ca
 
 let mx = -1, my = -1;
 addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; }, { passive: true });
-
-/* ---------- Blueprint ---------- */
-const BP_TARGETS = '.h2, .page-title, .big, .tile, .card, [data-frame], .globe-stage, .resume-cta, .hero-name';
-let bpOn = store.get('site.blueprint') === 'on';
-let bpRaf = 0;
-function bpApply() {
-  const active = bpOn && on('blueprint');
-  document.documentElement.classList.toggle('blueprint', active);
-  $$('[data-blueprint-toggle]').forEach((b) => { b.hidden = !on('blueprint'); b.innerHTML = `Blueprint: ${active ? 'on' : 'off'} <kbd>B</kbd>`; b.setAttribute('aria-pressed', String(active)); });
-  // The corner hint shows until blueprint mode has been tried once.
-  const hint = $('[data-bp-hint]'); if (hint) hint.hidden = !on('blueprint') || store.get('site.bpSeen') === '1';
-  const sheet = $('[data-bp-sheet]'); if (sheet) sheet.textContent = (document.documentElement.dataset.page || 'home').toUpperCase();
-  if (active) { bpRulers(); bpQueue(); }
-}
-function bpRulers() {
-  const top = $('[data-bp-top]'), left = $('[data-bp-left]'); if (!top || !left) return;
-  top.innerHTML = Array.from({ length: Math.ceil(innerWidth / 100) }, (_, i) => `<span style="left:${i * 100}px">${i * 100}</span>`).join('');
-  left.innerHTML = Array.from({ length: Math.ceil(innerHeight / 100) }, (_, i) => `<span style="top:${i * 100}px">${i * 100}</span>`).join('');
-}
-function bpQueue() { if (!bpRaf) bpRaf = requestAnimationFrame(bpDims); }
-function bpDims() {
-  bpRaf = 0;
-  const layer = $('[data-bp-dims]'); if (!layer || !document.documentElement.classList.contains('blueprint')) return;
-  const out: string[] = [];
-  for (const el of $$(BP_TARGETS)) {
-    const r = el.getBoundingClientRect();
-    if (r.bottom < 0 || r.top > innerHeight || r.width < 40 || out.length > 40) continue;
-    out.push(`<span style="left:${Math.round(r.left)}px;top:${Math.round(r.top)}px">${Math.round(r.width)} × ${Math.round(r.height)}</span>`);
-  }
-  layer.innerHTML = out.join('');
-}
-function bpToggle() {
-  if (!on('blueprint')) return;
-  bpOn = !document.documentElement.classList.contains('blueprint');
-  store.set('site.blueprint', bpOn ? 'on' : 'off'); store.set('site.bpSeen', '1');
-  bpApply();
-}
-document.addEventListener('click', (e) => { if ((e.target as Element).closest?.('[data-blueprint-toggle], [data-bp-hint]')) bpToggle(); });
-// Keyboard shortcut: B (not while typing in a field).
-addEventListener('keydown', (e) => {
-  if (e.key.toLowerCase() !== 'b' || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
-  const t = e.target as HTMLElement;
-  if (t.closest?.('input, textarea, select, [contenteditable="true"]')) return;
-  bpToggle();
-});
-addEventListener('scroll', bpQueue, { passive: true });
-addEventListener('resize', () => { if (document.documentElement.classList.contains('blueprint')) { bpRulers(); bpQueue(); } });
-addEventListener('pointermove', () => {
-  if (!document.documentElement.classList.contains('blueprint')) return;
-  const bp = $('#bp'); if (!bp) return;
-  bp.style.setProperty('--cx', `${mx}px`); bp.style.setProperty('--cy', `${my}px`);
-  const read = $('[data-bp-read]'); if (read) read.textContent = `x ${Math.round(mx)} · y ${Math.round(my + scrollY)}`;
-}, { passive: true });
 
 /* ---------- Tilting cards ---------- */
 const TILT = '.tile, [data-grid] .card, .resume-cta';
@@ -209,6 +155,5 @@ function initSignature() {
 }
 
 /* ---------- Wiring ---------- */
-document.addEventListener('astro:after-swap', () => bpApply());
-document.addEventListener('astro:page-load', () => { bpApply(); initTilt(); initRecord(); initSignature(); depth(); });
+document.addEventListener('astro:page-load', () => { initTilt(); initRecord(); initSignature(); depth(); });
 onMotion(() => depth());

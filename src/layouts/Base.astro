@@ -64,6 +64,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
           if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !d.classList.contains('no-motion')) d.classList.add('intro');
         }
         if (window.__bannerClosed) d.classList.add('banner-hidden');
+        // /interact: hide the page before first paint; the cursors build it in (scripts/build.ts).
+        if (d.dataset.page === 'interact' && !d.classList.contains('no-motion') && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('building');
       } catch (e) {}
     </script>
     <noscript>
@@ -82,7 +84,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
           .site-header .hnav-link .sq, .site-header .hnav-link.is-contact { display: none !important; }
         }
         .menu-btn, #progress, #ring, #flood, .hero-hint, .dive-meter, .layer-label, .hero-side time,
-        [data-layer-next], [data-motion-toggle], [data-blueprint-toggle], [data-banner-close], [data-copy],
+        [data-layer-next], [data-motion-toggle], [data-banner-close], [data-copy],
         [data-gh-3d], [data-marquee-pause], [data-filter], [data-open-cookies] { display: none !important; }
       </style>
     </noscript>
@@ -93,6 +95,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     data-transitions={String(site.features.pageTransitions)}
     data-ring={String(site.features.cursorRing)}
     data-accent-cursor={String(site.theme.accentCursor)}
+    data-home-title={`${site.name} | ${t(lang, 'nav.home')}`}
     data-ix={Object.entries(site.interactive).filter(([, on]) => on).map(([k]) => k).join(' ')}
     data-loader={String(site.features.loader)}
   >
@@ -105,24 +108,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     </button>
     <div class="sr-only" aria-live="polite" id="announcer" transition:persist></div>
     {site.interactive.sheen && <div id="sheen" aria-hidden="true" transition:persist></div>}
-    {site.interactive.blueprint && (
-      <button type="button" class="bp-hint mono" data-bp-hint hidden transition:persist>
-        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1 11V1h10M1 4h2M1 7h2M4 1v2M7 1v2" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
-        Press <kbd>B</kbd> for the blueprint
-      </button>
-    )}
-    {site.interactive.blueprint && (
-      <div id="bp" aria-hidden="true" transition:persist>
-        <div class="bp-ruler bp-top" data-bp-top></div><div class="bp-ruler bp-left" data-bp-left></div>
-        <div class="bp-cross"></div><span class="bp-read mono" data-bp-read></span>
-        <div class="bp-dims mono" data-bp-dims></div>
-        <dl class="bp-title mono">
-          <div><dt>Drawn by</dt><dd>{site.name}</dd></div>
-          <div><dt>Sheet</dt><dd data-bp-sheet>HOME</dd></div>
-          <div><dt>Scale</dt><dd>1 : 1 px</dd></div>
-          <div><dt>Date</dt><dd>{new Date().toISOString().slice(0, 10)}</dd></div>
-        </dl>
-      </div>
+    {site.interactive.build && page === 'home' && (
+      <a class="build-hint mono" href={`/${lang}/interact/`} data-build-hint data-astro-reload>
+        <svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1v11l3-3 2 4.5 2-1-2-4.4H10z" fill="currentColor"/></svg>
+        <span>{t(lang, 'build.hint')}</span> <kbd>⇧ B</kbd>
+      </a>
     )}
     <div id="peek" aria-hidden="true" transition:persist><canvas width="300" height="225"></canvas><img alt="" hidden /></div>
     {showBanner && <Banner lang={lang} />}

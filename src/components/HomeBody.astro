@@ -1,0 +1,26 @@
+---
+/* The home page's content: the name block and the sections from home.yaml. Shared by the home page and the
+   /interact page, where cursors build the same page live (scripts/build.ts). */
+import Hero from './hero/Hero.astro';
+import { SECTIONS, IS_EMPTY } from '../sections';
+import { home } from '../lib/config';
+
+interface Props { lang: string }
+const { lang } = Astro.props;
+
+// Sections alternate dark/light (starting dark, under the white name block) unless a tone is set.
+// Hidden sections and sections with nothing to show are dropped first, so the rhythm never skips.
+const visible = [];
+for (const s of home.sections) {
+  if (s.hidden) continue;
+  const empty = IS_EMPTY[s.type as keyof typeof IS_EMPTY];
+  if (empty && (await empty(lang))) continue;
+  visible.push(s);
+}
+const sections = visible.map((s, i) => ({ ...s, tone: s.tone ?? (i % 2 === 0 ? 'dark' : 'light') }));
+---
+<Hero lang={lang} />
+{sections.map((s) => {
+  const Component = SECTIONS[s.type] as any;
+  return <Component lang={lang} {...s} />;
+})}

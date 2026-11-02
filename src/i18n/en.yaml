@@ -4,6 +4,10 @@ meta:
   short: EN
   description: Engineering student at Queen's University. Portfolio of Torsten Young, working towards a career in engineering and design. Based in Kingston, Ontario, Canada.
 
+build:
+  title: Built live
+  hint: Watch it build
+
 nav:
   home: Home
   work: Work

@@ -49,7 +49,7 @@ const siteSchema = z.object({
   }).default({ accent: '#5B4CFF', accentCursor: true, logoDot: true, headingEcho: true }),
   // Interactive extras, each switchable. Anything with motion also stops when the visitor turns motion off.
   interactive: z.object({
-    blueprint: z.boolean().default(true),   // "Blueprint" switch in the footer: rulers, grid, dimensions
+    build: z.boolean().default(true),       // /interact: cursors build the home page live (Shift+B or Cmd/Ctrl+B)
     tiltCards: z.boolean().default(true),   // cards tilt toward the pointer with an accent outline behind
     record: z.boolean().default(true),      // drag the Listening record to spin it
     magnetic: z.boolean().default(true),    // main buttons lean toward the pointer
@@ -59,7 +59,7 @@ const siteSchema = z.object({
     wind: z.boolean().default(true),        // marquee words lean with scroll speed
     githubCity: z.boolean().default(true),  // "3D" switch on the GitHub calendar
     signature: z.boolean().default(true),   // handwritten name drawn in the contact section
-  }).default({ blueprint: true, tiltCards: true, record: true, magnetic: true, depth: true, sheen: true, pageTilt: true, wind: true, githubCity: true, signature: true }),
+  }).default({ build: true, tiltCards: true, record: true, magnetic: true, depth: true, sheen: true, pageTilt: true, wind: true, githubCity: true, signature: true }),
   typography: z.object({
     numbers: z.enum(['serif', 'outline']).default('serif'),
     headings: z.enum(['display', 'serif', 'outline']).default('display'),

@@ -9,6 +9,7 @@ import { differenceInk } from './gl';
 import { paintArt } from './art';
 import { initCards } from './cards';
 import './extras';
+import './build';
 
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
 const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll<T>(s)];

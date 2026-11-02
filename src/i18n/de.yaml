@@ -4,6 +4,10 @@ meta:
   short: DE
   description: Designer und Entwickler für ruhige, präzise Interfaces im Web.
 
+build:
+  title: Live gebaut
+  hint: Beim Bauen zusehen
+
 nav:
   home: Start
   work: Arbeiten

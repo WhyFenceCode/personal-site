@@ -78,34 +78,27 @@
     -webkit-mask-image: radial-gradient(380px circle at var(--sx, 50%) var(--sy, 50%), #000, transparent 70%); mask-image: radial-gradient(380px circle at var(--sx, 50%) var(--sy, 50%), #000, transparent 70%); }
   #sheen.on { opacity: 1; }
 
-  /* Blueprint mode: grid, rulers, crosshair, dimensions and a title block over the page. */
-  #bp { display: none; position: fixed; inset: 0; z-index: 46; pointer-events: none; color: var(--accent); }
-  html.blueprint #bp { display: block; }
-  /* A small corner hint (desktop only) until blueprint mode has been tried once; the footer switch stays. */
-  .bp-hint { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(18px, env(safe-area-inset-bottom, 0px)); z-index: 47;
+  /* "Watch it build" hint on the home page (desktop): bottom left, until you scroll. */
+  .build-hint { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(18px, env(safe-area-inset-bottom, 0px)); z-index: 47;
     display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; border: 1px dashed var(--accent); background: rgb(230 230 230 / .97);
-    color: var(--accent); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; opacity: .8; transition: opacity .3s;
-    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-  .bp-hint:hover { opacity: 1; }
-  .bp-hint[hidden], html.blueprint .bp-hint, html.intro .bp-hint { display: none; }
-  @media (hover: none), (pointer: coarse) { .bp-hint { display: none; } }
+    color: var(--accent); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; opacity: .85;
+    transition: opacity .4s, transform .4s var(--ease); }
+  .build-hint:hover { opacity: 1; }
+  .build-hint.gone, html.intro .build-hint { opacity: 0; transform: translateY(12px); pointer-events: none; }
+  @media (hover: none), (pointer: coarse) { .build-hint { display: none; } }
+  /* /interact build (scripts/build.ts). Before the script tags the pieces, everything waits hidden. */
+  html.building:not(.bld-ready) :is(main, #footer, .site-header) { opacity: 0; }
+  .bld { opacity: 0; translate: 0 18px; pointer-events: none; transition: opacity .6s var(--ease), translate .7s var(--ease); }
+  .bld.built { opacity: 1; translate: none; pointer-events: auto; }
+  .bld-wires { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 48; pointer-events: none; }
+  .bld-wire { position: absolute; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 9%, transparent);
+    clip-path: inset(0 calc((1 - var(--k, 0)) * 100%) calc((1 - var(--k, 0)) * 100%) 0); transition: opacity .6s; }
+  .bld-wire span { position: absolute; left: -1px; top: -18px; padding: 2px 6px; font-size: 9px; letter-spacing: .06em; background: var(--accent); color: #fff; white-space: nowrap; }
+  .bld-wire.fade { opacity: 0; }
+  .bld-crowd { position: fixed; inset: 0; z-index: 96; pointer-events: none; }
+  .bld-crowd i { position: absolute; left: 0; top: 0; margin: -2px 0 0 -2px; filter: drop-shadow(0 3px 6px rgb(0 0 0 / .35)); transition: opacity 1s; }
+  .bld-crowd.leaving i { opacity: 0; }
   kbd { font-family: var(--font-mono); font-size: .9em; padding: 0 .4em; border: 1px solid currentColor; border-radius: 3px; }
-  .bp-ruler { position: absolute; background: color-mix(in srgb, var(--accent) 12%, rgb(230 230 230 / .9)); font-size: 9px; letter-spacing: .04em; overflow: hidden; }
-  /* The horizontal ruler runs along the bottom edge, so it doesn't sit over the header. */
-  .bp-top { left: 0; right: 0; bottom: 0; height: 18px; border-top: 1px solid var(--accent);
-    background-image: linear-gradient(90deg, var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px); background-size: 100px 100%, 10px 6px; background-repeat: repeat-x; background-position: 0 0, 0 0; }
-  .bp-left { top: 0; bottom: 18px; left: 0; width: 18px; border-right: 1px solid var(--accent);
-    background-image: linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(var(--accent) 1px, transparent 1px); background-size: 100% 100px, 6px 10px; background-repeat: repeat-y; background-position: 0 0, 100% 0; }
-  .bp-ruler span { position: absolute; padding: 2px 3px; }
-  .bp-left span { writing-mode: vertical-rl; transform: rotate(180deg); }
-  .bp-cross { position: absolute; inset: 0;
-    background: linear-gradient(var(--accent), var(--accent)) var(--cx, -10px) 0 / 1px 100% no-repeat, linear-gradient(var(--accent), var(--accent)) 0 var(--cy, -10px) / 100% 1px no-repeat; opacity: .55; }
-  .bp-read { position: absolute; left: calc(var(--cx, -100px) + 10px); top: calc(var(--cy, -100px) + 10px); font-size: 10px; background: var(--accent); color: #fff; padding: 2px 6px; border-radius: 3px; }
-  .bp-dims span { position: absolute; transform: translateY(-100%); font-size: 9px; background: var(--accent); color: #fff; padding: 1px 5px; border-radius: 2px; white-space: nowrap; }
-  .bp-title { position: absolute; left: 30px; bottom: 30px; margin: 0; display: grid; grid-template-columns: repeat(2, auto); border: 1.5px solid var(--accent); background: rgb(230 230 230 / .92); font-size: 9px; }
-  .bp-title div { padding: 4px 8px; border: .5px solid var(--accent); }
-  .bp-title dt { opacity: .7; } .bp-title dd { margin: 0; color: #0B0B0B; }
-  html.blueprint :is(.h2, .page-title, .big, .tile, .card, [data-frame], .globe-stage, .resume-cta) { outline: 1px dashed var(--accent); outline-offset: 3px; }
 
   /* Places globe (components/places/Globe.tsx). */
   .globe { display: grid; gap: 24px; }

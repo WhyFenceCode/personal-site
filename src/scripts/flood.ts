@@ -10,13 +10,13 @@ function ensure() {
   if (el !== cv) {
     cv = el;
     try {
-      FL = makeGL(el, `uniform vec2 uRes, uO; uniform float uR, uT, uMode; uniform vec3 uAccent;
+      FL = makeGL(el, `uniform vec2 uRes, uO; uniform float uR, uT, uMode, uRim; uniform vec3 uAccent;
         void main(){ vec2 frag = vUv * uRes; float d = distance(frag, uO);
           float n = fbm(frag / uRes.y * 2.6 + vec2(uT * .5, uT * .3));
           float edge = uR * (1. + .22 * (n - .5)) + (n - .5) * 40.;
           float a = 1. - smoothstep(edge - 1.5, edge + 1.5, d); if (uMode > .5) a = 1. - a;
           // A thin accent rim along the ink's edge as it spreads.
-          float rim = (1. - smoothstep(0., 7., abs(d - edge))) * step(.5, 1. - uMode);
+          float rim = (1. - smoothstep(0., 7., abs(d - edge))) * step(.5, 1. - uMode) * uRim;
           vec3 col = mix(vec3(.086), uAccent, rim);
           float al = max(a, rim);
           gl_FragColor = vec4(col * al, al); }`);
@@ -47,7 +47,7 @@ export function floodDraw(mode: 'cover' | 'reveal', r: number, ox: number, oy: n
   const d = cv.width / Math.max(1, innerWidth);
   G.set2('uRes', cv.width, cv.height); G.set2('uO', ox * d, (innerHeight - oy) * d);
   G.set1('uR', r * d); G.set1('uT', performance.now() / 1000); G.set1('uMode', mode === 'reveal' ? 1 : 0);
-  G.set3('uAccent', ...accentRGB()); G.draw();
+  G.set3('uAccent', ...accentRGB()); G.set1('uRim', document.documentElement.dataset.page === 'interact' ? 0 : 1); G.draw();
 }
 
 export function floodClear() { const G = ensure(); if (G) { G.gl.clearColor(0, 0, 0, 0); G.gl.clear(G.gl.COLOR_BUFFER_BIT); } }
