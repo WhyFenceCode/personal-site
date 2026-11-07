@@ -15,7 +15,7 @@ const { title, metaLeft, metaRight, lead, id = 'page-title' } = Astro.props;
 <style>
   .page-head { padding-top: clamp(16px, 4vw, 48px); padding-bottom: 32px; display: grid; gap: 20px; border-bottom: 1.5px solid var(--fg); }
   .meta { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-  .page-title { margin: 0; }
+  .page-title { margin: 0; min-width: 0; }  /* min-width: a long title measured at 100px (site.ts fitAll) mustn't stretch the grid it measures */
   /* An accent ring a few pixels outside the letters: a wide accent stroke underneath, a background-coloured
      stroke on top of it to open the gap, then the title itself. */
   .page-title .fit { position: relative; isolation: isolate; }

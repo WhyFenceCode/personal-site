@@ -1,0 +1,1007 @@
+---
+/* The brand kit: every rule the site follows, shown with the site's own tokens, fonts and components so it can't
+   drift from the real thing. Not linked from the nav and kept out of search (noindex, left out of the sitemap).
+   Colours, the accent and the name come from site.yaml; change them there and this page follows. */
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import ContactButton from '../../components/ui/ContactButton.astro';
+import HeadingText from '../../components/ui/HeadingText.astro';
+import Signature from '../../components/ui/Signature.astro';
+import { site } from '../../lib/config';
+import { langStaticPaths } from '../../lib/i18n';
+// The script face is normally only baked into SVG; here it's shown as live text in the specimens.
+import '@fontsource/mrs-saint-delafield/400.css';
+
+export const getStaticPaths = langStaticPaths;
+const { lang } = Astro.params as { lang: string };
+
+const accent = site.theme.accent.toUpperCase();
+
+/* WCAG contrast, worked out at build time so the numbers stay true when the accent changes. */
+const lum = (hex: string) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const ratio = (a: string, b: string) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+const grade = (r: number) => (r >= 7 ? 'AAA' : r >= 4.5 ? 'AA' : r >= 3 ? 'AA large' : 'Decor only');
+
+const palette = [
+  { name: 'Ink', hex: '#0B0B0B', token: '--color-ink · --fg (light)', use: 'Text on light sections, solid buttons, the 1.5px rules under page titles.' },
+  { name: 'Paper', hex: '#E6E6E6', token: '--color-paper · --bg (light)', use: 'Light section background. About 90% brightness, never pure white.' },
+  { name: 'Night', hex: '#161616', token: '--bg (dark)', use: 'Dark sections, floating pills and popovers, the browser theme colour.' },
+  { name: 'White', hex: '#FFFFFF', token: '--fg (dark)', use: 'Text on Night only. Never a background.' },
+  { name: 'Muted', hex: '#555555', token: '--muted (light)', use: 'Secondary text and captions on Paper.' },
+  { name: 'Muted dark', hex: '#A0A0A0', token: '--muted (dark)', use: 'Secondary text and captions on Night.' },
+  { name: 'Line', hex: '#CBCBCB', token: '--line (light)', use: 'Hairlines and quiet borders on Paper.' },
+  { name: 'Line dark', hex: '#2E2E2E', token: '--line (dark)', use: 'Hairlines and quiet borders on Night.' },
+  { name: 'Placeholder', hex: '#D6D6D6', token: 'image wells', use: 'Behind images that have not loaded, and placeholder art.' },
+  { name: 'Chalk', hex: '#F2F2F2', token: '--color-chalk', use: 'Reserved for a raised surface on Paper. Not in use yet.' },
+];
+
+const pairs = [
+  { fg: '#0B0B0B', bg: '#E6E6E6', label: 'Ink on Paper' },
+  { fg: '#555555', bg: '#E6E6E6', label: 'Muted on Paper' },
+  { fg: '#FFFFFF', bg: '#161616', label: 'White on Night' },
+  { fg: '#A0A0A0', bg: '#161616', label: 'Muted dark on Night' },
+  { fg: accent, bg: '#E6E6E6', label: 'Accent on Paper' },
+  { fg: accent, bg: '#161616', label: 'Accent on Night' },
+  { fg: '#FFFFFF', bg: accent, label: 'White on Accent' },
+  { fg: '#0B0B0B', bg: accent, label: 'Ink on Accent' },
+].map((p) => { const r = ratio(p.fg, p.bg); return { ...p, r: r.toFixed(2), grade: grade(r) }; });
+
+const tints = [
+  { pct: 100, use: 'Markers, the logo full stop, focus rings, live dots, the pressed state of a place chip.' },
+  { pct: 45, use: 'Thin edges on floating pills (the build hint, the loader), build wireframes mixed with grey.' },
+  { pct: 34, use: 'Text selection.' },
+  { pct: 22, use: 'The halo around a map pin.' },
+  { pct: 5, use: 'The pointer sheen. Barely there on purpose.' },
+];
+
+const sections = [
+  ['principles', 'Principles'], ['logo', 'Wordmark & mark'], ['signature', 'Signature'], ['colour', 'Colour'],
+  ['type', 'Typography'], ['corners', 'Corner rounding'], ['lines', 'Lines & borders'], ['space', 'Spacing & layout'],
+  ['depth', 'Elevation'], ['components', 'Components'], ['icons', 'Icons & markers'], ['motion', 'Motion'],
+  ['imagery', 'Imagery'], ['voice', 'Voice & writing'], ['a11y', 'Accessibility'], ['tokens', 'Tokens'],
+];
+
+const radii = [
+  { r: '0', css: '0', where: 'Rules, meters, square markers (■), the eyebrow square, wireframe handles.', rule: 'Anything that marks or measures.' },
+  { r: '1–3px', css: '3px', where: 'kbd keys, scrollbar thumb, text selection boxes, GitHub cells, wire size tags.', rule: 'Tiny chips; just enough to soften a pixel edge.' },
+  { r: '4px', css: '4px', where: 'Photos and thumbnails, the portrait, dashed notes in prose, the link peek.', rule: 'Images and content blocks. Reads as square from a distance.' },
+  { r: '6px', css: '6px', where: 'Info cards for books and map pins.', rule: 'Small popovers.' },
+  { r: '8px', css: '8px', where: 'Activity tiles on the home page.', rule: 'Grid cards.' },
+  { r: '10px', css: '10px', where: 'Browser frames, the globe card, 3D model stages.', rule: 'Framed media and larger floating cards.' },
+  { r: '14–16px', css: '16px', where: 'The large browser-frame card, the loader pill.', rule: 'Only for big surfaces that hold other rounded things.' },
+  { r: '999px', css: '999px', where: 'Every button, nav link, language switch, place chip, hint, banner pill.', rule: 'Anything you press. Always a full pill.' },
+  { r: '50%', css: '50%', where: 'Arrow discs, the cursor dot, the progress ring, live and map dots.', rule: 'Square elements that should be circles.' },
+];
+
+const typeScale = [
+  { name: 'Wordmark title', cls: 'ts-wm', sample: 'Brand', spec: 'Display 800 · 87.5% wide · uppercase · −0.02em · lh 0.84 · fitted to the width', where: 'Page titles (fitted), hero name' },
+  { name: 'Section heading', cls: 'ts-h2', sample: 'Selected work', spec: 'Display 800 · 80% · uppercase · clamp(44px, 7vw, 112px) · −0.02em · lh 0.86', where: '.h2, home sections' },
+  { name: 'Menu / big link', cls: 'ts-menu', sample: 'About', spec: 'Display 800 · 87.5% · uppercase · clamp(52px, 13vw, 150px) · lh 0.92', where: 'Full-screen menu' },
+  { name: 'Statement', cls: 'ts-statement', sample: 'Type does the heavy lifting; everything around it stays quiet.', spec: 'Display 500 · clamp(28px, 3.4vw, 52px) · −0.035em · lh 1.04 · balanced', where: 'About lead, big quotes' },
+  { name: 'Prose heading', cls: 'ts-h2p', sample: 'What I did', spec: 'Display 800 · 85% · uppercase · 30px · lh 1', where: 'h2 in Markdown' },
+  { name: 'Row title', cls: 'ts-row', sample: 'Head Sailing Coach', spec: 'Display 700 · 90% · clamp(22px, 2.2vw, 30px) · −0.02em · lh 1.05', where: 'Experience rows, CTAs' },
+  { name: 'Lead', cls: 'ts-lead', sample: 'A short line that sets up the page.', spec: 'Sans 500 · clamp(20px, 2.2vw, 30px) · −0.02em · lh 1.25 · max 34ch', where: 'Page leads' },
+  { name: 'Body', cls: 'ts-body', sample: 'Body copy sits at 17px with a relaxed line height, so long paragraphs stay easy to read on any screen.', spec: 'Sans 400 · 17px · lh 1.55 · max 66ch', where: 'Everything you read' },
+  { name: 'Small', cls: 'ts-small', sample: 'Cards, captions and table cells drop a step.', spec: 'Sans 400 · 14–15px · lh 1.35–1.5', where: 'Cards, tables, popovers' },
+  { name: 'Label', cls: 'ts-label', sample: 'Kingston · Available for work', spec: 'Mono 400 · 12px · +0.14em · uppercase', where: '.mono: eyebrows, meta lines, buttons' },
+  { name: 'Micro label', cls: 'ts-micro', sample: 'Frame · 1240 × 640', spec: 'Mono 400 · 9–11px · +0.04–0.12em · uppercase', where: 'Wire tags, hints, card meta' },
+];
+
+const motion = [
+  { name: 'Quick', d: '.2s', use: 'Colour and opacity on hover, tiny dots.' },
+  { name: 'Standard', d: '.3s', use: 'Background swaps on nav links and chips.' },
+  { name: 'Move', d: '.4–.5s', use: 'Buttons nudging, arrows sliding, labels rolling, discs turning.' },
+  { name: 'Reveal', d: '.55–.8s', use: 'Rows opening, the heading underline, the menu circle.' },
+  { name: 'Scene', d: '1–1.4s', use: 'Build-mode fades, the hero name arriving, the ink flood.' },
+];
+---
+<Base lang={lang} page="brand" title="Brand kit" description={`The design system behind ${site.name}'s site.`} noindex>
+  <div class="wrap">
+    <PageHead title="Brand kit" metaLeft="Design system" metaRight={`v${new Date().getFullYear()}`} lead="Black and white in charge, one colour used sparingly, and type doing the heavy lifting." />
+  </div>
+
+  {/* Contents */}
+  <nav class="wrap bk-toc" aria-label="Brand kit contents">
+    <ol>
+      {sections.map(([id, label], i) => (
+        <li><a href={`#${id}`}><span class="mono muted">{String(i + 1).padStart(2, '0')}</span><span>{label}</span></a></li>
+      ))}
+    </ol>
+  </nav>
+
+  {/* 01 Principles */}
+  <section class="tone-dark bk-sec" id="principles" aria-labelledby="principles-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">01 · Principles</div>
+      <h2 class="h2" id="principles-t"><HeadingText text="Principles" /></h2>
+      <ol class="bk-principles">
+        <li><b>Monochrome first.</b><p>Ink and Paper, Night and White. Every layout has to work in greyscale before the accent goes anywhere near it.</p></li>
+        <li><b>One accent, used like salt.</b><p>The accent marks what is alive or pressable: a full stop, a square, a focus ring, a live dot. It never fills a section or carries body text.</p></li>
+        <li><b>Light and dark at once.</b><p>The page has no single theme. Each section picks a tone (tone-light or tone-dark) and the bands alternate down the page.</p></li>
+        <li><b>Type is the image.</b><p>Huge condensed uppercase headings do the work illustrations would do elsewhere. Keep everything around them quiet.</p></li>
+        <li><b>Pills to press, squares to read.</b><p>Anything interactive is a full pill or a circle. Content and media are nearly square. Markers are square.</p></li>
+        <li><b>Motion with an off switch.</b><p>Everything that moves has a purpose, the same soft ease, and stops instantly for reduced motion or the footer toggle.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  {/* 02 Logo */}
+  <section class="tone-light bk-sec" id="logo" aria-labelledby="logo-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">02 · Wordmark & mark</div>
+      <h2 class="h2" id="logo-t"><HeadingText text="Wordmark" /></h2>
+      <p class="bk-intro">There is no drawn logo. The name, set in the display face, <em>is</em> the logo, finished with an accent full stop. The favicon mark is a heavy T in a rounded square.</p>
+
+      <div class="bk-grid2">
+        <figure class="bk-panel bk-on-light">
+          <div class="bk-wordmark">{site.name}<span class="dot">.</span></div>
+          <figcaption class="mono muted">Primary · on Paper</figcaption>
+        </figure>
+        <figure class="bk-panel bk-on-dark">
+          <div class="bk-wordmark">{site.name}<span class="dot">.</span></div>
+          <figcaption class="mono muted">Primary · on Night</figcaption>
+        </figure>
+        <figure class="bk-panel bk-on-light bk-clear">
+          <div class="bk-clearbox"><div class="bk-wordmark">{site.name}<span class="dot">.</span></div></div>
+          <figcaption class="mono muted">Clear space · the height of the caps on every side</figcaption>
+        </figure>
+        <figure class="bk-panel bk-on-light bk-marks">
+          <div class="bk-mark-row">
+            <svg class="bk-mark" viewBox="0 0 32 32" width="96" height="96" aria-label="Favicon mark"><rect width="32" height="32" rx="7" fill="#0B0B0B"/><path d="M8 9.5h16M16 9.5V25" fill="none" stroke="#fff" stroke-width="4.2"/></svg>
+            <svg class="bk-mark" viewBox="0 0 32 32" width="48" height="48" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0B0B0B"/><path d="M8 9.5h16M16 9.5V25" fill="none" stroke="#fff" stroke-width="4.2"/></svg>
+            <svg class="bk-mark" viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0B0B0B"/><path d="M8 9.5h16M16 9.5V25" fill="none" stroke="#fff" stroke-width="4.2"/></svg>
+            <svg class="bk-mark" viewBox="0 0 32 32" width="16" height="16" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0B0B0B"/><path d="M8 9.5h16M16 9.5V25" fill="none" stroke="#fff" stroke-width="4.2"/></svg>
+          </div>
+          <figcaption class="mono muted">Mark · 32 grid · corner 7 (22%) · stroke 4.2 · down to 16px</figcaption>
+        </figure>
+      </div>
+
+      <div class="bk-spec">
+        <dl>
+          <div><dt class="mono muted">Face</dt><dd>Bricolage Grotesque 800, 87.5% wide</dd></div>
+          <div><dt class="mono muted">Case</dt><dd>Always uppercase, tracking −0.01em</dd></div>
+          <div><dt class="mono muted">Full stop</dt><dd>Accent, same weight; drawn outside the inverting header so it stays the accent</dd></div>
+          <div><dt class="mono muted">Smallest</dt><dd>20px (header). Below that, use the mark</dd></div>
+        </dl>
+      </div>
+
+      <h3 class="bk-h3">Don't</h3>
+      <ul class="bk-donts">
+        <li><div class="bk-dont-art"><span class="bk-wordmark sm" style="font-stretch:100%;text-transform:none;font-weight:400">{site.name}.</span></div><p>Set it in another weight, width or case.</p></li>
+        <li><div class="bk-dont-art"><span class="bk-wordmark sm" style={`color:${accent}`}>{site.name}<span style="color:#0B0B0B">.</span></span></div><p>Colour the name. Only the full stop takes the accent.</p></li>
+        <li><div class="bk-dont-art"><span class="bk-wordmark sm" style="transform:skewX(-12deg);display:inline-block">{site.name}<span class="dot">.</span></span></div><p>Skew, stretch, outline or add effects.</p></li>
+        <li><div class="bk-dont-art bk-busy"><span class="bk-wordmark sm">{site.name}<span class="dot">.</span></span></div><p>Put it on busy photos or mid-grey where it loses contrast.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  {/* 03 Signature */}
+  <section class="tone-dark bk-sec" id="signature" aria-labelledby="signature-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">03 · Signature</div>
+      <h2 class="h2" id="signature-t"><HeadingText text="Signature" /></h2>
+      <p class="bk-intro">A handwritten sign-off that writes itself in, letter by letter, with an accent flourish underneath. It is the one human, loose element in an otherwise strict system, so it appears rarely.</p>
+      <div class="bk-sig-stage">
+        <Signature size="large" />
+        {!site.interactive.signature && <p class="mono muted">The signature is switched off (site.yaml → interactive.signature).</p>}
+      </div>
+      <div class="bk-grid3">
+        <div class="bk-panel bk-on-dark bk-fontcard">
+          <span class="mono muted">Face</span>
+          <span class="bk-script">Mrs Saint Delafield</span>
+          <p>@fontsource/mrs-saint-delafield, 400. Not loaded as a web font on the rest of the site (only here, for the specimens): the letters are turned into SVG paths when the site builds (opentype.js), so it costs nothing at runtime.</p>
+        </div>
+        <div class="bk-panel bk-on-dark">
+          <span class="mono muted">How it draws</span>
+          <ul class="bk-list">
+            <li>Each letter's outline is traced as a stroke (1.4 units) in <b>.55s</b>.</li>
+            <li>Its fill fades in <b>.4s</b> later, over <b>.35s</b>, as the stroke fades out.</li>
+            <li>Letters start <b>0.2s</b> apart, in writing order.</li>
+            <li>The accent flourish draws last, in <b>.9s</b>, stroke 2.5 (3 at xl), round caps.</li>
+            <li>Starts when 60% of it is on screen. Motion off: shown finished.</li>
+          </ul>
+        </div>
+        <div class="bk-panel bk-on-dark">
+          <span class="mono muted">Sizes & placement</span>
+          <ul class="bk-list">
+            <li><b>xl</b> · clamp(120px, 19vw, 300px) · end of the résumé.</li>
+            <li><b>large</b> · clamp(80px, 10vw, 170px) · home contact section.</li>
+            <li><b>medium</b> · clamp(62px, 7vw, 110px) · tighter spots.</li>
+            <li>Left-aligned, in the text colour, with room around it. One per page, near the end, as a sign-off.</li>
+            <li>Never as a heading, a button label, or on top of an image.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* 04 Colour */}
+  <section class="tone-light bk-sec" id="colour" aria-labelledby="colour-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">04 · Colour</div>
+      <h2 class="h2" id="colour-t"><HeadingText text="Colour" /></h2>
+      <p class="bk-intro">Nine neutrals and one accent. Neutrals are soft on purpose: Paper is not white and Night is not black, so large areas never glare.</p>
+
+      <div class="bk-accent">
+        <div class="bk-accent-chip" style={`background:${accent}`}>
+          <span class="mono">Accent</span>
+          <b>{accent}</b>
+        </div>
+        <div class="bk-accent-copy">
+          <p>Set once in <code>site.yaml → theme.accent</code> and written into the page as <code>--accent</code>. Everything accent on the site reads that variable, so changing it here recolours the whole site.</p>
+          <h3 class="bk-h3">Where the accent goes</h3>
+          <ul class="bk-list">
+            <li>The full stop after the name.</li>
+            <li>Eyebrow squares and the underline bar under section headings.</li>
+            <li>The outline echo behind headings and the ring around page titles.</li>
+            <li>Link underlines as they draw on hover.</li>
+            <li>Focus rings, text selection, live dots, map pins, GitHub peaks.</li>
+            <li>The signature flourish and the edge of the ink flood.</li>
+          </ul>
+          <h3 class="bk-h3">Where it never goes</h3>
+          <ul class="bk-list">
+            <li>Section or page backgrounds. Body text. Large blocks of any kind.</li>
+            <li>Next to a second accent. There is only ever one.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="bk-h3">Accent strengths</h3>
+      <ul class="bk-tints">
+        {tints.map((t) => (
+          <li>
+            <div class="bk-tint" style={`background:color-mix(in srgb, ${accent} ${t.pct}%, #E6E6E6)`}><span class="mono">{t.pct}%</span></div>
+            <p>{t.use}</p>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="bk-h3">Neutrals</h3>
+      <ul class="bk-swatches">
+        {palette.map((c) => (
+          <li>
+            <div class="bk-swatch" style={`background:${c.hex};color:${lum(c.hex) > 0.3 ? '#0B0B0B' : '#FFFFFF'}`}><span class="mono">{c.hex}</span></div>
+            <b>{c.name}</b>
+            <code>{c.token}</code>
+            <p>{c.use}</p>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="bk-h3">Tones</h3>
+      <div class="bk-grid2">
+        <div class="bk-panel tone-light bk-tone">
+          <span class="mono muted">.tone-light</span>
+          <b class="bk-tone-h">Paper</b>
+          <p>Text Ink, secondary Muted #555, hairlines Line #CBCBCB.</p>
+          <a class="btn" href="#colour">Solid</a>
+        </div>
+        <div class="bk-panel tone-dark bk-tone">
+          <span class="mono muted">.tone-dark</span>
+          <b class="bk-tone-h">Night</b>
+          <p>Text White, secondary #A0A0A0, hairlines #2E2E2E.</p>
+          <a class="btn" href="#colour">Solid</a>
+        </div>
+      </div>
+      <p class="bk-note">Components never hard-code colours. They read <code>--bg</code>, <code>--fg</code>, <code>--muted</code> and <code>--line</code>, so the same button works in either tone. Alternate tones section by section; never put two dark sections next to each other.</p>
+
+      <h3 class="bk-h3">Contrast</h3>
+      <table class="bk-table">
+        <thead><tr><th>Pair</th><th>Sample</th><th>Ratio</th><th>WCAG</th></tr></thead>
+        <tbody>
+          {pairs.map((p) => (
+            <tr><td>{p.label}</td><td><span class="bk-pair" style={`color:${p.fg};background:${p.bg}`}>Aa</span></td><td class="num">{p.r}:1</td><td class="mono">{p.grade}</td></tr>
+          ))}
+        </tbody>
+      </table>
+      <p class="bk-note">Ratios are worked out from the live accent when the site builds. If the accent drops under 3:1 on either tone, it can still mark things but must never be the only signal (pair it with shape, weight or position).</p>
+    </div>
+  </section>
+
+  {/* 05 Typography */}
+  <section class="tone-dark bk-sec" id="type" aria-labelledby="type-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">05 · Typography</div>
+      <h2 class="h2" id="type-t"><HeadingText text="Typography" /></h2>
+      <p class="bk-intro">Four working faces plus two special ones, all self-hosted through Fontsource so no visitor data goes to a font CDN.</p>
+
+      <div class="bk-fonts">
+        <article class="bk-font">
+          <span class="mono muted">Display · --font-display</span>
+          <div class="bk-font-big f-display">Aa</div>
+          <b>Bricolage Grotesque Variable</b>
+          <p>Headings, the wordmark, big numbers, menus. Mostly 800 at 80–87.5% width, uppercase, tight tracking. Weight 500 at normal width for statements.</p>
+          <span class="mono muted">Fallback: Arial Narrow, Helvetica Neue, Arial</span>
+        </article>
+        <article class="bk-font">
+          <span class="mono muted">Text · --font-sans</span>
+          <div class="bk-font-big f-sans">Aa</div>
+          <b>Instrument Sans Variable</b>
+          <p>Everything you read: body, leads, cards, tables. 400 for body, 500 for leads, 600 for emphasis. Sentence case.</p>
+          <span class="mono muted">Fallback: Helvetica Neue, Helvetica, Arial</span>
+        </article>
+        <article class="bk-font">
+          <span class="mono muted">Serif · --font-serif</span>
+          <div class="bk-font-big f-serif">Aa<i>a</i></div>
+          <b>Instrument Serif</b>
+          <p>The alternate voice. Optional style for big numbers and headings (site.yaml → typography), and italic for a single word of emphasis inside display type.</p>
+          <span class="mono muted">Fallback: Georgia, Times New Roman</span>
+        </article>
+        <article class="bk-font">
+          <span class="mono muted">Mono · --font-mono</span>
+          <div class="bk-font-big f-mono">Aa</div>
+          <b>DM Mono</b>
+          <p>Labels, eyebrows, meta lines, buttons, nav links, kbd and code. 12px, +0.14em, uppercase. 500 for keys.</p>
+          <span class="mono muted">Fallback: ui-monospace, Menlo, Consolas</span>
+        </article>
+        <article class="bk-font">
+          <span class="mono muted">Pixel · hero only</span>
+          <div class="bk-font-big f-pixel">Aa</div>
+          <b>Pixelify Sans Variable</b>
+          <p>One job: a layer of the hero name you can dive through. Never for text anywhere else.</p>
+          <span class="mono muted">Loaded with weight axis only</span>
+        </article>
+        <article class="bk-font">
+          <span class="mono muted">Script · signature only</span>
+          <div class="bk-font-big bk-script">Ty</div>
+          <b>Mrs Saint Delafield</b>
+          <p>Only ever as the signature, baked to SVG at build. Never typed as live text.</p>
+          <span class="mono muted">See 03 · Signature</span>
+        </article>
+      </div>
+
+      <h3 class="bk-h3">Type scale</h3>
+      <div class="bk-scale">
+        {typeScale.map((s) => (
+          <div class="bk-scale-row">
+            <div class="bk-scale-meta"><b>{s.name}</b><span class="mono muted">{s.where}</span><span class="bk-scale-spec">{s.spec}</span></div>
+            <div class:list={['bk-scale-sample', s.cls]}>{s.sample}</div>
+          </div>
+        ))}
+      </div>
+
+      <h3 class="bk-h3">Width axis</h3>
+      <p class="bk-note">Bricolage has a width axis; the site picks a few stops and keeps to them. Narrower for bigger type.</p>
+      <ul class="bk-widths">
+        {[75, 80, 85, 87.5, 90, 100].map((w) => (
+          <li><span class="bk-width-s" style={`font-stretch:${w}%`}>Kingston</span><span class="mono muted">{w}%{w === 75 ? ' · outline numbers' : w === 80 ? ' · section headings' : w === 85 ? ' · prose h2, small numbers' : w === 87.5 ? ' · wordmark, titles, menu' : w === 90 ? ' · row titles' : ' · statements'}</span></li>
+        ))}
+      </ul>
+
+      <h3 class="bk-h3">Numbers</h3>
+      <div class="bk-nums">
+        <div><span class="bk-num-outline">2026</span><span class="mono muted">Outline · display 800, 75%, 1.25px stroke (current)</span></div>
+        <div><span class="bk-num-serif">2026</span><span class="mono muted">Serif · Instrument Serif 400, −0.03em</span></div>
+        <div><span class="num bk-num-small">12.4 km · 03:58</span><span class="mono muted">.num · display 700, 85%, tabular</span></div>
+      </div>
+
+      <h3 class="bk-h3">Rules</h3>
+      <ul class="bk-rules">
+        <li><b>Uppercase is for display and mono only.</b> Body and leads stay sentence case.</li>
+        <li><b>Tracking scales with size.</b> Big display goes negative (−0.02 to −0.035em); small mono goes wide (+0.14em).</li>
+        <li><b>Line height shrinks as type grows.</b> 1.55 for body, 1.25 for leads, under 0.9 for headings.</li>
+        <li><b>Keep measures short.</b> 66ch for prose, 34ch for leads, 32ch for side notes.</li>
+        <li><b>Balance headings.</b> Use <code>text-wrap: balance</code> on anything that wraps to two lines.</li>
+        <li><b>Tabular figures</b> wherever numbers line up or count.</li>
+        <li><b>No more than two faces in one component.</b> Typically display + mono, or sans + mono.</li>
+      </ul>
+    </div>
+  </section>
+
+  {/* 06 Corners */}
+  <section class="tone-light bk-sec" id="corners" aria-labelledby="corners-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">06 · Corner rounding</div>
+      <h2 class="h2" id="corners-t"><HeadingText text="Corners" /></h2>
+      <p class="bk-intro">Corners say what something is. Things you press are fully round. Things you read are nearly square. Things that mark or measure are square. Pick from this scale; nothing in between.</p>
+
+      <ul class="bk-radii">
+        {radii.map((r) => (
+          <li>
+            <div class="bk-radius-demo"><i style={`border-radius:${r.css}`}></i></div>
+            <b class="num">{r.r}</b>
+            <p class="bk-radius-rule">{r.rule}</p>
+            <p class="muted">{r.where}</p>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="bk-h3">The three families</h3>
+      <div class="bk-grid3">
+        <div class="bk-panel bk-on-light bk-family">
+          <div class="bk-family-demo"><a class="btn" href="#corners">Press</a><span class="bk-chip-demo">Chip</span><span class="bk-disc-demo">→</span></div>
+          <b>Pill · 999px / 50%</b>
+          <p>Buttons, nav links, toggles, chips, hints. The pill is the site's signal for "you can press this".</p>
+        </div>
+        <div class="bk-panel bk-on-light bk-family">
+          <div class="bk-family-demo"><span class="bk-img-demo"></span><span class="bk-card-demo"></span></div>
+          <b>Soft · 4–10px</b>
+          <p>Images, tiles, cards, frames. Small enough to read as square, round enough not to cut.</p>
+        </div>
+        <div class="bk-panel bk-on-light bk-family">
+          <div class="bk-family-demo"><span class="bk-sq-demo"></span><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="bk-rule-demo"></span></div>
+          <b>Square · 0</b>
+          <p>Markers, meters, rules, bullets (■). Square is the house bullet; never use a round dot as a list marker.</p>
+        </div>
+      </div>
+
+      <h3 class="bk-h3">Nesting</h3>
+      <div class="bk-grid2">
+        <div class="bk-panel bk-on-light">
+          <div class="bk-nest good"><div></div></div>
+          <p><b>Do:</b> inner radius = outer radius − padding. A 16px card with 10px padding holds a 6px item.</p>
+        </div>
+        <div class="bk-panel bk-on-light">
+          <div class="bk-nest bad"><div></div></div>
+          <p><b>Don't:</b> repeat the same radius inside, which makes the gap look pinched at the corners.</p>
+        </div>
+      </div>
+      <p class="bk-note">The favicon mark is the exception that proves the rule: a 7/32 corner (22%), because at 16px anything smaller disappears.</p>
+    </div>
+  </section>
+
+  {/* 07 Lines */}
+  <section class="tone-dark bk-sec" id="lines" aria-labelledby="lines-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">07 · Lines & borders</div>
+      <h2 class="h2" id="lines-t"><HeadingText text="Lines" /></h2>
+      <p class="bk-intro">Two weights, one dash. Lines separate; they never decorate.</p>
+      <ul class="bk-lines">
+        <li><span class="l-hair"></span><b>1px · --line</b><p>Hairlines between rows, around tiles and frames, under table cells. The quiet default.</p></li>
+        <li><span class="l-rule"></span><b>1.5px · --fg</b><p>Strong rules: under page titles, above row lists, the outline of ghost buttons and chips. Starts a group.</p></li>
+        <li><span class="l-dash"></span><b>1.5px dashed · --fg</b><p>Notes and asides in prose (blockquotes), 4px corners. Means "this is a side remark".</p></li>
+        <li><span class="l-accent"></span><b>1px · accent 45%</b><p>The edge of a dark floating pill on any background. The only coloured border.</p></li>
+      </ul>
+      <p class="bk-note">Ghost buttons draw their outline with <code>box-shadow: inset 0 0 0 1.5px</code> instead of a border, so solid and ghost buttons are exactly the same size.</p>
+    </div>
+  </section>
+
+  {/* 08 Space */}
+  <section class="tone-light bk-sec" id="space" aria-labelledby="space-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">08 · Spacing & layout</div>
+      <h2 class="h2" id="space-t"><HeadingText text="Spacing" /></h2>
+      <p class="bk-intro">Full-bleed bands with a fixed gutter, generous vertical rhythm, and a short list of gaps.</p>
+
+      <h3 class="bk-h3">Gap scale</h3>
+      <ul class="bk-space">
+        {[3, 6, 8, 12, 16, 24, 32, 48, 56].map((n) => (
+          <li><i style={`width:${n}px;height:${n}px`}></i><span class="num">{n}</span></li>
+        ))}
+      </ul>
+      <p class="bk-note">3–8 inside small parts (meters, icon-to-label), 12–16 between controls, 24 between cards, 32–48 between groups, 56+ between big blocks.</p>
+
+      <h3 class="bk-h3">Layout tokens</h3>
+      <table class="bk-table">
+        <thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>--gutter</code></td><td>16px, 28px from 720px</td><td>Side padding of every band (.wrap). Respects the safe area on notched phones.</td></tr>
+          <tr><td><code>--header-h</code></td><td>64px</td><td>Sticky header height.</td></tr>
+          <tr><td><code>.section</code></td><td>clamp(64px, 8vw, 120px)</td><td>Top and bottom padding of a home section.</td></tr>
+          <tr><td>Section head</td><td>clamp(32px, 4vw, 56px)</td><td>Space under a section heading and above its CTA.</td></tr>
+          <tr><td>Page head</td><td>clamp(16px, 4vw, 48px) top · 32px bottom</td><td>Inner page titles.</td></tr>
+          <tr><td>Breakpoints</td><td>720 · 760 · 860px</td><td>Gutter grows · section heads stack · nav becomes a menu, grids stack.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="bk-h3">Layout rules</h3>
+      <ul class="bk-rules">
+        <li><b>Bands go edge to edge;</b> content inside keeps the gutter. No centred max-width box around the whole page.</li>
+        <li><b>Headings left, notes right.</b> A section's side note sits right-aligned beside its heading and drops under it on small screens.</li>
+        <li><b>CTAs sit bottom right</b> of their section, as a big underlined display link with an arrow.</li>
+        <li><b>Grids use <code>minmax(0, 1fr)</code></b> so long words can't push columns wider than the screen.</li>
+        <li><b>Never scroll sideways.</b> Wide tables scroll inside themselves.</li>
+      </ul>
+    </div>
+  </section>
+
+  {/* 09 Depth */}
+  <section class="tone-dark bk-sec" id="depth" aria-labelledby="depth-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">09 · Elevation</div>
+      <h2 class="h2" id="depth-t"><HeadingText text="Elevation" /></h2>
+      <p class="bk-intro">The page is flat. Only things that float above it (popovers, hints, the loader) get a shadow, and always the same kind: soft, low, pulled in with a negative spread.</p>
+      <ul class="bk-shadows">
+        <li><div class="bk-sh s1">Hint</div><code>0 10px 26px -12px rgb(0 0 0 / .45)</code><p>Small floating pills.</p></li>
+        <li><div class="bk-sh s2">Popover</div><code>0 12px 32px -12px rgb(0 0 0 / .45)</code><p>Info cards for books and places.</p></li>
+        <li><div class="bk-sh s3">Overlay</div><code>0 18px 44px -16px rgb(0 0 0 / .55)</code><p>The biggest float: loader and cookie card.</p></li>
+      </ul>
+      <p class="bk-note">No shadows on cards, buttons or images in the flow. Separation comes from tone, lines and space. Floating things are usually inverted (Night on Paper, or the text colour as background).</p>
+    </div>
+  </section>
+
+  {/* 10 Components */}
+  <section class="tone-light bk-sec" id="components" aria-labelledby="components-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">10 · Components</div>
+      <h2 class="h2" id="components-t"><HeadingText text="Components" /></h2>
+      <p class="bk-intro">The real components, live. Hover them.</p>
+
+      <div class="bk-comps">
+        <div class="bk-comp">
+          <div class="bk-comp-demo"><a class="btn" href="#components"><span>■</span>View résumé</a><a class="btn btn-ghost" href="#components">Ghost</a></div>
+          <b>.btn / .btn-ghost</b>
+          <p>Pill, 15px × 24px padding, mono label. Lead with a ■ or end with an arrow. One solid button per group; the rest are ghost.</p>
+        </div>
+        <div class="bk-comp">
+          <div class="bk-comp-demo"><ContactButton lang={lang} label="Let's talk" to="#components" /></div>
+          <b>ContactButton</b>
+          <p>The split pill: 52px tall. The label rolls up to a copy of itself and the disc turns 45° toward you. Reserved for the main call to action.</p>
+        </div>
+        <div class="bk-comp">
+          <div class="bk-comp-demo"><a class="link" href="#components">Read the case study</a></div>
+          <b>.link</b>
+          <p>Mono uppercase with a 1.5px underline in the text colour; the accent draws over it left to right in .5s.</p>
+        </div>
+        <div class="bk-comp">
+          <div class="bk-comp-demo"><span class="eyebrow mono">Selected work</span></div>
+          <b>.eyebrow</b>
+          <p>An 8px accent square, then a mono label. Sits above every section heading.</p>
+        </div>
+        <div class="bk-comp">
+          <div class="bk-comp-demo"><a class="bk-cta" href="#components"><span>All projects</span><svg width="28" height="16" viewBox="0 0 28 16" aria-hidden="true"><path d="M0 8h25M18 1l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a></div>
+          <b>Section CTA</b>
+          <p>Display 700 at 85%, uppercase, 2px underline, long arrow that slides 8px on hover.</p>
+        </div>
+        <div class="bk-comp">
+          <div class="bk-comp-demo"><span>Press <kbd>⇧ B</kbd></span><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+          <b>kbd · .meter</b>
+          <p>Keys get a 1px current-colour border and 3px corners. Meters are 10px squares, filled in the text colour.</p>
+        </div>
+        <div class="bk-comp">
+          <div class="bk-comp-demo bk-chips"><span class="bk-chip">Kingston</span><span class="bk-chip on">Vancouver</span></div>
+          <b>Chip</b>
+          <p>1.5px Line outline, darkens to the text colour on hover; pressed fills with the accent and white text.</p>
+        </div>
+        <div class="bk-comp">
+          <div class="bk-comp-demo"><span class="bk-pop"><b>The Old Man and the Sea</b><span class="mono">Hemingway · 1952</span></span></div>
+          <b>Popover card</b>
+          <p>Inverted colours, 6px corners, 12 × 14px padding, max 260px wide, soft shadow.</p>
+        </div>
+      </div>
+
+      <h3 class="bk-h3">Section heading</h3>
+      <div class="bk-panel bk-on-light bk-h2demo">
+        <div class="eyebrow mono">04 · Example</div>
+        <h2 class="h2 in"><HeadingText text="Heading" /></h2>
+      </div>
+      <p class="bk-note">An eyebrow, then the heading. As it scrolls in, an accent bar 1.4em wide slides in under its first letters; behind it, an accent outline copy drifts with the pointer (site.yaml → theme.headingEcho).</p>
+    </div>
+  </section>
+
+  {/* 11 Icons */}
+  <section class="tone-dark bk-sec" id="icons" aria-labelledby="icons-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">11 · Icons & markers</div>
+      <h2 class="h2" id="icons-t"><HeadingText text="Icons" /></h2>
+      <p class="bk-intro">Almost no icons. The few there are are drawn inline as SVG with plain strokes; there is no icon font or icon library.</p>
+      <ul class="bk-icons">
+        <li><svg width="28" height="16" viewBox="0 0 28 16" aria-hidden="true"><path d="M0 8h25M18 1l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><b>Long arrow</b><span class="mono muted">CTAs · 1.6 stroke</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><b>Arrow</b><span class="mono muted">Contact disc · 1.6</span></li>
+        <li><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 10L10 2M4 2h6v6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><b>Out-arrow</b><span class="mono muted">Leaves the page · 1.5</span></li>
+        <li><span class="bk-ic-sq"></span><b>Square</b><span class="mono muted">Bullets, markers · 7–8px</span></li>
+        <li><span class="bk-ic-grip"><i></i><i></i><i></i><i></i></span><b>Grip</b><span class="mono muted">Menu · 3px dots</span></li>
+        <li><span class="bk-ic-dot"></span><b>Live dot</b><span class="mono muted">Accent · pulses</span></li>
+      </ul>
+      <ul class="bk-rules">
+        <li><b>Strokes, not fills:</b> 1.5–1.6 at small sizes, butt caps, current colour.</li>
+        <li><b>Square markers:</b> ■ as a text bullet (9px), or a 7–8px box before labels.</li>
+        <li><b>Arrows move toward where they go</b> on hover: right for next, 45° for out.</li>
+        <li><b>Decorative icons are <code>aria-hidden</code>;</b> the text next to them carries the meaning.</li>
+      </ul>
+    </div>
+  </section>
+
+  {/* 12 Motion */}
+  <section class="tone-light bk-sec" id="motion" aria-labelledby="motion-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">12 · Motion</div>
+      <h2 class="h2" id="motion-t"><HeadingText text="Motion" /></h2>
+      <p class="bk-intro">One curve for almost everything: a fast start that settles softly. Things arrive, they don't bounce.</p>
+      <div class="bk-grid2">
+        <div class="bk-panel bk-on-light">
+          <svg class="bk-curve" viewBox="-.05 -.05 1.1 1.1" aria-label="The ease curve">
+            <path d="M0 1 L1 1 M0 1 L0 0" stroke="var(--line)" stroke-width=".006" fill="none" />
+            <path d="M0 1 C .2 .3, .1 0, 1 0" stroke="var(--fg)" stroke-width=".014" fill="none" />
+            <path d="M0 1 L.2 .3 M1 0 L.1 0" stroke="var(--accent)" stroke-width=".006" fill="none" />
+            <circle cx=".2" cy=".3" r=".022" fill="var(--accent)" /><circle cx=".1" cy="0" r=".022" fill="var(--accent)" />
+          </svg>
+          <code>--ease: cubic-bezier(.2, .7, .1, 1)</code>
+        </div>
+        <div class="bk-panel bk-on-light bk-motion-demo">
+          <span class="mono muted">Hover to compare</span>
+          <div class="bk-track"><i class="e-site"></i><span class="mono">--ease</span></div>
+          <div class="bk-track"><i class="e-lin"></i><span class="mono">linear (don't)</span></div>
+          <div class="bk-track"><i class="e-bounce"></i><span class="mono">overshoot (don't)</span></div>
+        </div>
+      </div>
+      <h3 class="bk-h3">Durations</h3>
+      <table class="bk-table">
+        <thead><tr><th>Step</th><th>Time</th><th>Use</th></tr></thead>
+        <tbody>{motion.map((m) => <tr><td>{m.name}</td><td class="num">{m.d}</td><td>{m.use}</td></tr>)}</tbody>
+      </table>
+      <h3 class="bk-h3">Signature moments</h3>
+      <ul class="bk-rules">
+        <li><b>Ink flood:</b> an organic ink circle with a thin accent rim covers the screen between pages.</li>
+        <li><b>Menu:</b> opens as a growing circle from the button, .8s.</li>
+        <li><b>Build mode:</b> a crowd of cursors draws the home page in as wireframes (Shift+B).</li>
+        <li><b>Tilt cards:</b> cards lean toward the pointer, an accent outline drifting the other way.</li>
+        <li><b>Inverting cursor:</b> a dot that inverts what's under it, keeping the accent the accent.</li>
+      </ul>
+      <p class="bk-note">Every effect has a switch in <code>site.yaml → interactive</code>, and all of them stop at once for <code>prefers-reduced-motion</code> or the footer's motion toggle (<code>html.no-motion</code>). Hover effects only run where there is a real hover, so a first tap on a phone is never wasted.</p>
+    </div>
+  </section>
+
+  {/* 13 Imagery */}
+  <section class="tone-dark bk-sec" id="imagery" aria-labelledby="imagery-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">13 · Imagery</div>
+      <h2 class="h2" id="imagery-t"><HeadingText text="Imagery" /></h2>
+      <p class="bk-intro">Photos stay in the monochrome world, so the accent never has to compete.</p>
+      <div class="bk-grid3">
+        <div class="bk-panel bk-on-dark"><div class="bk-img gray"></div><b>Greyscale</b><p>Portraits and photos on this site are shown in greyscale. Colour photography lives on the photo site.</p></div>
+        <div class="bk-panel bk-on-dark"><div class="bk-img grain"></div><b>Grain</b><p>A fine static (<code>--grain</code>, 9% noise) over gradients, so they never band into steps.</p></div>
+        <div class="bk-panel bk-on-dark"><div class="bk-img ratio"><span class="mono">4:5 · 4:3 · 16:10</span></div><b>Ratios & wells</b><p>Portrait 4:5, project thumbs 4:3, screenshots 16:10 in a browser frame. #D6D6D6 wells hold the space while loading. 4px corners.</p></div>
+      </div>
+    </div>
+  </section>
+
+  {/* 14 Voice */}
+  <section class="tone-light bk-sec" id="voice" aria-labelledby="voice-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">14 · Voice & writing</div>
+      <h2 class="h2" id="voice-t"><HeadingText text="Voice" /></h2>
+      <p class="bk-intro">Plain, first person, short. Say what it is and what it does; let the design be the loud part.</p>
+      <div class="bk-grid2">
+        <div class="bk-panel bk-on-light bk-voice do">
+          <span class="mono">Do</span>
+          <ul class="bk-list">
+            <li>"I also take photographs."</li>
+            <li>"Here is what I am working on now."</li>
+            <li>"Let's talk"</li>
+            <li>Sentence case in body, buttons in mono uppercase.</li>
+            <li>Numbers as numerals, with units: 12 km, 3 years.</li>
+          </ul>
+        </div>
+        <div class="bk-panel bk-on-light bk-voice dont">
+          <span class="mono">Don't</span>
+          <ul class="bk-list">
+            <li>"Passionate, results-driven creative visionary."</li>
+            <li>"Click here to learn more!!"</li>
+            <li>"Submit"</li>
+            <li>Title Case Sentences Or Exclamation Marks.</li>
+            <li>Emoji as decoration.</li>
+          </ul>
+        </div>
+      </div>
+      <ul class="bk-rules">
+        <li><b>Labels are nouns or short verbs:</b> "Work", "Résumé", "View résumé", "Visit the photo site".</li>
+        <li><b>The middle dot ( · ) separates</b> items in a meta line: "Kingston · Ontario · Canada".</li>
+        <li><b>The en dash ( – ) for ranges:</b> 2022–2026. Never a hyphen.</li>
+        <li><b>Real quotes and apostrophes:</b> ’ “ ”, not ' and ".</li>
+        <li><b>Every string lives in <code>src/i18n</code></b> so the site can be translated.</li>
+      </ul>
+    </div>
+  </section>
+
+  {/* 15 Accessibility */}
+  <section class="tone-dark bk-sec" id="a11y" aria-labelledby="a11y-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">15 · Accessibility</div>
+      <h2 class="h2" id="a11y-t"><HeadingText text="Access" /></h2>
+      <p class="bk-intro">The playful parts are extras on top of a page that works without them.</p>
+      <div class="bk-grid2">
+        <div class="bk-panel bk-on-dark"><div class="bk-comp-demo"><span class="btn bk-focus">Focused</span></div><b>Focus ring</b><p>2px accent outline, 3px offset, 3px corners, shown only for keyboard focus (<code>:focus-visible</code>).</p></div>
+        <div class="bk-panel bk-on-dark"><div class="bk-comp-demo"><span>Some <span class="bk-selected">selected text</span> here.</span></div><b>Selection</b><p>Accent at 34% behind the text; the text keeps its own colour.</p></div>
+      </div>
+      <ul class="bk-rules">
+        <li><b>Contrast:</b> body text is AAA on both tones; muted text stays AA.</li>
+        <li><b>Motion:</b> reduced motion and the in-page toggle both cut every animation to an instant.</li>
+        <li><b>High contrast:</b> in forced-colours mode the custom cursor, ink flood and blend effects switch off and the system takes over.</li>
+        <li><b>No JavaScript:</b> titles size with CSS, rows open, and controls that need scripts hide.</li>
+        <li><b>Touch:</b> hover effects only where hover exists; targets are at least 44px where they can be.</li>
+        <li><b>Meaning never rests on colour alone.</b> The accent always comes with a shape, a weight or a position.</li>
+      </ul>
+    </div>
+  </section>
+
+  {/* 16 Tokens */}
+  <section class="tone-light bk-sec" id="tokens" aria-labelledby="tokens-t">
+    <div class="wrap section">
+      <div class="eyebrow mono">16 · Tokens</div>
+      <h2 class="h2" id="tokens-t"><HeadingText text="Tokens" /></h2>
+      <p class="bk-intro">The source of truth is <code>src/styles/global.css</code> (and the accent in <code>site.yaml</code>). This is the short version to copy into anything that should look like the site.</p>
+      <pre class="bk-code"><code>{`:root {
+  /* colour */
+  --ink: #0B0B0B;  --paper: #E6E6E6;  --night: #161616;  --white: #FFFFFF;
+  --muted: #555555;  --muted-dark: #A0A0A0;
+  --line: #CBCBCB;   --line-dark: #2E2E2E;
+  --accent: ${accent};
+
+  /* type */
+  --font-display: "Bricolage Grotesque Variable", "Arial Narrow", sans-serif;
+  --font-sans:    "Instrument Sans Variable", "Helvetica Neue", Arial, sans-serif;
+  --font-serif:   "Instrument Serif", Georgia, serif;
+  --font-mono:    "DM Mono", ui-monospace, Menlo, monospace;
+
+  /* corners */
+  --r-mark: 0;  --r-chip: 3px;  --r-img: 4px;  --r-pop: 6px;
+  --r-tile: 8px;  --r-frame: 10px;  --r-sheet: 16px;  --r-pill: 999px;
+
+  /* lines */
+  --hair: 1px;  --rule: 1.5px;
+
+  /* space */
+  --gutter: 16px;  /* 28px from 720px */
+  --header-h: 64px;
+  --section-y: clamp(64px, 8vw, 120px);
+
+  /* motion */
+  --ease: cubic-bezier(.2, .7, .1, 1);
+  --t-quick: .2s;  --t-move: .45s;  --t-reveal: .8s;
+}
+
+.display { font: 800 1em/.84 var(--font-display); font-stretch: 87.5%;
+           letter-spacing: -.02em; text-transform: uppercase; }
+.mono    { font: 400 12px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
+body     { font: 400 17px/1.55 var(--font-sans); }`}</code></pre>
+      <div class="bk-end">
+        <Signature size="medium" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Contents */
+  .bk-toc { padding-block: 28px 56px; }
+  .bk-toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 24px; }
+  .bk-toc a { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; font-family: var(--font-display); font-weight: 700; font-stretch: 85%; text-transform: uppercase; font-size: 20px; letter-spacing: -.01em; transition: padding .4s var(--ease); }
+  .bk-toc a:hover { padding-left: 8px; }
+  .bk-toc a .mono { font-size: 11px; }
+
+  .bk-sec { scroll-margin-top: 0; }
+  .bk-sec .eyebrow { margin-bottom: 18px; }
+  .bk-sec .h2 { margin-bottom: 40px; }
+  .bk-intro { font-size: clamp(19px, 1.8vw, 24px); line-height: 1.35; letter-spacing: -.01em; max-width: 46ch; margin: 0 0 clamp(32px, 4vw, 56px); text-wrap: pretty; }
+  .bk-intro em { font-family: var(--font-serif); font-size: 1.1em; }
+  .bk-h3 { font-family: var(--font-display); font-weight: 800; font-stretch: 85%; text-transform: uppercase; font-size: 26px; line-height: 1; letter-spacing: -.01em; margin: clamp(48px, 5vw, 72px) 0 20px; }
+  .bk-note { color: var(--muted); max-width: 72ch; margin: 20px 0 0; font-size: 15px; }
+  .bk-sec code, .bk-sec pre { font-family: var(--font-mono); }
+  .bk-sec :not(pre) > code { font-size: .85em; padding: 1px 6px; border-radius: 3px; background: color-mix(in srgb, var(--fg) 8%, transparent); white-space: nowrap; }
+  .bk-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .bk-list li::before { content: "■ "; font-size: 9px; vertical-align: 2px; }
+  .bk-list li { color: var(--muted); }
+  .bk-list b { color: var(--fg); font-weight: 600; }
+
+  .bk-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .bk-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 860px) { .bk-grid2, .bk-grid3 { grid-template-columns: minmax(0, 1fr); } }
+  .bk-panel { margin: 0; border: 1px solid var(--line); border-radius: 10px; padding: 24px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+  .bk-panel p { margin: 0; color: var(--muted); font-size: 15px; }
+  .bk-panel b { font-weight: 600; }
+  .bk-on-light { background: #E6E6E6; color: #0B0B0B; --fg: #0B0B0B; --bg: #E6E6E6; --muted: #555; --line: #CBCBCB; }
+  .bk-on-dark { background: #161616; color: #fff; --fg: #fff; --bg: #161616; --muted: #A0A0A0; --line: #2E2E2E; }
+  .tone-light .bk-on-dark, .tone-dark .bk-on-light { border-color: transparent; }
+
+  /* Principles */
+  .bk-principles { list-style: none; counter-reset: p; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0 32px; }
+  .bk-principles li { counter-increment: p; border-top: 1.5px solid var(--fg); padding: 20px 0 32px; display: grid; gap: 10px; }
+  .bk-principles li::before { content: counter(p, decimal-leading-zero); font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; color: var(--accent); }
+  .bk-principles b { font-family: var(--font-display); font-weight: 700; font-stretch: 90%; font-size: clamp(22px, 2.2vw, 30px); letter-spacing: -.02em; line-height: 1.05; }
+  .bk-principles p { margin: 0; color: var(--muted); max-width: 44ch; }
+
+  /* Wordmark */
+  .bk-wordmark { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; text-transform: uppercase; letter-spacing: -.01em; font-size: clamp(32px, 5vw, 64px); line-height: 1; white-space: nowrap; }
+  .bk-wordmark .dot { color: var(--accent); }
+  .bk-wordmark.sm { font-size: 22px; }
+  .bk-panel figcaption { font-size: 11px; }
+  .bk-panel:has(.bk-wordmark) { min-height: 200px; align-content: space-between; overflow: hidden; }
+  .bk-clearbox { justify-self: start; padding: .72em; outline: 1px dashed var(--accent); outline-offset: 0; font-size: clamp(32px, 5vw, 64px); background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--accent) 10%, transparent) 0 6px, transparent 6px 12px); max-width: 100%; overflow: hidden; }
+  .bk-clearbox .bk-wordmark { background: var(--bg); font-size: inherit; }
+  .bk-mark-row { display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+  .bk-spec dl { margin: 32px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0 24px; }
+  .bk-spec dl div { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 4px; }
+  .bk-spec dt { font-size: 11px; }
+  .bk-spec dd { margin: 0; }
+  .bk-donts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .bk-donts li { display: grid; gap: 10px; }
+  .bk-donts p { margin: 0; color: var(--muted); font-size: 15px; }
+  .bk-dont-art { position: relative; height: 110px; border-radius: 10px; border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; }
+  .bk-dont-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1px), #c0392b calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)); opacity: .7; }
+  .bk-busy { background: repeating-linear-gradient(115deg, #8a8a8a 0 14px, #6f6f6f 14px 22px, #9a9a9a 22px 40px); }
+
+  /* Signature */
+  .bk-sig-stage { padding: 24px 0 48px; display: grid; }
+  .bk-script { font-family: "Mrs Saint Delafield", cursive; font-size: 44px; line-height: 1.1; }
+  .bk-fontcard .bk-script { font-size: 40px; }
+
+  /* Colour */
+  .bk-accent { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; }
+  @media (max-width: 860px) { .bk-accent { grid-template-columns: minmax(0, 1fr); } }
+  .bk-accent-chip { border-radius: 10px; min-height: 280px; padding: 24px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; }
+  .bk-accent-chip b { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; font-size: clamp(48px, 6vw, 88px); line-height: .9; letter-spacing: -.02em; }
+  .bk-accent-copy p { margin: 0; color: var(--muted); }
+  .bk-accent-copy .bk-h3 { margin-top: 28px; font-size: 20px; }
+  .bk-tints { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 860px) { .bk-tints { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .bk-tints li { display: grid; gap: 10px; align-content: start; }
+  .bk-tints p { margin: 0; color: var(--muted); font-size: 14px; }
+  .bk-tint { height: 88px; border-radius: 8px; padding: 10px; display: flex; align-items: flex-end; border: 1px solid var(--line); }
+  .bk-tint .mono { font-size: 11px; }
+  .bk-swatches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 24px 16px; }
+  .bk-swatches li { display: grid; gap: 6px; align-content: start; }
+  .bk-swatches p { margin: 0; color: var(--muted); font-size: 14px; }
+  .bk-swatches code { font-size: 11px !important; white-space: normal !important; justify-self: start; }
+  .bk-swatch { height: 110px; border-radius: 8px; padding: 10px; display: flex; align-items: flex-end; box-shadow: inset 0 0 0 1px rgb(128 128 128 / .3); margin-bottom: 6px; }
+  .bk-swatch .mono { font-size: 11px; }
+  .bk-tone { border-radius: 10px; }
+  .bk-tone-h { font-family: var(--font-display); font-weight: 800 !important; font-stretch: 80%; text-transform: uppercase; font-size: 56px; line-height: .9; }
+  .bk-tone .btn { justify-self: start; }
+  .bk-table { width: 100%; border-collapse: collapse; font-size: 15px; display: block; overflow-x: auto; }
+  .bk-table thead th { font-family: var(--font-mono); font-weight: 400; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--fg); }
+  .bk-table th, .bk-table td { text-align: left; padding: 12px 24px 12px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .bk-table td:last-child { width: 100%; }
+  .bk-pair { display: inline-grid; place-items: center; width: 56px; height: 34px; border-radius: 4px; font-family: var(--font-display); font-weight: 700; font-size: 18px; box-shadow: inset 0 0 0 1px rgb(128 128 128 / .3); }
+
+  /* Type */
+  .bk-fonts { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .bk-font { border: 1px solid var(--line); border-radius: 10px; padding: 24px; display: grid; gap: 10px; align-content: start; }
+  .bk-font p { margin: 0; color: var(--muted); font-size: 15px; }
+  .bk-font b { font-weight: 600; font-size: 18px; }
+  .bk-font .mono { font-size: 10.5px; }
+  .bk-font-big { font-size: 112px; line-height: 1; margin: 8px 0; }
+  .f-display { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; letter-spacing: -.03em; }
+  .f-sans { font-family: var(--font-sans); font-weight: 500; letter-spacing: -.03em; }
+  .f-serif { font-family: var(--font-serif); }
+  .f-mono { font-family: var(--font-mono); font-size: 96px; }
+  .f-pixel { font-family: "Pixelify Sans Variable", var(--font-mono); font-weight: 600; }
+  .bk-font-big.bk-script { font-size: 104px; }
+
+  .bk-scale { border-top: 1.5px solid var(--fg); }
+  .bk-scale-row { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--line); align-items: center; }
+  @media (max-width: 860px) { .bk-scale-row { grid-template-columns: minmax(0, 1fr); gap: 12px; } }
+  .bk-scale-meta { display: grid; gap: 4px; }
+  .bk-scale-meta b { font-weight: 600; }
+  .bk-scale-meta .mono { font-size: 10.5px; }
+  .bk-scale-spec { color: var(--muted); font-size: 13px; }
+  .bk-scale-sample { min-width: 0; overflow-wrap: anywhere; }
+  .ts-wm { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; letter-spacing: -.02em; line-height: .84; text-transform: uppercase; font-size: clamp(64px, 12vw, 180px); }
+  .ts-h2 { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; font-size: clamp(44px, 7vw, 112px); letter-spacing: -.02em; line-height: .86; text-wrap: balance; }
+  .ts-menu { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; text-transform: uppercase; letter-spacing: -.02em; line-height: .92; font-size: clamp(52px, 9vw, 150px); }
+  .ts-statement { font-family: var(--font-display); font-weight: 500; font-size: clamp(28px, 3.4vw, 52px); letter-spacing: -.035em; line-height: 1.04; text-wrap: balance; }
+  .ts-h2p { font-family: var(--font-display); font-weight: 800; font-stretch: 85%; text-transform: uppercase; font-size: 30px; line-height: 1; }
+  .ts-row { font-family: var(--font-display); font-weight: 700; font-stretch: 90%; font-size: clamp(22px, 2.2vw, 30px); letter-spacing: -.02em; line-height: 1.05; }
+  .ts-lead { font-size: clamp(20px, 2.2vw, 30px); letter-spacing: -.02em; line-height: 1.25; max-width: 34ch; font-weight: 500; }
+  .ts-body { font-size: 17px; line-height: 1.55; max-width: 66ch; }
+  .ts-small { font-size: 14px; line-height: 1.4; }
+  .ts-label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+  .ts-micro { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+
+  .bk-widths { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--fg); }
+  .bk-widths li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: baseline; border-bottom: 1px solid var(--line); padding: 10px 0; }
+  .bk-width-s { font-family: var(--font-display); font-weight: 800; text-transform: uppercase; font-size: clamp(40px, 6vw, 80px); line-height: 1; letter-spacing: -.02em; overflow: hidden; }
+  .bk-widths .mono { font-size: 10.5px; text-align: right; }
+  .bk-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  @media (max-width: 860px) { .bk-nums { grid-template-columns: minmax(0, 1fr); } }
+  .bk-nums > div { display: grid; gap: 10px; align-content: end; border-top: 1px solid var(--line); padding-top: 16px; }
+  .bk-nums .mono { font-size: 10.5px; }
+  .bk-num-outline { font-family: var(--font-display); font-weight: 800; font-stretch: 75%; letter-spacing: -.01em; color: transparent; -webkit-text-stroke: max(1.25px, .016em) var(--fg); font-size: 110px; line-height: .9; font-variant-numeric: tabular-nums; }
+  .bk-num-serif { font-family: var(--font-serif); letter-spacing: -.03em; font-size: 110px; line-height: .9; }
+  .bk-num-small { font-size: 34px; }
+  .bk-rules { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 0 32px; }
+  .bk-rules li { border-top: 1px solid var(--line); padding: 14px 0; color: var(--muted); }
+  .bk-rules b { color: var(--fg); font-weight: 600; }
+
+  /* Corners */
+  .bk-radii { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(210px, 40vw), 1fr)); gap: 32px 16px; }
+  @media (max-width: 520px) { .bk-radius-demo { height: 90px; } .bk-radius-demo i { width: 68px; height: 68px; } .bk-radii li:nth-child(8) .bk-radius-demo i { width: 110px; height: 40px; } }
+  .bk-radii li { display: grid; gap: 6px; align-content: start; }
+  .bk-radii b { font-size: 26px; }
+  .bk-radii p { margin: 0; font-size: 14px; }
+  .bk-radius-rule { font-weight: 600; }
+  .bk-radius-demo { height: 120px; display: grid; place-items: center; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .bk-radius-demo i { width: 96px; height: 96px; background: var(--fg); }
+  .bk-radii li:nth-child(8) .bk-radius-demo i { width: 150px; height: 52px; }
+  .bk-family-demo { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; min-height: 80px; }
+  .bk-chip-demo, .bk-chip { display: inline-flex; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line); font-size: 15px; transition: border-color .2s, background .2s, color .2s; }
+  .bk-chip:hover { border-color: var(--fg); }
+  .bk-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .bk-disc-demo { width: 44px; height: 44px; border-radius: 50%; background: var(--fg); color: var(--bg); display: grid; place-items: center; }
+  .bk-img-demo { width: 96px; height: 72px; border-radius: 4px; background: #D6D6D6; }
+  .bk-card-demo { width: 80px; height: 72px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--fg) 24%, transparent); }
+  .bk-sq-demo { width: 8px; height: 8px; background: var(--accent); }
+  .bk-rule-demo { width: 72px; height: 1.5px; background: var(--fg); }
+  .bk-nest { width: 180px; height: 120px; border-radius: 16px; padding: 10px; background: var(--fg); }
+  .bk-nest div { width: 100%; height: 100%; background: var(--accent); }
+  .bk-nest.good div { border-radius: 6px; }
+  .bk-nest.bad div { border-radius: 16px; }
+
+  /* Lines */
+  .bk-lines { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 32px 24px; }
+  .bk-lines li { display: grid; gap: 10px; align-content: start; }
+  .bk-lines p { margin: 0; color: var(--muted); font-size: 15px; }
+  .bk-lines span { display: block; height: 56px; border-radius: 4px; }
+  .l-hair { border-bottom: 1px solid var(--line); border-radius: 0 !important; }
+  .l-rule { border-bottom: 1.5px solid var(--fg); border-radius: 0 !important; }
+  .l-dash { border: 1.5px dashed var(--fg); }
+  .l-accent { border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 999px !important; background: #161616; }
+
+  /* Space */
+  .bk-space { list-style: none; margin: 0; padding: 0; display: flex; gap: 24px; align-items: flex-end; flex-wrap: wrap; }
+  .bk-space li { display: grid; gap: 8px; justify-items: center; }
+  .bk-space i { background: var(--accent); }
+  .bk-space .num { font-size: 14px; }
+
+  /* Depth */
+  .bk-shadows { list-style: none; margin: 0; padding: 32px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; background: #E6E6E6; color: #0B0B0B; border-radius: 10px; --muted: #555; }
+  @media (max-width: 860px) { .bk-shadows { grid-template-columns: minmax(0, 1fr); } }
+  .bk-shadows li { display: grid; gap: 10px; align-content: start; }
+  .bk-shadows p { margin: 0; color: #555; font-size: 14px; }
+  .bk-shadows code { font-size: 11px !important; white-space: normal !important; background: rgb(0 0 0 / .06) !important; }
+  .bk-sh { height: 96px; display: grid; place-items: center; background: #161616; color: #fff; font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }
+  .s1 { border-radius: 999px; box-shadow: 0 10px 26px -12px rgb(0 0 0 / .45); }
+  .s2 { border-radius: 6px; box-shadow: 0 12px 32px -12px rgb(0 0 0 / .45); }
+  .s3 { border-radius: 16px; box-shadow: 0 18px 44px -16px rgb(0 0 0 / .55); }
+
+  /* Components */
+  .bk-comps { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .bk-comp { border: 1px solid var(--line); border-radius: 10px; padding: 24px; display: grid; gap: 10px; align-content: start; }
+  .bk-comp p { margin: 0; color: var(--muted); font-size: 15px; }
+  .bk-comp b { font-family: var(--font-mono); font-weight: 500; font-size: 13px; }
+  .bk-comp-demo { min-height: 96px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .bk-cta { display: inline-flex; align-items: center; gap: 18px; text-decoration: none; font-family: var(--font-display); font-weight: 700; font-stretch: 85%; text-transform: uppercase; font-size: 28px; letter-spacing: -.01em; border-bottom: 2px solid currentColor; padding-bottom: 6px; }
+  .bk-cta svg { transition: transform .5s var(--ease); }
+  .bk-cta:hover svg { transform: translateX(8px); }
+  .bk-pop { display: grid; gap: 4px; max-width: 260px; padding: 12px 14px; border-radius: 6px; background: var(--fg); color: var(--bg); box-shadow: 0 12px 32px -12px rgb(0 0 0 / .45); font-size: 14px; line-height: 1.35; }
+  .bk-pop b { font-family: var(--font-sans); font-size: 15px; font-weight: 600; }
+  .bk-pop .mono { font-size: 10.5px; opacity: .7; }
+  .bk-h2demo { padding: 32px; }
+
+  /* Icons */
+  .bk-icons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+  .bk-icons li { border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 6px; justify-items: start; }
+  .bk-icons li > :first-child { height: 28px; margin-bottom: 14px; }
+  .bk-icons .mono { font-size: 10px; }
+  .bk-ic-sq { width: 8px; height: 8px !important; background: var(--accent); margin-top: 10px; }
+  .bk-ic-grip { display: grid; grid-template-columns: 3px 3px; gap: 3px; align-content: center; }
+  .bk-ic-grip i { width: 3px; height: 3px; background: currentColor; }
+  .bk-ic-dot { width: 8px; height: 8px !important; border-radius: 50%; background: var(--accent); margin-top: 10px; animation: bk-pulse 2s ease-in-out infinite; }
+  @keyframes bk-pulse { 50% { opacity: .25; } }
+
+  /* Motion */
+  .bk-curve { width: 100%; max-width: 320px; aspect-ratio: 1; justify-self: center; }
+  .bk-motion-demo { align-content: center; }
+  .bk-track { position: relative; height: 40px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: flex-end; }
+  .bk-track i { position: absolute; left: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--fg); transition: transform 1.2s; }
+  .bk-track .mono { font-size: 10.5px; color: var(--muted); }
+  .e-site { transition-timing-function: cubic-bezier(.2, .7, .1, 1) !important; }
+  .e-lin { transition-timing-function: linear !important; }
+  .e-bounce { transition-timing-function: cubic-bezier(.5, -.6, .3, 1.8) !important; }
+  .bk-motion-demo:hover .bk-track i { transform: translateX(min(240px, 40vw)); }
+
+  /* Imagery */
+  .bk-img { aspect-ratio: 4 / 3; border-radius: 4px; background: #D6D6D6; }
+  .bk-img.gray { background: radial-gradient(60% 70% at 40% 35%, #f0f0f0, #8a8a8a 60%, #3a3a3a); filter: grayscale(1); }
+  .bk-img.grain { background: var(--grain), linear-gradient(135deg, #2a2a2a, #6a6a6a 50%, #1a1a1a); }
+  .bk-img.ratio { display: grid; place-items: center; color: #0B0B0B; }
+  .bk-img.ratio .mono { font-size: 11px; }
+
+  /* Voice */
+  .bk-voice > .mono { font-size: 12px; }
+  .bk-voice.do > .mono { color: var(--fg); }
+  .bk-voice.dont { opacity: .8; }
+  .bk-voice.dont li { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+  /* Accessibility */
+  .bk-focus { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .bk-selected { background: color-mix(in srgb, var(--accent) 34%, transparent); }
+
+  /* Tokens */
+  .bk-code { margin: 0; padding: 24px; border-radius: 10px; background: #161616; color: #E6E6E6; font-size: 13px; line-height: 1.6; overflow-x: auto; }
+  .bk-code code { font-size: inherit !important; background: none !important; padding: 0 !important; white-space: pre !important; }
+  .bk-end { margin-top: 72px; display: grid; }
+</style>

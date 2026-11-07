@@ -47,7 +47,7 @@ banner:
 #   numbers:  serif | outline           big numbers: education years, stats, loader
 #   headings: display | serif | outline section and page titles
 # One accent colour, used sparingly (3D mouse light, live markers, focus rings, text selection, GitHub peaks).
-# Pick it with private/brandkit/index.html. Must be a 6-digit hex.
+# Pick it with private/brandkit/index.html. Must be a 6-digit hex. The full design system is at /en/brand/.
 theme:
   accent: "#7E76D0"         # soft blue-violet
   accentCursor: false       # the cursor dot turns accent over links and buttons

@@ -14,8 +14,9 @@ export default defineConfig({
   integrations: [
     react(),
     // /sitemap-index.xml, linked from robots.txt. The root language redirect and the 404 aren't real pages.
+    // The brand kit (/<lang>/brand/) is an internal reference page, so it stays out too.
     sitemap({
-      filter: (page) => new URL(page).pathname !== '/' && !new URL(page).pathname.startsWith('/404'),
+      filter: (page) => { const p = new URL(page).pathname; return p !== '/' && !p.startsWith('/404') && !/^\/[a-z]{2}\/brand\//.test(p); },
       i18n: site.languages.length > 1
         ? { defaultLocale: site.languages[0], locales: Object.fromEntries(site.languages.map((/** @type {string} */ l) => [l, l])) }
         : undefined,
