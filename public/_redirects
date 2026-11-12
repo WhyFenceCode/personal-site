@@ -2,3 +2,43 @@
 # The sitemap used to live at /sitemap-index.xml; it is now one file at /sitemap.xml.
 /sitemap-index.xml  /sitemap.xml  301
 /sitemap-0.xml      /sitemap.xml  301
+
+# Short addresses for the brand kit, with and without the language. Temporary (302), so they can change later
+# without browsers remembering them. /brand on its own would otherwise land on the 404 page first.
+/brand                     /en/brand/    302
+/brand-kit                 /en/brand/    302
+/brandkit                  /en/brand/    302
+/branding                  /en/brand/    302
+/brand-identity            /en/brand/    302
+/brandidentity             /en/brand/    302
+/brand-guidelines          /en/brand/    302
+/brandguidelines           /en/brand/    302
+/brand-guide               /en/brand/    302
+/brandguide                /en/brand/    302
+/brand-assets              /en/brand/    302
+/brandassets               /en/brand/    302
+/style-guide               /en/brand/    302
+/styleguide                /en/brand/    302
+/design-system             /en/brand/    302
+/designsystem              /en/brand/    302
+/identity                  /en/brand/    302
+/logo                      /en/brand/    302
+/logos                     /en/brand/    302
+/:lang/brand-kit           /:lang/brand/ 302
+/:lang/brandkit            /:lang/brand/ 302
+/:lang/branding            /:lang/brand/ 302
+/:lang/brand-identity      /:lang/brand/ 302
+/:lang/brandidentity       /:lang/brand/ 302
+/:lang/brand-guidelines    /:lang/brand/ 302
+/:lang/brandguidelines     /:lang/brand/ 302
+/:lang/brand-guide         /:lang/brand/ 302
+/:lang/brandguide          /:lang/brand/ 302
+/:lang/brand-assets        /:lang/brand/ 302
+/:lang/brandassets         /:lang/brand/ 302
+/:lang/style-guide         /:lang/brand/ 302
+/:lang/styleguide          /:lang/brand/ 302
+/:lang/design-system       /:lang/brand/ 302
+/:lang/designsystem        /:lang/brand/ 302
+/:lang/identity            /:lang/brand/ 302
+/:lang/logo                /:lang/brand/ 302
+/:lang/logos               /:lang/brand/ 302
