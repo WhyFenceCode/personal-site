@@ -1,0 +1,33 @@
+---
+/* Two lists side by side: what to do and what not to do. Brand kit only.
+   Items may contain inline HTML (<code>, <b>), so they're trusted strings written in brand.astro. */
+interface Props { do?: string[]; dont?: string[] }
+const { do: dos = [], dont = [] } = Astro.props;
+---
+<div class="dd">
+  {dos.length > 0 && (
+    <div class="dd-col do">
+      <span class="mono dd-h">Do</span>
+      <ul>{dos.map((d) => <li set:html={d} />)}</ul>
+    </div>
+  )}
+  {dont.length > 0 && (
+    <div class="dd-col dont">
+      <span class="mono dd-h">Don't</span>
+      <ul>{dont.map((d) => <li set:html={d} />)}</ul>
+    </div>
+  )}
+</div>
+
+<style>
+  .dd { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 0 32px; margin-top: 32px; }
+  .dd-col { border-top: 1.5px solid var(--fg); padding-top: 14px; }
+  .dd-h { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; }
+  .do .dd-h::before { content: ""; width: 8px; height: 8px; background: var(--accent); }
+  .dont .dd-h::before { content: "×"; font-size: 15px; line-height: 8px; }
+  ul { list-style: none; margin: 10px 0 0; padding: 0; }
+  li { border-top: 1px solid var(--line); padding: 12px 0; }
+  li:first-child { border-top: 0; }
+  .dont li { color: var(--muted); }
+  li :global(code) { font-size: .88em; }
+</style>

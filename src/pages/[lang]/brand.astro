@@ -7,6 +7,7 @@ import PageHead from '../../components/PageHead.astro';
 import ContactButton from '../../components/ui/ContactButton.astro';
 import HeadingText from '../../components/ui/HeadingText.astro';
 import Signature from '../../components/ui/Signature.astro';
+import DoDont from '../../components/brand/DoDont.astro';
 import { site } from '../../lib/config';
 import { langStaticPaths } from '../../lib/i18n';
 // The script face is normally only baked into SVG; here it's shown as live text in the specimens.
@@ -100,7 +101,7 @@ const motion = [
 ---
 <Base lang={lang} page="brand" title="Brand kit" description={`The design system behind ${site.name}'s site.`} noindex>
   <div class="wrap">
-    <PageHead title="Brand kit" metaLeft="Design system" metaRight={`v${new Date().getFullYear()}`} lead="Black and white in charge, one colour used sparingly, and type doing the heavy lifting." />
+    <PageHead title="Brand kit" metaLeft="Design system" metaRight={`v${new Date().getFullYear()}`} lead="The rules behind this site. Follow them for anything that should look like it." />
   </div>
 
   {/* Contents */}
@@ -118,12 +119,12 @@ const motion = [
       <div class="eyebrow mono">01 · Principles</div>
       <h2 class="h2" id="principles-t"><HeadingText text="Principles" /></h2>
       <ol class="bk-principles">
-        <li><b>Monochrome first.</b><p>Ink and Paper, Night and White. Every layout has to work in greyscale before the accent goes anywhere near it.</p></li>
-        <li><b>One accent, used like salt.</b><p>The accent marks what is alive or pressable: a full stop, a square, a focus ring, a live dot. It never fills a section or carries body text.</p></li>
-        <li><b>Light and dark at once.</b><p>The page has no single theme. Each section picks a tone (tone-light or tone-dark) and the bands alternate down the page.</p></li>
-        <li><b>Type is the image.</b><p>Huge condensed uppercase headings do the work illustrations would do elsewhere. Keep everything around them quiet.</p></li>
-        <li><b>Pills to press, squares to read.</b><p>Anything interactive is a full pill or a circle. Content and media are nearly square. Markers are square.</p></li>
-        <li><b>Motion with an off switch.</b><p>Everything that moves has a purpose, the same soft ease, and stops instantly for reduced motion or the footer toggle.</p></li>
+        <li><b>Design in black and white first.</b><p>Add the accent last.</p></li>
+        <li><b>Use one accent, sparingly.</b><p>Small marks only. Never fills or body text.</p></li>
+        <li><b>Alternate light and dark sections.</b><p>Never two dark ones in a row.</p></li>
+        <li><b>Let big type be the image.</b><p>Keep everything around it quiet.</p></li>
+        <li><b>Pills to press, squares to read.</b><p>Shape tells people what they can click.</p></li>
+        <li><b>Give motion an off switch.</b><p>Reduced motion stops everything at once.</p></li>
       </ol>
     </div>
   </section>
@@ -133,7 +134,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">02 · Wordmark & mark</div>
       <h2 class="h2" id="logo-t"><HeadingText text="Wordmark" /></h2>
-      <p class="bk-intro">There is no drawn logo. The name, set in the display face, <em>is</em> the logo, finished with an accent full stop. The favicon mark is a heavy T with the same accent full stop, Ink on light browsers and White on dark.</p>
+      <p class="bk-intro">The name <em>is</em> the logo. The T is the mark.</p>
 
       <div class="bk-grid2">
         <figure class="bk-panel bk-on-light">
@@ -174,6 +175,13 @@ const motion = [
         </dl>
       </div>
 
+      <DoDont do={[
+        'Set the name in Bricolage 800, uppercase, with the accent full stop.',
+        'Leave clear space the height of the caps on every side.',
+        'Switch to the T mark below 20px and for icons.',
+        'Use Ink on light backgrounds and White on dark.',
+      ]} />
+
       <h3 class="bk-h3">Don't</h3>
       <ul class="bk-donts">
         <li><div class="bk-dont-art"><span class="bk-wordmark sm" style="font-stretch:100%;text-transform:none;font-weight:400">{site.name}.</span></div><p>Set it in another weight, width or case.</p></li>
@@ -189,7 +197,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">03 · Signature</div>
       <h2 class="h2" id="signature-t"><HeadingText text="Signature" /></h2>
-      <p class="bk-intro">A handwritten sign-off that writes itself in, letter by letter, with an accent flourish underneath. It is the one human, loose element in an otherwise strict system, so it appears rarely.</p>
+      <p class="bk-intro">A handwritten sign-off. The one loose element, so use it rarely.</p>
       <div class="bk-sig-stage">
         <Signature size="large" />
         {!site.interactive.signature && <p class="mono muted">The signature is switched off (site.yaml → interactive.signature).</p>}
@@ -198,29 +206,36 @@ const motion = [
         <div class="bk-panel bk-on-dark bk-fontcard">
           <span class="mono muted">Face</span>
           <span class="bk-script">Mrs Saint Delafield</span>
-          <p>@fontsource/mrs-saint-delafield, 400. Not loaded as a web font on the rest of the site (only here, for the specimens): the letters are turned into SVG paths when the site builds (opentype.js), so it costs nothing at runtime.</p>
+          <p>Turned into SVG paths at build. No web font loads.</p>
         </div>
         <div class="bk-panel bk-on-dark">
           <span class="mono muted">How it draws</span>
           <ul class="bk-list">
-            <li>Each letter's outline is traced as a stroke (1.4 units) in <b>.55s</b>.</li>
-            <li>Its fill fades in <b>.4s</b> later, over <b>.35s</b>, as the stroke fades out.</li>
-            <li>Letters start <b>0.2s</b> apart, in writing order.</li>
-            <li>The accent flourish draws last, in <b>.9s</b>, stroke 2.5 (3 at xl), round caps.</li>
-            <li>Starts when 60% of it is on screen. Motion off: shown finished.</li>
+            <li>Letters trace in <b>.55s</b> each, <b>0.2s</b> apart, then fill.</li>
+            <li>The accent flourish draws last, in <b>.9s</b>.</li>
+            <li>Starts at 60% on screen. Motion off: shown finished.</li>
           </ul>
         </div>
         <div class="bk-panel bk-on-dark">
-          <span class="mono muted">Sizes & placement</span>
+          <span class="mono muted">Sizes</span>
           <ul class="bk-list">
-            <li><b>xl</b> · clamp(120px, 19vw, 300px) · end of the résumé.</li>
-            <li><b>large</b> · clamp(80px, 10vw, 170px) · home contact section.</li>
-            <li><b>medium</b> · clamp(62px, 7vw, 110px) · tighter spots.</li>
-            <li>Left-aligned, in the text colour, with room around it. One per page, near the end, as a sign-off.</li>
-            <li>Never as a heading, a button label, or on top of an image.</li>
+            <li><b>xl</b> · end of the résumé.</li>
+            <li><b>large</b> · home contact section.</li>
+            <li><b>medium</b> · tighter spots.</li>
           </ul>
         </div>
       </div>
+      <DoDont
+        do={[
+          'Use one per page, near the end, as a sign-off.',
+          'Left-align it in the text colour, with room around it.',
+        ]}
+        dont={[
+          'Use it as a heading or button label.',
+          'Put it on an image.',
+          'Type the script face as live text.',
+        ]}
+      />
     </div>
   </section>
 
@@ -229,7 +244,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">04 · Colour</div>
       <h2 class="h2" id="colour-t"><HeadingText text="Colour" /></h2>
-      <p class="bk-intro">Nine neutrals and one accent. Neutrals are soft on purpose: Paper is not white and Night is not black, so large areas never glare.</p>
+      <p class="bk-intro">Nine neutrals, one accent. Paper isn't white and Night isn't black.</p>
 
       <div class="bk-accent">
         <div class="bk-accent-chip" style={`background:${accent}`}>
@@ -237,21 +252,19 @@ const motion = [
           <b>{accent}</b>
         </div>
         <div class="bk-accent-copy">
-          <p>Set once in <code>site.yaml → theme.accent</code> and written into the page as <code>--accent</code>. Everything accent on the site reads that variable, so changing it here recolours the whole site.</p>
-          <h3 class="bk-h3">Where the accent goes</h3>
-          <ul class="bk-list">
-            <li>The full stop after the name.</li>
-            <li>Eyebrow squares and the underline bar under section headings.</li>
-            <li>The outline echo behind headings and the ring around page titles.</li>
-            <li>Link underlines as they draw on hover.</li>
-            <li>Focus rings, text selection, live dots, map pins, GitHub peaks.</li>
-            <li>The signature flourish and the edge of the ink flood.</li>
-          </ul>
-          <h3 class="bk-h3">Where it never goes</h3>
-          <ul class="bk-list">
-            <li>Section or page backgrounds. Body text. Large blocks of any kind.</li>
-            <li>Next to a second accent. There is only ever one.</li>
-          </ul>
+          <p>Change it in <code>site.yaml → theme.accent</code>. The whole site follows.</p>
+          <DoDont
+            do={[
+              'Use it for small marks: the full stop, eyebrow squares, heading underlines, link hovers.',
+              'Use it for state: focus rings, selection, live dots, map pins.',
+              'Read <code>--accent</code>. Never type the hex.',
+            ]}
+            dont={[
+              'Fill backgrounds or large blocks with it.',
+              'Set body text in it.',
+              'Add a second accent.',
+            ]}
+          />
         </div>
       </div>
 
@@ -292,7 +305,17 @@ const motion = [
           <a class="btn" href="#colour">Solid</a>
         </div>
       </div>
-      <p class="bk-note">Components never hard-code colours. They read <code>--bg</code>, <code>--fg</code>, <code>--muted</code> and <code>--line</code>, so the same button works in either tone. Alternate tones section by section; never put two dark sections next to each other.</p>
+      <DoDont
+        do={[
+          'Read <code>--bg</code>, <code>--fg</code>, <code>--muted</code> and <code>--line</code> so components work in either tone.',
+          'Alternate tones section by section.',
+        ]}
+        dont={[
+          'Hard-code colours in a component.',
+          'Put two dark sections next to each other.',
+          'Use pure white as a background.',
+        ]}
+      />
 
       <h3 class="bk-h3">Contrast</h3>
       <table class="bk-table">
@@ -303,7 +326,7 @@ const motion = [
           ))}
         </tbody>
       </table>
-      <p class="bk-note">Ratios are worked out from the live accent when the site builds. If the accent drops under 3:1 on either tone, it can still mark things but must never be the only signal (pair it with shape, weight or position).</p>
+      <p class="bk-note">Worked out from the live accent at build. Under 3:1, never let the accent be the only signal.</p>
     </div>
   </section>
 
@@ -312,49 +335,49 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">05 · Typography</div>
       <h2 class="h2" id="type-t"><HeadingText text="Typography" /></h2>
-      <p class="bk-intro">Four working faces plus two special ones, all self-hosted through Fontsource so no visitor data goes to a font CDN.</p>
+      <p class="bk-intro">Four working faces, two special ones. All self-hosted.</p>
 
       <div class="bk-fonts">
         <article class="bk-font">
           <span class="mono muted">Display · --font-display</span>
           <div class="bk-font-big f-display">Aa</div>
           <b>Bricolage Grotesque Variable</b>
-          <p>Headings, the wordmark, big numbers, menus. Mostly 800 at 80–87.5% width, uppercase, tight tracking. Weight 500 at normal width for statements.</p>
+          <p>Headings, wordmark, numbers, menus. 800 at 80–87.5% width, uppercase. 500 for statements.</p>
           <span class="mono muted">Fallback: Arial Narrow, Helvetica Neue, Arial</span>
         </article>
         <article class="bk-font">
           <span class="mono muted">Text · --font-sans</span>
           <div class="bk-font-big f-sans">Aa</div>
           <b>Instrument Sans Variable</b>
-          <p>Everything you read: body, leads, cards, tables. 400 for body, 500 for leads, 600 for emphasis. Sentence case.</p>
+          <p>Everything you read. 400 body, 500 leads, 600 emphasis. Sentence case.</p>
           <span class="mono muted">Fallback: Helvetica Neue, Helvetica, Arial</span>
         </article>
         <article class="bk-font">
           <span class="mono muted">Serif · --font-serif</span>
           <div class="bk-font-big f-serif">Aa<i>a</i></div>
           <b>Instrument Serif</b>
-          <p>The alternate voice. Optional style for big numbers and headings (site.yaml → typography), and italic for a single word of emphasis inside display type.</p>
+          <p>Optional style for numbers and headings. Italic for one word of emphasis in display type.</p>
           <span class="mono muted">Fallback: Georgia, Times New Roman</span>
         </article>
         <article class="bk-font">
           <span class="mono muted">Mono · --font-mono</span>
           <div class="bk-font-big f-mono">Aa</div>
           <b>DM Mono</b>
-          <p>Labels, eyebrows, meta lines, buttons, nav links, kbd and code. 12px, +0.14em, uppercase. 500 for keys.</p>
+          <p>Labels, eyebrows, buttons, nav, code. 12px, +0.14em, uppercase.</p>
           <span class="mono muted">Fallback: ui-monospace, Menlo, Consolas</span>
         </article>
         <article class="bk-font">
           <span class="mono muted">Pixel · hero only</span>
           <div class="bk-font-big f-pixel">Aa</div>
           <b>Pixelify Sans Variable</b>
-          <p>One job: a layer of the hero name you can dive through. Never for text anywhere else.</p>
+          <p>Hero name layer only.</p>
           <span class="mono muted">Loaded with weight axis only</span>
         </article>
         <article class="bk-font">
           <span class="mono muted">Script · signature only</span>
           <div class="bk-font-big bk-script">Ty</div>
           <b>Mrs Saint Delafield</b>
-          <p>Only ever as the signature, baked to SVG at build. Never typed as live text.</p>
+          <p>Signature only, as SVG.</p>
           <span class="mono muted">See 03 · Signature</span>
         </article>
       </div>
@@ -370,7 +393,7 @@ const motion = [
       </div>
 
       <h3 class="bk-h3">Width axis</h3>
-      <p class="bk-note">Bricolage has a width axis; the site picks a few stops and keeps to them. Narrower for bigger type.</p>
+      <p class="bk-note">Narrower for bigger type. Use only these stops.</p>
       <ul class="bk-widths">
         {[75, 80, 85, 87.5, 90, 100].map((w) => (
           <li><span class="bk-width-s" style={`font-stretch:${w}%`}>Kingston</span><span class="mono muted">{w}%{w === 75 ? ' · outline numbers' : w === 80 ? ' · section headings' : w === 85 ? ' · prose h2, small numbers' : w === 87.5 ? ' · wordmark, titles, menu' : w === 90 ? ' · row titles' : ' · statements'}</span></li>
@@ -384,16 +407,21 @@ const motion = [
         <div><span class="num bk-num-small">12.4 km · 03:58</span><span class="mono muted">.num · display 700, 85%, tabular</span></div>
       </div>
 
-      <h3 class="bk-h3">Rules</h3>
-      <ul class="bk-rules">
-        <li><b>Uppercase is for display and mono only.</b> Body and leads stay sentence case.</li>
-        <li><b>Tracking scales with size.</b> Big display goes negative (−0.02 to −0.035em); small mono goes wide (+0.14em).</li>
-        <li><b>Line height shrinks as type grows.</b> 1.55 for body, 1.25 for leads, under 0.9 for headings.</li>
-        <li><b>Keep measures short.</b> 66ch for prose, 34ch for leads, 32ch for side notes.</li>
-        <li><b>Balance headings.</b> Use <code>text-wrap: balance</code> on anything that wraps to two lines.</li>
-        <li><b>Tabular figures</b> wherever numbers line up or count.</li>
-        <li><b>No more than two faces in one component.</b> Typically display + mono, or sans + mono.</li>
-      </ul>
+      <DoDont
+        do={[
+          'Tighten big display type (−0.02 to −0.035em). Widen small mono (+0.14em).',
+          'Drop line height as size grows: 1.55 body, 1.25 leads, under 0.9 headings.',
+          'Keep prose under 66ch and leads under 34ch.',
+          'Balance headings that wrap (<code>text-wrap: balance</code>).',
+          'Use tabular figures where numbers line up.',
+        ]}
+        dont={[
+          'Uppercase body or lead text. Uppercase is for display and mono.',
+          'Mix more than two faces in one component.',
+          'Use the pixel or script face anywhere else.',
+          'Pick a width that isn\'t on the list.',
+        ]}
+      />
     </div>
   </section>
 
@@ -402,7 +430,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">06 · Corner rounding</div>
       <h2 class="h2" id="corners-t"><HeadingText text="Corners" /></h2>
-      <p class="bk-intro">Corners say what something is. Things you press are fully round. Things you read are nearly square. Things that mark or measure are square. Pick from this scale; nothing in between.</p>
+      <p class="bk-intro">Press: round. Read: nearly square. Mark: square. Use only these values.</p>
 
       <ul class="bk-radii">
         {radii.map((r) => (
@@ -420,17 +448,17 @@ const motion = [
         <div class="bk-panel bk-on-light bk-family">
           <div class="bk-family-demo"><a class="btn" href="#corners">Press</a><span class="bk-chip-demo">Chip</span><span class="bk-disc-demo">→</span></div>
           <b>Pill · 999px / 50%</b>
-          <p>Buttons, nav links, toggles, chips, hints. The pill is the site's signal for "you can press this".</p>
+          <p>Buttons, nav, toggles, chips. If it's a pill, you can press it.</p>
         </div>
         <div class="bk-panel bk-on-light bk-family">
           <div class="bk-family-demo"><span class="bk-img-demo"></span><span class="bk-card-demo"></span></div>
           <b>Soft · 4–10px</b>
-          <p>Images, tiles, cards, frames. Small enough to read as square, round enough not to cut.</p>
+          <p>Images, tiles, cards, frames.</p>
         </div>
         <div class="bk-panel bk-on-light bk-family">
           <div class="bk-family-demo"><span class="bk-sq-demo"></span><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="bk-rule-demo"></span></div>
           <b>Square · 0</b>
-          <p>Markers, meters, rules, bullets (■). Square is the house bullet; never use a round dot as a list marker.</p>
+          <p>Markers, meters, rules, bullets (■). Never a round bullet.</p>
         </div>
       </div>
 
@@ -445,7 +473,7 @@ const motion = [
           <p><b>Don't:</b> repeat the same radius inside, which makes the gap look pinched at the corners.</p>
         </div>
       </div>
-      <p class="bk-note">The raster fallbacks (favicon.ico, the Apple touch icon) can't switch with the browser theme, so they put the mark on a Night tile with a 7/32 corner (22%), because at 16px anything smaller disappears.</p>
+      <p class="bk-note">Exception: the raster favicons sit on a Night tile with a 7/32 corner (22%), so it survives at 16px.</p>
     </div>
   </section>
 
@@ -454,14 +482,23 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">07 · Lines & borders</div>
       <h2 class="h2" id="lines-t"><HeadingText text="Lines" /></h2>
-      <p class="bk-intro">Two weights, one dash. Lines separate; they never decorate.</p>
+      <p class="bk-intro">Lines separate. They never decorate.</p>
       <ul class="bk-lines">
-        <li><span class="l-hair"></span><b>1px · --line</b><p>Hairlines between rows, around tiles and frames, under table cells. The quiet default.</p></li>
-        <li><span class="l-rule"></span><b>1.5px · --fg</b><p>Strong rules: under page titles, above row lists, the outline of ghost buttons and chips. Starts a group.</p></li>
-        <li><span class="l-dash"></span><b>1.5px dashed · --fg</b><p>Notes and asides in prose (blockquotes), 4px corners. Means "this is a side remark".</p></li>
-        <li><span class="l-accent"></span><b>1px · accent 45%</b><p>The edge of a dark floating pill on any background. The only coloured border.</p></li>
+        <li><span class="l-hair"></span><b>1px · --line</b><p>Between rows, around tiles and frames. The default.</p></li>
+        <li><span class="l-rule"></span><b>1.5px · --fg</b><p>Starts a group: under titles, above lists, ghost outlines.</p></li>
+        <li><span class="l-dash"></span><b>1.5px dashed · --fg</b><p>Side remarks in prose.</p></li>
+        <li><span class="l-accent"></span><b>1px · accent 45%</b><p>Edge of a dark floating pill.</p></li>
       </ul>
-      <p class="bk-note">Ghost buttons draw their outline with <code>box-shadow: inset 0 0 0 1.5px</code> instead of a border, so solid and ghost buttons are exactly the same size.</p>
+      <DoDont
+        do={[
+          'Draw ghost button outlines with <code>box-shadow: inset 0 0 0 1.5px</code>, so they match solid buttons in size.',
+          'Start with a hairline. Step up to 1.5px only to start a group.',
+        ]}
+        dont={[
+          'Add a line just for decoration.',
+          'Colour a border, except the floating pill edge.',
+        ]}
+      />
     </div>
   </section>
 
@@ -470,7 +507,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">08 · Spacing & layout</div>
       <h2 class="h2" id="space-t"><HeadingText text="Spacing" /></h2>
-      <p class="bk-intro">Full-bleed bands with a fixed gutter, generous vertical rhythm, and a short list of gaps.</p>
+      <p class="bk-intro">Full-bleed bands, a fixed gutter, a short list of gaps.</p>
 
       <h3 class="bk-h3">Gap scale</h3>
       <ul class="bk-space">
@@ -493,14 +530,20 @@ const motion = [
         </tbody>
       </table>
 
-      <h3 class="bk-h3">Layout rules</h3>
-      <ul class="bk-rules">
-        <li><b>Bands go edge to edge;</b> content inside keeps the gutter. No centred max-width box around the whole page.</li>
-        <li><b>Headings left, notes right.</b> A section's side note sits right-aligned beside its heading and drops under it on small screens.</li>
-        <li><b>CTAs sit bottom right</b> of their section, as a big underlined display link with an arrow.</li>
-        <li><b>Grids use <code>minmax(0, 1fr)</code></b> so long words can't push columns wider than the screen.</li>
-        <li><b>Never scroll sideways.</b> Wide tables scroll inside themselves.</li>
-      </ul>
+      <DoDont
+        do={[
+          'Run bands edge to edge. Keep content inside the gutter.',
+          'Put headings left and side notes right.',
+          'Put section CTAs bottom right.',
+          'Use <code>minmax(0, 1fr)</code> in grids.',
+          'Let wide tables scroll inside themselves.',
+        ]}
+        dont={[
+          'Wrap the page in a centred max-width box.',
+          'Let anything scroll the page sideways.',
+          'Use a gap that isn\'t on the scale.',
+        ]}
+      />
     </div>
   </section>
 
@@ -509,13 +552,23 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">09 · Elevation</div>
       <h2 class="h2" id="depth-t"><HeadingText text="Elevation" /></h2>
-      <p class="bk-intro">The page is flat. Only things that float above it (popovers, hints, the loader) get a shadow, and always the same kind: soft, low, pulled in with a negative spread.</p>
+      <p class="bk-intro">The page is flat. Only floating things get a shadow.</p>
       <ul class="bk-shadows">
         <li><div class="bk-sh s1">Hint</div><code>0 10px 26px -12px rgb(0 0 0 / .45)</code><p>Small floating pills.</p></li>
         <li><div class="bk-sh s2">Popover</div><code>0 12px 32px -12px rgb(0 0 0 / .45)</code><p>Info cards for books and places.</p></li>
         <li><div class="bk-sh s3">Overlay</div><code>0 18px 44px -16px rgb(0 0 0 / .55)</code><p>The biggest float: loader and cookie card.</p></li>
       </ul>
-      <p class="bk-note">No shadows on cards, buttons or images in the flow. Separation comes from tone, lines and space. Floating things are usually inverted (Night on Paper, or the text colour as background).</p>
+      <DoDont
+        do={[
+          'Use one of these three shadows, and only on things that float.',
+          'Invert floating things: Night on Paper.',
+          'Separate in-flow things with tone, lines and space.',
+        ]}
+        dont={[
+          'Shadow cards, buttons or images in the flow.',
+          'Make a new shadow.',
+        ]}
+      />
     </div>
   </section>
 
@@ -524,48 +577,48 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">10 · Components</div>
       <h2 class="h2" id="components-t"><HeadingText text="Components" /></h2>
-      <p class="bk-intro">The real components, live. Hover them.</p>
+      <p class="bk-intro">Live. Hover them.</p>
 
       <div class="bk-comps">
         <div class="bk-comp">
           <div class="bk-comp-demo"><a class="btn" href="#components"><span>■</span>View résumé</a><a class="btn btn-ghost" href="#components">Ghost</a></div>
           <b>.btn / .btn-ghost</b>
-          <p>Pill, 15px × 24px padding, mono label. Lead with a ■ or end with an arrow. One solid button per group; the rest are ghost.</p>
+          <p>One solid per group, the rest ghost. Lead with ■ or end with an arrow.</p>
         </div>
         <div class="bk-comp">
           <div class="bk-comp-demo"><ContactButton lang={lang} label="Let's talk" to="#components" /></div>
           <b>ContactButton</b>
-          <p>The split pill: 52px tall. The label rolls up to a copy of itself and the disc turns 45° toward you. Reserved for the main call to action.</p>
+          <p>Main call to action only. One per page.</p>
         </div>
         <div class="bk-comp">
           <div class="bk-comp-demo"><a class="link" href="#components">Read the case study</a></div>
           <b>.link</b>
-          <p>Mono uppercase with a 1.5px underline in the text colour; the accent draws over it left to right in .5s.</p>
+          <p>For inline actions. The accent draws over the underline on hover.</p>
         </div>
         <div class="bk-comp">
           <div class="bk-comp-demo"><span class="eyebrow mono">Selected work</span></div>
           <b>.eyebrow</b>
-          <p>An 8px accent square, then a mono label. Sits above every section heading.</p>
+          <p>Put one above every section heading.</p>
         </div>
         <div class="bk-comp">
           <div class="bk-comp-demo"><a class="bk-cta" href="#components"><span>All projects</span><svg width="28" height="16" viewBox="0 0 28 16" aria-hidden="true"><path d="M0 8h25M18 1l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a></div>
           <b>Section CTA</b>
-          <p>Display 700 at 85%, uppercase, 2px underline, long arrow that slides 8px on hover.</p>
+          <p>Ends a section, bottom right.</p>
         </div>
         <div class="bk-comp">
           <div class="bk-comp-demo"><span>Press <kbd>⇧ B</kbd></span><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
           <b>kbd · .meter</b>
-          <p>Keys get a 1px current-colour border and 3px corners. Meters are 10px squares, filled in the text colour.</p>
+          <p>Keys get a 1px border. Meters are 10px squares in the text colour.</p>
         </div>
         <div class="bk-comp">
           <div class="bk-comp-demo bk-chips"><span class="bk-chip">Kingston</span><span class="bk-chip on">Vancouver</span></div>
           <b>Chip</b>
-          <p>1.5px Line outline, darkens to the text colour on hover; pressed fills with the accent and white text.</p>
+          <p>Outline at rest. Accent fill when pressed.</p>
         </div>
         <div class="bk-comp">
           <div class="bk-comp-demo"><span class="bk-pop"><b>The Old Man and the Sea</b><span class="mono">Hemingway · 1952</span></span></div>
           <b>Popover card</b>
-          <p>Inverted colours, 6px corners, 12 × 14px padding, max 260px wide, soft shadow.</p>
+          <p>Inverted, 6px corners, max 260px wide.</p>
         </div>
       </div>
 
@@ -574,7 +627,16 @@ const motion = [
         <div class="eyebrow mono">04 · Example</div>
         <h2 class="h2 in"><HeadingText text="Heading" /></h2>
       </div>
-      <p class="bk-note">An eyebrow, then the heading. As it scrolls in, an accent bar 1.4em wide slides in under its first letters; behind it, an accent outline copy drifts with the pointer (site.yaml → theme.headingEcho).</p>
+      <DoDont
+        do={[
+          'Always put an eyebrow above the heading.',
+          'Keep headings to one or two words.',
+        ]}
+        dont={[
+          'Use more than one solid button or ContactButton in a group.',
+          'Restyle a component for one page. Change it everywhere or not at all.',
+        ]}
+      />
     </div>
   </section>
 
@@ -583,7 +645,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">11 · Icons & markers</div>
       <h2 class="h2" id="icons-t"><HeadingText text="Icons" /></h2>
-      <p class="bk-intro">Almost no icons. The few there are are drawn inline as SVG with plain strokes; there is no icon font or icon library.</p>
+      <p class="bk-intro">Almost none. Inline SVG strokes only.</p>
       <ul class="bk-icons">
         <li><svg width="28" height="16" viewBox="0 0 28 16" aria-hidden="true"><path d="M0 8h25M18 1l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><b>Long arrow</b><span class="mono muted">CTAs · 1.6 stroke</span></li>
         <li><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><b>Arrow</b><span class="mono muted">Contact disc · 1.6</span></li>
@@ -592,12 +654,19 @@ const motion = [
         <li><span class="bk-ic-grip"><i></i><i></i><i></i><i></i></span><b>Grip</b><span class="mono muted">Menu · 3px dots</span></li>
         <li><span class="bk-ic-dot"></span><b>Live dot</b><span class="mono muted">Accent · pulses</span></li>
       </ul>
-      <ul class="bk-rules">
-        <li><b>Strokes, not fills:</b> 1.5–1.6 at small sizes, butt caps, current colour.</li>
-        <li><b>Square markers:</b> ■ as a text bullet (9px), or a 7–8px box before labels.</li>
-        <li><b>Arrows move toward where they go</b> on hover: right for next, 45° for out.</li>
-        <li><b>Decorative icons are <code>aria-hidden</code>;</b> the text next to them carries the meaning.</li>
-      </ul>
+      <DoDont
+        do={[
+          'Draw strokes at 1.5–1.6, butt caps, in <code>currentColor</code>.',
+          'Use ■ as the bullet.',
+          'Move arrows toward where they go on hover: right for next, 45° for out.',
+          'Mark decorative icons <code>aria-hidden</code> and let the text carry the meaning.',
+        ]}
+        dont={[
+          'Add an icon font or icon library.',
+          'Use filled icons or round bullets.',
+          'Use an icon without a text label.',
+        ]}
+      />
     </div>
   </section>
 
@@ -606,7 +675,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">12 · Motion</div>
       <h2 class="h2" id="motion-t"><HeadingText text="Motion" /></h2>
-      <p class="bk-intro">One curve for almost everything: a fast start that settles softly. Things arrive, they don't bounce.</p>
+      <p class="bk-intro">One curve. Things arrive; they don't bounce.</p>
       <div class="bk-grid2">
         <div class="bk-panel bk-on-light">
           <svg class="bk-curve" viewBox="-.05 -.05 1.1 1.1" aria-label="The ease curve">
@@ -631,13 +700,25 @@ const motion = [
       </table>
       <h3 class="bk-h3">Signature moments</h3>
       <ul class="bk-rules">
-        <li><b>Ink flood:</b> an organic ink circle with a thin accent rim covers the screen between pages.</li>
-        <li><b>Menu:</b> opens as a growing circle from the button, .8s.</li>
-        <li><b>Build mode:</b> a crowd of cursors draws the home page in as wireframes (Shift+B).</li>
-        <li><b>Tilt cards:</b> cards lean toward the pointer, an accent outline drifting the other way.</li>
-        <li><b>Inverting cursor:</b> a dot that inverts what's under it, keeping the accent the accent.</li>
+        <li><b>Ink flood:</b> covers the screen between pages.</li>
+        <li><b>Menu:</b> grows as a circle from the button.</li>
+        <li><b>Build mode:</b> cursors draw the home page as wireframes (Shift+B).</li>
+        <li><b>Tilt cards:</b> lean toward the pointer.</li>
+        <li><b>Inverting cursor:</b> inverts what's under it.</li>
       </ul>
-      <p class="bk-note">Every effect has a switch in <code>site.yaml → interactive</code>, and all of them stop at once for <code>prefers-reduced-motion</code> or the footer's motion toggle (<code>html.no-motion</code>). Hover effects only run where there is a real hover, so a first tap on a phone is never wasted.</p>
+      <DoDont
+        do={[
+          'Use <code>--ease</code> and a duration from the table.',
+          'Give every effect a switch in <code>site.yaml → interactive</code>.',
+          'Stop everything for <code>prefers-reduced-motion</code> and the footer toggle.',
+          'Run hover effects only where real hover exists.',
+        ]}
+        dont={[
+          'Use linear or overshoot easing.',
+          'Animate anything without a reason.',
+          'Add a sixth signature moment.',
+        ]}
+      />
     </div>
   </section>
 
@@ -646,12 +727,24 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">13 · Imagery</div>
       <h2 class="h2" id="imagery-t"><HeadingText text="Imagery" /></h2>
-      <p class="bk-intro">Photos stay in the monochrome world, so the accent never has to compete.</p>
+      <p class="bk-intro">Photos stay monochrome, so the accent never competes.</p>
       <div class="bk-grid3">
-        <div class="bk-panel bk-on-dark"><div class="bk-img gray"></div><b>Greyscale</b><p>Portraits and photos on this site are shown in greyscale. Colour photography lives on the photo site.</p></div>
-        <div class="bk-panel bk-on-dark"><div class="bk-img grain"></div><b>Grain</b><p>A fine static (<code>--grain</code>, 9% noise) over gradients, so they never band into steps.</p></div>
-        <div class="bk-panel bk-on-dark"><div class="bk-img ratio"><span class="mono">4:5 · 4:3 · 16:10</span></div><b>Ratios & wells</b><p>Portrait 4:5, project thumbs 4:3, screenshots 16:10 in a browser frame. #D6D6D6 wells hold the space while loading. 4px corners.</p></div>
+        <div class="bk-panel bk-on-dark"><div class="bk-img gray"></div><b>Greyscale</b><p>Show every photo in greyscale.</p></div>
+        <div class="bk-panel bk-on-dark"><div class="bk-img grain"></div><b>Grain</b><p>Put <code>--grain</code> over gradients so they don't band.</p></div>
+        <div class="bk-panel bk-on-dark"><div class="bk-img ratio"><span class="mono">4:5 · 4:3 · 16:10</span></div><b>Ratios</b><p>Portrait 4:5, thumbs 4:3, screenshots 16:10.</p></div>
       </div>
+      <DoDont
+        do={[
+          'Hold space with a #D6D6D6 well while images load.',
+          'Round images 4px.',
+          'Put screenshots in a browser frame.',
+        ]}
+        dont={[
+          'Show colour photos here. They belong on the photo site.',
+          'Crop to a ratio not on the list.',
+          'Put text on top of a photo.',
+        ]}
+      />
     </div>
   </section>
 
@@ -660,7 +753,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">14 · Voice & writing</div>
       <h2 class="h2" id="voice-t"><HeadingText text="Voice" /></h2>
-      <p class="bk-intro">Plain, first person, short. Say what it is and what it does; let the design be the loud part.</p>
+      <p class="bk-intro">Plain, first person, short. Let the design be loud.</p>
       <div class="bk-grid2">
         <div class="bk-panel bk-on-light bk-voice do">
           <span class="mono">Do</span>
@@ -683,13 +776,19 @@ const motion = [
           </ul>
         </div>
       </div>
-      <ul class="bk-rules">
-        <li><b>Labels are nouns or short verbs:</b> "Work", "Résumé", "View résumé", "Visit the photo site".</li>
-        <li><b>The middle dot ( · ) separates</b> items in a meta line: "Kingston · Ontario · Canada".</li>
-        <li><b>The en dash ( – ) for ranges:</b> 2022–2026. Never a hyphen.</li>
-        <li><b>Real quotes and apostrophes:</b> ’ “ ”, not ' and ".</li>
-        <li><b>Every string lives in <code>src/i18n</code></b> so the site can be translated.</li>
-      </ul>
+      <DoDont
+        do={[
+          'Label with nouns or short verbs: “Work”, “View résumé”.',
+          'Separate meta items with a middle dot: Kingston · Ontario.',
+          'Use an en dash for ranges: 2022–2026.',
+          'Use real quotes and apostrophes: ’ “ ”.',
+          'Put every string in <code>src/i18n</code>.',
+        ]}
+        dont={[
+          'Use a hyphen for ranges.',
+          'Hard-code text in a component.',
+        ]}
+      />
     </div>
   </section>
 
@@ -698,19 +797,24 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">15 · Accessibility</div>
       <h2 class="h2" id="a11y-t"><HeadingText text="Access" /></h2>
-      <p class="bk-intro">The playful parts are extras on top of a page that works without them.</p>
+      <p class="bk-intro">The playful parts are extras. The page works without them.</p>
       <div class="bk-grid2">
-        <div class="bk-panel bk-on-dark"><div class="bk-comp-demo"><span class="btn bk-focus">Focused</span></div><b>Focus ring</b><p>2px accent outline, 3px offset, 3px corners, shown only for keyboard focus (<code>:focus-visible</code>).</p></div>
-        <div class="bk-panel bk-on-dark"><div class="bk-comp-demo"><span>Some <span class="bk-selected">selected text</span> here.</span></div><b>Selection</b><p>Accent at 34% behind the text; the text keeps its own colour.</p></div>
+        <div class="bk-panel bk-on-dark"><div class="bk-comp-demo"><span class="btn bk-focus">Focused</span></div><b>Focus ring</b><p>2px accent outline, 3px offset. Keyboard only (<code>:focus-visible</code>).</p></div>
+        <div class="bk-panel bk-on-dark"><div class="bk-comp-demo"><span>Some <span class="bk-selected">selected text</span> here.</span></div><b>Selection</b><p>Accent at 34%. Text keeps its colour.</p></div>
       </div>
-      <ul class="bk-rules">
-        <li><b>Contrast:</b> body text is AAA on both tones; muted text stays AA.</li>
-        <li><b>Motion:</b> reduced motion and the in-page toggle both cut every animation to an instant.</li>
-        <li><b>High contrast:</b> in forced-colours mode the custom cursor, ink flood and blend effects switch off and the system takes over.</li>
-        <li><b>No JavaScript:</b> titles size with CSS, rows open, and controls that need scripts hide.</li>
-        <li><b>Touch:</b> hover effects only where hover exists; targets are at least 44px where they can be.</li>
-        <li><b>Meaning never rests on colour alone.</b> The accent always comes with a shape, a weight or a position.</li>
-      </ul>
+      <DoDont
+        do={[
+          'Keep body text AAA and muted text AA on both tones.',
+          'Make touch targets at least 44px.',
+          'Make the page work without JavaScript. Hide controls that need it.',
+          'Switch custom effects off in forced-colours mode.',
+        ]}
+        dont={[
+          'Let colour be the only signal. Add a shape, weight or position.',
+          'Show focus rings on mouse clicks.',
+          'Hide the system cursor outside the effect.',
+        ]}
+      />
     </div>
   </section>
 
@@ -719,7 +823,7 @@ const motion = [
     <div class="wrap section">
       <div class="eyebrow mono">16 · Tokens</div>
       <h2 class="h2" id="tokens-t"><HeadingText text="Tokens" /></h2>
-      <p class="bk-intro">The source of truth is <code>src/styles/global.css</code> (and the accent in <code>site.yaml</code>). This is the short version to copy into anything that should look like the site.</p>
+      <p class="bk-intro">Copy this into anything that should match. Source: <code>src/styles/global.css</code> and <code>site.yaml</code>.</p>
       <pre class="bk-code"><code>{`:root {
   /* colour */
   --ink: #0B0B0B;  --paper: #E6E6E6;  --night: #161616;  --white: #FFFFFF;
