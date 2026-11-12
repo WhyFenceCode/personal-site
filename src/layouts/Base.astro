@@ -39,7 +39,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, noai, noimageai'} />
     <meta name="tdm-reservation" content="1" />
     <link rel="canonical" href={canonical} />
-    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="alternate" type="text/markdown" title="llms.txt" href="/llms.txt" />
     {languages.map((l) => <link rel="alternate" hreflang={l} href={new URL(switchPath(Astro.url.pathname, l), Astro.site ?? site.url).href} />)}
     <meta property="og:title" content={fullTitle} />

@@ -1,0 +1,4 @@
+# Redirects for Cloudflare Pages (also read by Netlify).
+# The sitemap used to live at /sitemap-index.xml; it is now one file at /sitemap.xml.
+/sitemap-index.xml  /sitemap.xml  301
+/sitemap-0.xml      /sitemap.xml  301
