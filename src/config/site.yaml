@@ -26,7 +26,7 @@ github:
   username: "WhyFenceCode"              # your GitHub handle. Public contributions only. Empty = sample data.
 
 resume:
-  pdf: ""                  # e.g. /resume.pdf (file in /public) or a full URL. Empty hides the download buttons.
+  pdf: "/resume_torstenyoung.pdf"                  # e.g. /resume.pdf (file in /public) or a full URL. Empty hides the download buttons.
 
 # Your photo. Used on the About page and as the image when the site is shared (link previews).
 portrait:
