@@ -8,9 +8,10 @@ import { createStage } from '../scripts/model-scene';
 import { motionOn } from '../scripts/motion';
 
 /** fill: take the height of the parent (e.g. a pinned side panel) instead of a fixed 16:9-ish box. */
-type Props = { src: string; title: string; hint: string; fill?: boolean };
+/** angle: where the model starts, in degrees (the project's `modelAngle`, same as its work card). */
+type Props = { src: string; title: string; hint: string; fill?: boolean; angle?: { turn: number; tilt: number } };
 
-export default function ProjectModel({ src, title, hint, fill = false }: Props) {
+export default function ProjectModel({ src, title, hint, fill = false, angle = { turn: 54, tilt: 26 } }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
 
@@ -25,8 +26,8 @@ export default function ProjectModel({ src, title, hint, fill = false }: Props) 
     stage.load(src).then(() => { if (alive) { setState('ready'); kick(); } }, () => alive && setState('error'));
 
     // Drag sideways to spin, up and down to tip it a little towards or away from you (pitch is clamped).
-    let yaw = 0.6, vel = 0, pitch = fill ? 0.25 : 0, drag = false, lx = 0, ly = 0;
-    const PITCH = 0.7;
+    let yaw = angle.turn * Math.PI / 180, vel = 0, pitch = angle.tilt * Math.PI / 180, drag = false, lx = 0, ly = 0;
+    const PITCH = 0.7, P0 = pitch; // up to ~40° either way from the starting tilt
     const loop = () => {
       raf = 0; if (!alive) return;
       if (!drag) { vel *= 0.95; yaw += vel + (motionOn() ? 0.002 : 0); }
@@ -43,13 +44,13 @@ export default function ProjectModel({ src, title, hint, fill = false }: Props) 
     cv.addEventListener('pointermove', (e) => {
       if (!drag) return;
       vel = (e.clientX - lx) * 0.008; yaw += vel; lx = e.clientX;
-      pitch = Math.max(-PITCH, Math.min(PITCH, pitch + (e.clientY - ly) * 0.006)); ly = e.clientY;
+      pitch = Math.max(P0 - PITCH, Math.min(P0 + PITCH, pitch + (e.clientY - ly) * 0.006)); ly = e.clientY;
     });
     const up = () => { drag = false; };
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
     const ro = new ResizeObserver(size); ro.observe(el);
     return () => { alive = false; cancelAnimationFrame(raf); ro.disconnect(); stage.dispose(); };
-  }, [src, fill]);
+  }, [src, fill, angle.turn, angle.tilt]);
 
   return (
     <figure className="model" aria-label={`3D model: ${title}`}>

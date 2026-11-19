@@ -28,7 +28,7 @@ const years = projects.map((p) => p.data.year);
     <div class="grid" data-grid>
       {projects.map((p) => (
         <a class="card" href={href(lang, `work/${slugOf(p.id)}`)} data-cat={p.data.category}>
-          <div class="thumb" data-model-card={!coverFor(p) && p.data.model ? p.data.model : undefined}>
+          <div class="thumb" data-model-card={!coverFor(p) && p.data.model ? p.data.model : undefined} data-model-turn={p.data.modelAngle.turn} data-model-tilt={p.data.modelAngle.tilt}>
             {coverFor(p)
               ? <Image src={coverFor(p)!} alt="" widths={[480, 800, 1200]} sizes="(max-width: 720px) 100vw, 50vw" class="cover" />
               : p.data.model

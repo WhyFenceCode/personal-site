@@ -73,7 +73,7 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
       </div>
     </div>
    </div>
-    {d.model && <div class="case-side"><ProjectModel client:visible src={d.model} title={d.title} hint={t(lang, 'work.modelHint')} fill /></div>}
+    {d.model && <div class="case-side"><ProjectModel client:visible src={d.model} title={d.title} hint={t(lang, 'work.modelHint')} angle={d.modelAngle} fill /></div>}
   </article>
 
   <div class="tone-dark">
@@ -135,7 +135,9 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
   .metrics { list-style: none; margin: 0 0 56px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px; }
   .metrics li { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 10px; }
   .metrics .stat { font-size: clamp(56px, 6vw, 96px); }
-  .overview, .case-prose :global(h2) { font-family: var(--font-display); font-weight: 600; font-stretch: 100%; text-transform: none; letter-spacing: -.025em; font-size: clamp(30px, 3vw, 44px); line-height: 1.05; margin: 0 0 18px; }
+  .overview, .case-prose :global(h2) { font-family: var(--font-display); font-weight: 800; font-stretch: 85%; text-transform: none; letter-spacing: -.03em; font-size: clamp(38px, 4.4vw, 64px); line-height: .95; margin: 0 0 20px; color: var(--fg); }
+  /* Sub-sections (### in Markdown): clearly a step below the h2, but still above the body text. */
+  .case-prose :global(h3) { font-family: var(--font-display); font-weight: 700; font-stretch: 90%; letter-spacing: -.02em; font-size: clamp(22px, 1.8vw, 27px); line-height: 1.1; margin: 36px 0 10px; }
   .case-prose { max-width: 62ch; }
   .case-prose :global(h2) { margin-top: 56px; }
   .case-prose :global(h2:first-child) { margin-top: 0; }

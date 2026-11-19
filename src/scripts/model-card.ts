@@ -6,8 +6,7 @@
 import { createStage } from './model-scene';
 import { ditherCtx } from './art';
 
-// Leading edge towards the viewer, three-quarter view from a little above (the mast's pointed trailing edge is +X).
-const YAW = 0.95, TILT = 0.45;
+const rad = Math.PI / 180;
 
 export function initModelCards(root: ParentNode = document): () => void {
   const cleanups: (() => void)[] = [];
@@ -18,12 +17,16 @@ export function initModelCards(root: ParentNode = document): () => void {
     io.observe(thumb);
     cleanups.push(() => { alive = false; io.disconnect(); cleanup(); });
 
+    // The pose comes from the project's `modelAngle` (degrees); defaults suit a model exported front-on.
+    const YAW = (+(thumb.dataset.modelTurn ?? 54)) * rad, TILT = (+(thumb.dataset.modelTilt ?? 26)) * rad;
+
     async function start() {
       const cv = thumb.querySelector<HTMLCanvasElement>('canvas.smooth')!, stage = createStage(thumb, 'fit', cv);
       try { await stage.load(thumb.dataset.modelCard!); } catch { stage.dispose(); return; }
       if (!alive) { stage.dispose(); return; }
 
-      const size = () => { const w = thumb.clientWidth, h = thumb.clientHeight; if (w && h) stage.setSize(w, h); };
+      // Pose it, then frame what the camera actually sees, so any model sits in the visual centre of the card.
+      const size = () => { const w = thumb.clientWidth, h = thumb.clientHeight; if (!w || !h) return; stage.setSize(w, h); stage.pivot.rotation.set(TILT, YAW, 0); stage.frameToView(1.25); };
       const draw = () => { stage.pivot.rotation.set(TILT, YAW, 0); stage.render(); };
       // The still: render at the resting angle, shrink it to the dither canvas and dither it like the placeholder art.
       const paintStill = () => {

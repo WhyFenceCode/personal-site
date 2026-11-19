@@ -23,6 +23,9 @@ const projects = defineCollection({
     live: z.url().optional(),      // the live site: "Visit the site" button, screenshot cover, live preview
     preview: z.boolean().default(true),     // false = never offer the interactive live preview
     model: z.string().optional(),           // a 3D model to spin, e.g. /models/foil.glb (file in public/models/); see docs/guides/3d-models.md
+    // How the model is turned on its work card (and where the project page's viewer starts), in degrees:
+    // turn = spin around the vertical axis, tilt = tip the top towards you. See docs/guides/3d-models.md
+    modelAngle: z.object({ turn: z.number().default(54), tilt: z.number().default(26) }).default({ turn: 54, tilt: 26 }),
     client: z.string().optional(),
     services: z.array(z.string()).default([]),
     metrics: z.array(z.object({ value: z.union([z.string(), z.number()]), label: z.string() })).default([]),

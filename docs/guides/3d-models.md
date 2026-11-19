@@ -30,12 +30,30 @@ Put the file in `public/models/`, then add one line to the project's Markdown fr
 model: /models/foil.glb
 ```
 
-Run `pnpm dev` and open the project page. The model appears under the screenshot/live preview. Drag to spin it.
+Run `pnpm dev` and open the project page. The model sits pinned on the right while the story scrolls on the left.
+Drag to spin it (and up/down to tip it). On the work page, the project's card shows a dithered still of the model
+that turns smooth on hover.
+
+## 4. Point it the right way (optional)
+The card shows the model from one fixed angle, and the project page's viewer starts there too. If your model faces
+away or sideways, set the angle in the frontmatter, in degrees:
+
+```yaml
+modelAngle: { turn: 54, tilt: 26 }
+```
+
+- `turn` spins it around the vertical axis. Try steps of 90 (e.g. `-126`, `144`) to find the side you want facing
+  you, then fine-tune. Positive turns it anticlockwise as seen from above.
+- `tilt` tips the top towards you so you look down on it a little. `0` is level, `26` is the default.
+
+The card always centres and sizes whatever the camera sees at that angle, so you only pick the angle, not the
+framing.
 
 ## Troubleshooting
 | Problem | Fix |
 | --- | --- |
 | "Couldn't load /models/…" under the model area | Check the path in `model:` matches the file in `public/models/` |
 | Model is tiny, huge or off-centre | The viewer centres and frames it automatically; if it's still odd, apply scale and rotation in Blender (**Ctrl+A → All Transforms**) before exporting |
+| Card shows the back or side of the model | Change `turn` in `modelAngle` (step 4) |
 | Looks flat or black | Give it a material in Blender before export; the default grey works but metal looks better |
 | Page feels slow | The file is too big: decimate in Blender and run the optimize command again |

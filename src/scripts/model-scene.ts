@@ -13,6 +13,11 @@ export type ModelStage = {
   radius: number;
   load(src: string): Promise<void>;
   setSize(w: number, h: number): void;
+  /**
+   * Frame the model as it looks right now (pivot's current rotation): centres its silhouette on screen and sizes it
+   * to fill the view, with `margin` breathing room. For still poses (the cards); a spinning model keeps `fit`.
+   */
+  frameToView(margin?: number): void;
   render(): void;
   dispose(): void;
 };
@@ -34,6 +39,33 @@ export function createStage(accentFrom: Element, fit: 'side' | 'fit' = 'side', c
   const pivot = new THREE.Group(); scene.add(pivot);
 
   const size = new THREE.Vector3();
+  let points: THREE.Vector3[] = []; // a sample of the model's vertices, in the pivot's space
+
+  const frameToView = (m = margin) => {
+    if (!points.length) return;
+    pivot.updateMatrixWorld(true);
+    const world = points.map((p) => p.clone().applyMatrix4(pivot.matrixWorld));
+    const target = new THREE.Vector3(), back = cam.position.clone().normalize(); // keep the current viewing direction
+    const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), back).normalize();
+    const up = new THREE.Vector3().crossVectors(back, right);
+    const tanV = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2));
+    // First guess, ignoring perspective: centre and size from the silhouette as seen straight on.
+    let r0 = Infinity, r1 = -Infinity, u0 = Infinity, u1 = -Infinity, near = -Infinity;
+    for (const p of world) { const r = p.dot(right), u = p.dot(up); r0 = Math.min(r0, r); r1 = Math.max(r1, r); u0 = Math.min(u0, u); u1 = Math.max(u1, u); near = Math.max(near, p.dot(back)); }
+    target.addScaledVector(right, (r0 + r1) / 2).addScaledVector(up, (u0 + u1) / 2);
+    let dist = Math.max((u1 - u0) / 2 / tanV, (r1 - r0) / 2 / (tanV * cam.aspect)) * m + Math.max(0, near);
+    // Then correct for perspective with what the camera really sees, a few times until it settles.
+    const ndc = new THREE.Vector3();
+    for (let i = 0; i < 4; i++) {
+      cam.position.copy(target).addScaledVector(back, dist); cam.lookAt(target); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      for (const p of world) { ndc.copy(p).project(cam); x0 = Math.min(x0, ndc.x); x1 = Math.max(x1, ndc.x); y0 = Math.min(y0, ndc.y); y1 = Math.max(y1, ndc.y); }
+      const h = dist * tanV, w = h * cam.aspect;
+      target.addScaledVector(right, ((x0 + x1) / 2) * w).addScaledVector(up, ((y0 + y1) / 2) * h);
+      dist *= Math.max((x1 - x0) / 2, (y1 - y0) / 2) * m;
+    }
+    cam.position.copy(target).addScaledVector(back, dist); cam.lookAt(target); cam.updateProjectionMatrix();
+  };
   const frame = () => {
     const r = stage.radius; if (!r) return;
     cam.near = r / 100; cam.far = r * 20;
@@ -60,10 +92,20 @@ export function createStage(accentFrom: Element, fit: 'side' | 'fit' = 'side', c
         const box = new THREE.Box3().setFromObject(model), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
         model.position.sub(c); pivot.add(model);
         stage.radius = Math.max(s.x, s.y, s.z); size.copy(s);
+        // Keep up to ~20k vertices for frameToView: plenty to find the silhouette, cheap to project.
+        model.updateMatrixWorld(true); points = [];
+        let total = 0; model.traverse((o) => { if ((o as THREE.Mesh).isMesh) total += (o as THREE.Mesh).geometry.attributes.position.count; });
+        const step = Math.max(1, Math.floor(total / 20000));
+        model.traverse((o) => {
+          const mesh = o as THREE.Mesh; if (!mesh.isMesh) return;
+          const pos = mesh.geometry.attributes.position;
+          for (let i = 0; i < pos.count; i += step) points.push(new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld));
+        });
         frame(); ok();
       }, undefined, fail);
     }),
     setSize: (w, h) => { renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); frame(); },
+    frameToView,
     render: () => renderer.render(scene, cam),
     dispose: () => { pmrem.dispose(); renderer.dispose(); if (!canvas) renderer.domElement.remove(); },
   };
