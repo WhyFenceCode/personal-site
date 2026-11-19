@@ -55,6 +55,11 @@ export function paintArt(cv: HTMLCanvasElement, name: string, dither = false) {
   c.fillStyle = '#D6D6D6'; c.fillRect(0, 0, w, h);
   (ART[name] ?? ART.orbit)(c, w, h);
   if (!dither) { grain(c, w, h); return; }
+  ditherCtx(c, w, h);
+}
+
+/** Turn whatever is on the canvas into the site's 1-bit ordered dither (also used for 3D model stills). */
+export function ditherCtx(c: Ctx, w: number, h: number) {
   const img = c.getImageData(0, 0, w, h), d = img.data;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     // Stretch the tones so near-white becomes clean paper instead of a grid of stray dots.

@@ -34,7 +34,9 @@ const facts: [string, string][] = [
 const firstHeading = headings.find((h) => h.depth === 2)?.text;
 ---
 <Base lang={lang} page="work" title={d.title} description={d.summary}>
-  <article class="wrap case">
+  {/* With a 3D model: the story on the left, the model small and pinned on the right while you read. */}
+  <article class:list={['wrap case', { split: d.model }]}>
+   <div class="case-text">
     <header class="case-head">
       <div class="crumbs mono muted"><a href={href(lang, 'work')}>← {t(lang, 'nav.work')}</a><span>{d.kind} {d.year}</span></div>
       <h1 class="case-title" id="page-title" tabindex="-1">{d.title}</h1>
@@ -47,13 +49,12 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
           </a>
         )}
       </div>
+      {d.model && <a class="scroll-cue mono muted" href="#case-body"><span>{t(lang, 'work.scrollCue')}</span><span class="cue-arrow" aria-hidden="true">↓</span></a>}
     </header>
 
     {/* The big window only for a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
     {(cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} tablet={tablet} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
-    {d.model && <ProjectModel client:visible src={d.model} title={d.title} hint={t(lang, 'work.modelHint')} />}
-
-    <div class="case-body">
+    <div class="case-body" id="case-body">
       <aside class="facts">
         <dl>
           {facts.map(([k, v]) => <div><dt class="mono muted">{k}</dt><dd>{v}</dd></div>)}
@@ -71,6 +72,8 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
         <div class="prose-site case-prose"><Content /></div>
       </div>
     </div>
+   </div>
+    {d.model && <div class="case-side"><ProjectModel client:visible src={d.model} title={d.title} hint={t(lang, 'work.modelHint')} fill /></div>}
   </article>
 
   <div class="tone-dark">
@@ -83,8 +86,33 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
 
 <style>
   .case { padding-bottom: clamp(64px, 8vw, 120px); }
-  .case :global(.model) { margin: clamp(32px, 4vw, 56px) 0 0; display: grid; gap: 10px; }
+  .case :global(.model) { margin: 0; display: grid; gap: 10px; }
   .case :global(.model-stage canvas) { display: block; width: 100%; border-radius: 10px; }
+
+  /* Split layout (projects with a model): text left, the model pinned on the right. */
+  .split { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
+  .case-side { position: sticky; top: calc(var(--header-h) + 8px); height: calc(100svh - var(--header-h) - 16px); }
+  .case-side :global(.model) { height: 100%; grid-template-rows: minmax(0, 1fr) auto; }
+  .case-side :global(.model-stage) { position: relative; min-height: 0; }
+  .case-side :global(.model-stage canvas) { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* The intro fills the first screen, with a cue at the bottom to scroll on into the story. */
+  .split .case-head { min-height: calc(100svh - var(--header-h) - 24px); display: flex; flex-direction: column; padding-bottom: 32px; }
+  .split .crumbs { margin-bottom: auto; padding-bottom: 32px; }
+  .split .case-title { font-size: clamp(48px, 7vw, 120px); }
+  .split .case-body { grid-template-columns: minmax(0, 1fr); margin-top: clamp(32px, 4vw, 64px); scroll-margin-top: calc(var(--header-h) + 32px); }
+  .split .facts dl { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); column-gap: 24px; }
+  .scroll-cue { display: inline-flex; align-items: center; gap: 12px; justify-self: start; margin-top: clamp(24px, 6vh, 72px); text-decoration: none; }
+  .cue-arrow { display: inline-grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; color: var(--fg); }
+  :global(html:not(.no-motion)) .cue-arrow { animation: cue 2.2s var(--ease) infinite; }
+  @keyframes cue { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+  @media (prefers-reduced-motion: reduce) { .cue-arrow { animation: none !important; } }
+  @media (max-width: 860px) {
+    .split { grid-template-columns: minmax(0, 1fr); }
+    .case-side { position: static; height: 60svh; order: 1; }
+    .split .case-body { order: 2; }
+    .split .case-head { min-height: 0; }
+    .case-text { display: contents; }
+  }
   .case-head { padding-top: clamp(24px, 5vw, 72px); padding-bottom: 40px; display: grid; gap: 20px; }
   .crumbs { display: flex; justify-content: space-between; gap: 16px; }
   .crumbs a { text-decoration: none; }

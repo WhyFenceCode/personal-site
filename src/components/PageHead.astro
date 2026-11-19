@@ -1,9 +1,10 @@
 ---
 /* Header for inner pages: meta line, fitted wordmark title, optional lead. */
-interface Props { title: string; metaLeft?: string; metaRight?: string; lead?: string; id?: string }
-const { title, metaLeft, metaRight, lead, id = 'page-title' } = Astro.props;
+/* compact: a smaller title with more room around it, so the page's content shows above the fold. */
+interface Props { title: string; metaLeft?: string; metaRight?: string; lead?: string; id?: string; compact?: boolean }
+const { title, metaLeft, metaRight, lead, id = 'page-title', compact = false } = Astro.props;
 ---
-<div class="page-head">
+<div class:list={["page-head", { compact }]}>
   {(metaLeft || metaRight || Astro.slots.has('meta')) && (
     <div class="meta mono muted"><span>{metaLeft}</span><span><slot name="meta">{metaRight}</slot></span></div>
   )}
@@ -14,6 +15,9 @@ const { title, metaLeft, metaRight, lead, id = 'page-title' } = Astro.props;
 
 <style>
   .page-head { padding-top: clamp(16px, 4vw, 48px); padding-bottom: 32px; display: grid; gap: 20px; border-bottom: 1.5px solid var(--fg); }
+  .compact { padding-block: clamp(24px, 5vw, 64px) clamp(28px, 4vw, 48px); gap: clamp(20px, 3vw, 36px); }
+  .compact .page-title { width: min(100%, 52%); }
+  @media (max-width: 720px) { .compact .page-title { width: 80%; } }
   .meta { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .page-title { margin: 0; min-width: 0; }  /* min-width: a long title measured at 100px (site.ts fitAll) mustn't stretch the grid it measures */
   /* An accent ring a few pixels outside the letters: a wide accent stroke underneath, a background-coloured

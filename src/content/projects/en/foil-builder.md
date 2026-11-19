@@ -7,6 +7,7 @@ role: Modify and Expand
 stack: [Python, Fusion]
 summary: A program to model hydrofoils from spline files.
 art: tidal
+model: /models/foil-builder.glb
 featured: true
 order: 1
 links:

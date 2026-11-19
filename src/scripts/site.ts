@@ -313,6 +313,7 @@ function initExternalLinks() {
 
 /* ---------- Per-page setup ---------- */
 let stopFooterInk: () => void = () => {};
+let stopModelCards: () => void = () => {};
 document.addEventListener('astro:page-load', () => {
   fitAll();
   document.fonts?.ready.then(fitAll);
@@ -323,11 +324,13 @@ document.addEventListener('astro:page-load', () => {
   initCards();
   initExternalLinks();
   $$<HTMLCanvasElement>('canvas[data-art]').forEach((cv) => paintArt(cv, cv.dataset.art!, cv.hasAttribute('data-dither')));
+  // 3D model cards pull in three.js, so only load that code on pages that have one.
+  if ($('[data-model-card]')) import('./model-card').then((m) => { stopModelCards(); stopModelCards = m.initModelCards(); });
   stopFooterInk();
   // Ink only over the big footer name: never over the legal, contact or navigation links.
   const mark = $('#footer [data-ink="footer"]'); if (mark) stopFooterInk = differenceInk(mark, { wander: false });
   try { const l = document.documentElement.lang; if (!localStorage.getItem('site.lang')) localStorage.setItem('site.lang', l); } catch {}
 });
-document.addEventListener('astro:before-swap', () => { stopFooterInk(); stopFooterInk = () => {}; });
+document.addEventListener('astro:before-swap', () => { stopFooterInk(); stopFooterInk = () => {}; stopModelCards(); stopModelCards = () => {}; });
 
 runIntro();

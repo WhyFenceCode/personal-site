@@ -100,6 +100,7 @@ work:
     outside: "Weiter lädt {host}, eine externe Website, hier in diese Seite. Sie sieht deinen Besuch und kann eigene Cookies setzen; es gilt ihre eigene Datenschutzerklärung."
     alt: Screenshot von
   modelHint: Ziehen zum Drehen
+  scrollCue: Weiterscrollen
 
 resume:
   lead: Zieh an der Zeitleiste oder nutze die Pfeiltasten, um zu sehen, was ich in jedem Jahr gemacht habe.
