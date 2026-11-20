@@ -4,18 +4,30 @@ import { t, type Lang } from '../lib/i18n';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const steps = t(lang, 'loader.steps') as string[];
+// site.yaml features.loaderStyle. console: a welcome line types out with a block cursor, the steps log below it.
+const consoleStyle = site.features.loaderStyle === 'console';
+const welcome = t(lang, 'loader.welcome', { host: new URL(site.url).host, name: site.name });
 ---
 <div id="loader" aria-hidden="true"></div>
+<div class="ld-hue" aria-hidden="true"></div>
 {site.interactive.build && (
   <a class="ld-build" href={`/${lang}/build/`} data-ld-build data-astro-reload hidden>
     <span class="ld-build-t">{t(lang, 'build.callout')} <kbd>⇧ B</kbd></span>
     <span class="ld-build-w mono">{t(lang, 'build.motion')}</span>
   </a>
 )}
-<div class="ld-ui wrap" id="ld-ui" role="status" aria-label="Loading" data-steps={JSON.stringify(steps)}>
+<div class:list={['ld-ui wrap', { 'ld-console': consoleStyle }]} id="ld-ui" role="status" aria-label="Loading" data-steps={JSON.stringify(steps)} data-style={site.features.loaderStyle} data-welcome={welcome}>
   <div class="ld-top"><span class="ld-brand">{site.name}</span><button class="ld-skip mono" type="button" id="ld-skip">{t(lang, 'loader.skip')}</button></div>
-  <div></div>
-  <div class="ld-bottom"><span class="ld-count stat" id="ld-num" aria-hidden="true">0</span><span class="mono" id="ld-log">{steps[0]}</span></div>
+  {consoleStyle ? (
+    <div class="ld-term" aria-hidden="true">
+      <p class="ld-line" style={`--len:${welcome.length + 3}`}><span class="ld-prompt">&gt;</span><span id="ld-text"></span><span class="ld-caret" id="ld-caret"></span></p>
+      <ol class="ld-steps" id="ld-steps"></ol>
+    </div>
+  ) : <div></div>}
+  <div class="ld-bottom">
+    {consoleStyle ? <span class="mono" id="ld-pct">0%</span> : <span class="ld-count stat" id="ld-num" aria-hidden="true">0</span>}
+    <span class="mono" id="ld-log">{steps[0]}</span>
+  </div>
 </div>
 
 <style>
@@ -41,5 +53,22 @@ const steps = t(lang, 'loader.steps') as string[];
   @keyframes ld-in { from { opacity: 0; transform: translateY(10px); } }
   /* It takes the place of the loading-step text in the bottom-right corner. */
   :global(html.ld-callout) #ld-log { visibility: hidden; }
+  /* Console style: a terminal line across the middle of the screen with a solid block cursor. */
+  .ld-term { align-self: center; display: grid; gap: 20px; }
+  /* One line, sized so the whole welcome (prompt + text + cursor, --len characters) fits across the screen. */
+  .ld-line { margin: 0; font-family: var(--font-mono); font-weight: 500; white-space: nowrap; font-size: min(92px, 5.4vw, calc((100vw - var(--gutter) - var(--gutter-r)) / (var(--len, 30) * .62))); line-height: 1.1; letter-spacing: -.02em; }
+  .ld-prompt { margin-right: .5em; opacity: .45; }
+  .ld-caret { display: inline-block; width: .58em; height: .95em; margin-left: .06em; vertical-align: -.12em; background: currentColor; }
+  .ld-caret.blink { animation: ld-blink 1s steps(1) infinite; }
+  @keyframes ld-blink { 50% { opacity: 0; } }
+  .ld-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em; min-height: 6em; }
+  .ld-steps :global(li)::before { content: "[ok] "; opacity: .5; }
+  .ld-console #ld-log { opacity: .6; }
+  /* The loader text inverts what's under it, which would turn the ink's accent rim green. During the intro the screen
+     is only greys and that rim, so a full-screen layer in mix-blend-mode: hue gives anything coloured the accent's
+     hue back, and leaves the greys alone (the same fix as the header's). */
+  .ld-hue { display: none; }
+  :global(html.intro) .ld-hue { display: block; position: fixed; inset: 0; z-index: 96; pointer-events: none; background: var(--accent); mix-blend-mode: hue; }
+  @media (forced-colors: active) { .ld-hue { display: none !important; } }
   .ld-skip { pointer-events: auto; background: none; color: inherit; border: 1.5px solid currentColor; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
 </style>

@@ -4,20 +4,57 @@
  */
 import { motionOn, onMotion } from './motion';
 
+/** site.yaml theme.ink: "smooth" (default) flowing edges, or "blotch" for broken, speckled ink-on-paper edges. */
+export const INK_BLOTCH = typeof document !== 'undefined' && document.body?.dataset.ink === 'blotch';
+
 export const NOISE = /* glsl */ `
+  ${INK_BLOTCH ? '#define INK_BLOTCH 1' : ''}
+  #ifdef INK_BLOTCH
   float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-  float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+  #else
+  // No sin(): on many GPUs sin() of the large numbers a long-running clock produces is imprecise, which tears the edge.
+  float h(vec2 p){ vec3 q = fract(vec3(p.xyx) * .1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
+  #endif
+  float vn(vec2 p){ vec2 i = floor(p), f = fract(p);
+  #ifdef INK_BLOTCH
+    f = f * f * (3. - 2. * f);
+  #else
+    f = f * f * f * (f * (f * 6. - 15.) + 10.); // quintic: no creases along the noise grid
+  #endif
     return mix(mix(h(i), h(i + vec2(1., 0.)), f.x), mix(h(i + vec2(0., 1.)), h(i + vec2(1., 1.)), f.x), f.y); }
-  float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 4; i++){ s += a * vn(p); p *= 2.03; a *= .5; } return s; }`;
+  float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 4; i++){ s += a * vn(p); p *= 2.03; a *= .5; } return s; }
+  /* How far an ink edge bulges at point p (measured in screen heights) at time t, 0 to 1.
+     Smooth: two broad octaves pushed around by a slow warp, so the edge rolls like flowing ink.
+     Blotch: four octaves, so the edge frays into small bumps. */
+  float inkWob(vec2 p, float t){
+  #ifdef INK_BLOTCH
+    return fbm(p * 2.6 + vec2(t * .5, t * .3));
+  #else
+    vec2 w = vec2(vn(p * .7 + vec2(t * .2, -t * .15)), vn(p * .7 + vec2(4.7 - t * .17, 1.3 + t * .13))) - .5;
+    vec2 q = p * 1.05 + w * 1.3 + vec2(t * .28, t * .18);
+    return .82 * vn(q) + .18 * vn(q * 1.8 + 7.3);
+  #endif
+  }`;
 
 /** Turns the soft field into a crisp blob with a wobbly, slowly drifting edge. */
 export const MASK_GLSL = /* glsl */ `
   float inkMaskB(sampler2D field, vec2 uv, vec2 res, float t, float bias){
     vec2 q = uv * res / 240. + vec2(t * .07, -t * .05);
+  #ifdef INK_BLOTCH
     vec2 warp = vec2(fbm(q), fbm(q + 5.2)) - .5;
     float f = texture2D(field, uv + warp * 90. / res).a;
     f += (fbm(q * 1.7 + 3.1) - .5) * .18 * smoothstep(.05, .5, f);
     return smoothstep(.48, .52, f - bias);
+  #else
+    // A slow, broad warp (the ink drifting), then a small blur of the field so the edge is a clean curve, not the
+    // stair-steps of the low-resolution field, and a soft threshold that anti-aliases it.
+    vec2 g = q * .55;
+    vec2 warp = vec2(vn(g), vn(g + 5.2)) - .5;
+    vec2 u = uv + warp * 34. / res, o = 3. / res;
+    float f = (2. * texture2D(field, u).a + texture2D(field, u + vec2(o.x, 0.)).a + texture2D(field, u - vec2(o.x, 0.)).a
+             + texture2D(field, u + vec2(0., o.y)).a + texture2D(field, u - vec2(0., o.y)).a) / 6.;
+    return smoothstep(.45, .55, f - bias);
+  #endif
   }
   float inkMask(sampler2D field, vec2 uv, vec2 res, float t){ return inkMaskB(field, uv, res, t, 0.); }`;
 
@@ -27,7 +64,11 @@ const EDGE_GLSL = /* glsl */ `
   float inkEdge(vec2 uv, vec2 res, float t){
     float d = (1. - uv.y) * res.y; // distance from the top edge (vUv.y is 1 at the top)
     float band = min(res.y * .4, 110.);
+  #ifdef INK_BLOTCH
     float n = fbm(uv * res / 26. + vec2(t * .15, 0.));
+  #else
+    float n = vn(uv * res / 140. + vec2(t * .12, 0.));
+  #endif
     return smoothstep(0., band, d + (n - .5) * band * 1.1);
   }`;
 
@@ -48,7 +89,8 @@ export interface InkField {
 export function inkField(host: HTMLElement, opts: { wander?: boolean } = {}): InkField {
   const field = document.createElement('canvas');
   const fx = field.getContext('2d')!;
-  const S = 0.25;
+  // The field is painted at a fraction of the screen's size; smooth ink uses a finer one so its edge stays round.
+  const S = INK_BLOTCH ? 0.25 : 0.5;
   let mvx = 0, mvy = 0, touching = false;
   const drops: { x: number; y: number; vx: number; vy: number; r: number }[] = [];
   const f: InkField = {

@@ -96,4 +96,18 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { projects, experience, education, pages, legal, blog };
+// The site's own documentation (README.md and docs/guides/), shown at /<lang>/docs/ beside the brand kit.
+// No frontmatter needed: the title is the file's first `# Heading`.
+const docs = defineCollection({
+  loader: glob({
+    pattern: ['README.md', 'docs/guides/*.md'],
+    base: '.',
+    generateId: ({ entry }) => {
+      const e = entry.replace(/\\/g, '/');
+      return e === 'README.md' ? 'overview' : e === 'docs/guides/README.md' ? 'guides' : e.replace(/^docs\/guides\//, '').replace(/\.md$/, '').toLowerCase();
+    },
+  }),
+  schema: z.object({}).passthrough(),
+});
+
+export const collections = { projects, experience, education, pages, legal, blog, docs };

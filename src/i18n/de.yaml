@@ -17,6 +17,7 @@ nav:
   resume: Lebenslauf
   about: Über mich
   brand: Markenkit
+  docs: Doku
   contact: Kontakt
   menu: Menü
   close: Schließen
@@ -46,7 +47,7 @@ cta:
 sections:
   education: { eyebrow: Studium, title: Ausbildung, courses: Relevante Kurse }
   certifications: { eyebrow: Nachweise, title: Zertifikate, verify: Prüfen, attained: Erworben, expires: Gültig bis, expired: Abgelaufen }
-  github: { eyebrow: Commit-Log, title: Shipping, total: Beiträge im letzten Jahr, streak: Tage in Folge, longest: längste Serie, recent: Letzte Pushes, repos: Aktive Repositories, sample: Beispieldaten. Trag deinen GitHub-Namen in site.yaml ein. }
+  github: { eyebrow: Commit-Log, title: Programmieren, total: Beiträge im letzten Jahr, streak: Tage in Folge, longest: längste Serie, recent: Letzte Pushes, repos: Aktive Repositories, sample: Beispieldaten. Trag deinen GitHub-Namen in site.yaml ein. }
   projects: { eyebrow: Ausgewählte Arbeiten, title: Projekte }
   experience: { eyebrow: Laufbahn, title: Erfahrung }
   activities: { eyebrow: Nach Feierabend, title: Hobbys }
@@ -148,6 +149,7 @@ cookie:
   policy: Cookie-Richtlinie lesen
 
 loader:
+  welcome: Willkommen auf {host}
   skip: Überspringen
   steps: [Tinte mischen, Schrift setzen, Chrom polieren, Fertig]
 

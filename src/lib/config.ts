@@ -24,9 +24,11 @@ const siteSchema = z.object({
   resume: z.object({ pdf: z.string().optional() }).default({}),
   features: z.object({
     loader: z.boolean().default(true),
+    // count: a big number counts to 100. console: shorter; a welcome line types across the screen with a block cursor.
+    loaderStyle: z.enum(['count', 'console']).default('count'),
     pageTransitions: z.boolean().default(true),
     cursorRing: z.boolean().default(true),
-  }).default({ loader: true, pageTransitions: true, cursorRing: true }),
+  }).default({ loader: true, loaderStyle: 'count', pageTransitions: true, cursorRing: true }),
   portrait: z.object({
     enabled: z.boolean().default(true),
     src: z.string().default('/portrait.jpg'),
@@ -46,7 +48,8 @@ const siteSchema = z.object({
     accentCursor: z.boolean().default(true),   // cursor dot turns accent over links and buttons
     logoDot: z.boolean().default(true),        // "Torsten Young." with an accent full stop
     headingEcho: z.boolean().default(true),    // accent outline copy behind section headings (hidden with motion off)
-  }).default({ accent: '#7E76D0', accentCursor: true, logoDot: true, headingEcho: true }),
+    ink: z.enum(['smooth', 'blotch']).default('smooth'), // ink edges: smooth flowing curves, or blotchy and broken like ink on paper
+  }).default({ accent: '#7E76D0', accentCursor: true, logoDot: true, headingEcho: true, ink: 'smooth' }),
   // Interactive extras, each switchable. Anything with motion also stops when the visitor turns motion off.
   interactive: z.object({
     build: z.boolean().default(true),       // /build: cursors build the home page live (Shift+B or Cmd/Ctrl+B)

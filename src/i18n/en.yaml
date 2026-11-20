@@ -17,6 +17,7 @@ nav:
   resume: Resume
   about: About
   brand: Brand kit
+  docs: Docs
   contact: Contact
   menu: Menu
   close: Close
@@ -46,7 +47,7 @@ cta:
 sections:
   education: { eyebrow: Study, title: Education, courses: Relevant courses }
   certifications: { eyebrow: Credentials, title: Certifications, verify: Verify, attained: Attained, expires: Expires, expired: Expired }
-  github: { eyebrow: Commit log, title: Shipping, total: contributions in the last year, streak: day streak, longest: longest streak, recent: Recent pushes, repos: Active repositories, sample: Sample data. Add your GitHub username in site.yaml. }
+  github: { eyebrow: Commit log, title: Programming, total: contributions in the last year, streak: day streak, longest: longest streak, recent: Recent pushes, repos: Active repositories, sample: Sample data. Add your GitHub username in site.yaml. }
   projects: { eyebrow: Selected work, title: Projects }
   experience: { eyebrow: Career, title: Experience }
   activities: { eyebrow: Off the clock, title: Hobbies }
@@ -148,6 +149,7 @@ cookie:
   policy: Read the cookie policy
 
 loader:
+  welcome: Welcome to {host}
   skip: Skip
   steps: [Mixing ink, Setting type, Polishing chrome, Ready]
 

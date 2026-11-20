@@ -9,7 +9,7 @@ import HeadingText from '../../components/ui/HeadingText.astro';
 import Signature from '../../components/ui/Signature.astro';
 import DoDont from '../../components/brand/DoDont.astro';
 import { site } from '../../lib/config';
-import { langStaticPaths } from '../../lib/i18n';
+import { langStaticPaths, t, href } from '../../lib/i18n';
 // The script face is normally only baked into SVG; here it's shown as live text in the specimens.
 import '@fontsource/mrs-saint-delafield/400.css';
 
@@ -101,7 +101,9 @@ const motion = [
 ---
 <Base lang={lang} page="brand" title="Brand kit" description={`The design system behind ${site.name}'s site.`} noindex>
   <div class="wrap">
-    <PageHead title="Brand kit" metaLeft="Design system" metaRight={`v${new Date().getFullYear()}`} lead="The rules behind this site. Follow them for anything that should look like it." />
+    <PageHead title="Brand kit" metaLeft="Design system" metaRight={`v${new Date().getFullYear()}`} lead="The rules behind this site. Follow them for anything that should look like it.">
+      <p class="mono muted bk-docs">How to run and edit the site: <a class="link" href={href(lang, 'docs')}>{t(lang, 'nav.docs')} →</a></p>
+    </PageHead>
   </div>
 
   {/* Contents */}
@@ -876,6 +878,7 @@ body     { font: 400 17px/1.55 var(--font-sans); }`}</code></pre>
   .bk-sec { scroll-margin-top: 0; }
   .bk-sec .eyebrow { margin-bottom: 18px; }
   .bk-sec .h2 { margin-bottom: 40px; }
+  .bk-docs { margin: 0; text-transform: none; letter-spacing: .04em; font-size: 13px; }
   .bk-intro { font-size: clamp(19px, 1.8vw, 24px); line-height: 1.35; letter-spacing: -.01em; max-width: 46ch; margin: 0 0 clamp(32px, 4vw, 56px); text-wrap: pretty; }
   .bk-intro em { font-family: var(--font-serif); font-size: 1.1em; }
   .bk-h3 { font-family: var(--font-display); font-weight: 800; font-stretch: 85%; text-transform: uppercase; font-size: 26px; line-height: 1; letter-spacing: -.01em; margin: clamp(48px, 5vw, 72px) 0 20px; }

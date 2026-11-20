@@ -7,8 +7,9 @@ and, where there is one, how to connect a live source.
 | --- | --- | --- | --- |
 | Education | Markdown files | none | [content-sections.md](content-sections.md) |
 | Projects | Markdown files | none | [content-sections.md](content-sections.md) |
+| Blog | Markdown files | none | [blog.md](blog.md) |
 | Experience | Markdown files | none | [content-sections.md](content-sections.md) |
-| Shipping (GitHub) | GitHub public data | yes, automatic | [github.md](github.md) |
+| Programming (GitHub) | GitHub public data | yes, automatic | [github.md](github.md) |
 | Reading | `src/data/reading.txt` | none (physical books) | [reading.md](reading.md) |
 | Listening | `activities.yaml` | none yet (Last.fm possible) | [listening.md](listening.md) |
 | On the move (distance) | `activities.yaml` or a Strava export | `pnpm strava:import`, by hand | [running-and-cycling.md](running-and-cycling.md) |
@@ -17,7 +18,7 @@ and, where there is one, how to connect a live source.
 | Languages | `activities.yaml` | none | [languages-and-uses.md](languages-and-uses.md) |
 | Uses (optional) | `activities.yaml` | none | [languages-and-uses.md](languages-and-uses.md) |
 
-**Going live:** [deploy-cloudflare.md](deploy-cloudflare.md). **Weekly reminders:** [reminders.md](reminders.md). **3D models on project pages:** [3d-models.md](3d-models.md).
+**Going live:** [deploy-cloudflare.md](deploy-cloudflare.md). **Weekly reminders:** [reminders.md](reminders.md). **3D models on project pages:** [3d-models.md](3d-models.md). **Writing a blog post:** [blog.md](blog.md).
 
 **Anything with a live source only refreshes when the site is rebuilt.** Set up a scheduled rebuild once
 your host is chosen: [scheduled-rebuilds.md](scheduled-rebuilds.md).

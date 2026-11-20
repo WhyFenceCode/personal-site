@@ -53,6 +53,7 @@ theme:
   accentCursor: false       # the cursor dot turns accent over links and buttons
   logoDot: true             # an accent full stop after your name in the header and footer
   headingEcho: true         # an accent outline copy behind section headings, drifting with the pointer (off with motion off)
+  ink: smooth               # ink edges (intro, page changes, the ink that follows the pointer): smooth | blotch
 
 # Interactive extras. Set any to false to switch it off. Anything that moves also stops when a visitor turns
 # motion off (footer) or has reduced motion set on their device.
@@ -73,7 +74,8 @@ typography:
   headings: display
 
 features:
-  loader: true              # intro animation, once per browser session
+  loader: true              # intro animation, on each fresh open of the site
+  loaderStyle: count        # count: a number counts to 100 | console: shorter, a welcome line types out with a block cursor
   pageTransitions: true     # ink flood between pages
   cursorRing: true          # inverting dot cursor (hides the system cursor for mice, except in high-contrast modes)
 

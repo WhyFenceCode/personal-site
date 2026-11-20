@@ -8,9 +8,13 @@ import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import { remarkSiteTokens } from './src/lib/remark-site-tokens.mjs';
-import { remarkBlogLinks, rehypeBlogDemote, rehypeBlogAnchors } from './src/lib/markdown-blog.mjs';
+import { remarkSiteLinks, rehypeBlogDemote, rehypeBlogAnchors } from './src/lib/markdown-blog.mjs';
+import { execSync } from 'node:child_process';
 
 const site = parse(readFileSync(new URL('./src/config/site.yaml', import.meta.url), 'utf8'));
+// The GitHub repo, so links in the docs pages to files that aren't docs (e.g. src/config/site.yaml) open on GitHub.
+let repo = '';
+try { repo = execSync('git remote get-url origin', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim().replace(/\.git$/, '').replace(/^git@github\.com:/, 'https://github.com/'); } catch {}
 
 // @astrojs/sitemap always writes sitemap-index.xml plus sitemap-0.xml, sitemap-1.xml…
 // This merges them into one plain /sitemap.xml (fine up to 50,000 pages) and removes the rest.
@@ -38,9 +42,9 @@ export default defineConfig({
   integrations: [
     react(),
     // /sitemap.xml (merged by singleSitemap below), linked from robots.txt. The root language redirect and the 404 aren't real pages.
-    // The brand kit (/<lang>/brand/) is an internal reference page, so it stays out too, and /blog/newest is a copy of the latest post.
+    // The brand kit (/<lang>/brand/) is an internal reference page, so it stays out too, as do the docs (/<lang>/docs/), and /blog/newest is a copy of the latest post.
     sitemap({
-      filter: (page) => { const p = new URL(page).pathname; return p !== '/' && !p.startsWith('/404') && !/^\/[a-z]{2}\/brand\//.test(p) && !/^\/[a-z]{2}\/blog\/newest\//.test(p); },
+      filter: (page) => { const p = new URL(page).pathname; return p !== '/' && !p.startsWith('/404') && !/^\/[a-z]{2}\/brand\//.test(p) && !/^\/[a-z]{2}\/(blog\/newest|docs)\//.test(p); },
       i18n: site.languages.length > 1
         ? { defaultLocale: site.languages[0], locales: Object.fromEntries(site.languages.map((/** @type {string} */ l) => [l, l])) }
         : undefined,
@@ -50,10 +54,10 @@ export default defineConfig({
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   devToolbar: { enabled: false },
   // {{email}}, {{owner}}, {{address}}… in Markdown are filled from site.yaml at build time.
-  // Blog posts: links between posts' .md files, heading levels, and a "#" link on each heading (src/lib/markdown-blog.mjs).
+  // Blog posts and docs: links between .md files, heading levels, and a "#" link on each heading (src/lib/markdown-blog.mjs).
   // rehypeHeadingIds is listed so the ids exist before the anchors are added; Astro then doesn't add it again.
   markdown: {
-    remarkPlugins: [remarkSiteTokens(site), remarkBlogLinks],
+    remarkPlugins: [remarkSiteTokens(site), remarkSiteLinks({ lang: site.languages[0], repo })],
     rehypePlugins: [rehypeBlogDemote, rehypeHeadingIds, rehypeBlogAnchors],
   },
   vite: { plugins: [tailwindcss()] },

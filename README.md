@@ -56,7 +56,7 @@ Create a component in `src/sections/`, register it in `src/sections/index.ts`, a
 
 ## Setup guides
 Step-by-step guides for every block (including Strava and scheduled rebuilds) are in
-[docs/guides/](docs/guides/README.md).
+[docs/guides/](docs/guides/README.md). The site shows all of them at `/en/docs/`, next to the brand kit.
 
 ## GitHub activity
 Set `github.username` in `site.yaml`. Public data only, fetched at build time, no token. If your GitHub

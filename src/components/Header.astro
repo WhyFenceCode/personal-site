@@ -44,7 +44,15 @@ const nav = [
 </div>
 
 <style>
-  .site-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #fff; mix-blend-mode: difference; pointer-events: none; }
+  /* --hw / --hk: the header's white and black. The hue layer below swaps both for the accent. */
+  .site-header { --hw: #fff; --hk: #000; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 16px; color: var(--hw); mix-blend-mode: difference; pointer-events: none; }
+  /* Inverting turns the accent (purple) into its opposite (green) wherever it passes under the header. A copy of the
+     header's shapes sits right on top in the accent with mix-blend-mode: hue, which keeps each pixel's brightness
+     and saturation but gives it the accent's hue: the green goes back to purple, and greys (no saturation) stay
+     exactly as they were. Made by the script below; it mirrors the real header's hover and current-page states. */
+  .site-header.hdr-hue { --hw: var(--accent); --hk: var(--accent); mix-blend-mode: hue; margin-top: calc(-1 * var(--header-h)); }
+  .site-header.hdr-hue, .site-header.hdr-hue * { pointer-events: none !important; }
+  @media (forced-colors: active) { .hdr-hue { display: none !important; } }
   .site-header > * { pointer-events: auto; }
   .brand-gap { visibility: hidden; }
   .brand .dot { color: var(--accent); }
@@ -52,11 +60,11 @@ const nav = [
   .brand { font-family: var(--font-display); font-weight: 800; font-stretch: 87.5%; font-size: 20px; letter-spacing: -.01em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
   .hnav { display: flex; align-items: center; gap: 6px; }
   .hnav-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; padding: 9px 14px; border-radius: 999px; transition: background .3s, color .3s; }
-  .hnav-link:hover, .hnav-link[aria-current="page"] { background: #fff; color: #000; }
-  .hnav-link.is-resume { box-shadow: inset 0 0 0 1.5px #fff; }
+  .hnav-link:hover, .hnav-link[data-hover], .hnav-link[aria-current="page"] { background: var(--hw); color: var(--hk); }
+  .hnav-link.is-resume { box-shadow: inset 0 0 0 1.5px var(--hw); }
   .hnav-link .sq { width: 7px; height: 7px; background: currentColor; }
-  .hnav-link.is-contact { background: #fff; color: #000; margin-left: 6px; }
-  .hnav-link.is-contact:hover { background: none; color: #fff; box-shadow: inset 0 0 0 1.5px #fff; }
+  .hnav-link.is-contact { background: var(--hw); color: var(--hk); margin-left: 6px; }
+  .hnav-link.is-contact:is(:hover, [data-hover]) { background: none; color: var(--hw); box-shadow: inset 0 0 0 1.5px var(--hw); }
   .menu-btn { display: none; align-items: center; gap: 10px; background: none; border: 0; padding: 10px 0; cursor: pointer; font-family: var(--font-mono); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: inherit; }
   .menu-btn .grip { display: grid; grid-template-columns: 3px 3px; gap: 3px; }
   .menu-btn .grip i { width: 3px; height: 3px; background: currentColor; }
@@ -75,3 +83,34 @@ const nav = [
   .menu li a[aria-current="page"]::after { content: ""; width: .14em; height: .14em; background: currentColor; align-self: center; }
   .menu-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 </style>
+
+<script>
+  // The hue layer (see the CSS above): a copy of the header right after it, kept in step with it.
+  document.addEventListener('astro:page-load', () => {
+    const real = document.querySelector<HTMLElement>('.site-header:not(.hdr-hue)'); if (!real) return;
+    document.querySelectorAll('.hdr-hue').forEach((e) => e.remove());
+    const copy = real.cloneNode(true) as HTMLElement;
+    copy.classList.add('hdr-hue');
+    copy.setAttribute('aria-hidden', 'true'); copy.inert = true;
+    copy.querySelectorAll('[id]').forEach((e) => e.removeAttribute('id'));
+    real.after(copy);
+    const realEls = [...real.querySelectorAll<HTMLElement>('*')], copyEls = [...copy.querySelectorAll<HTMLElement>('*')];
+    // :hover can't be copied, so the real links mark themselves with data-hover while the pointer is on them.
+    real.querySelectorAll('.hnav-link').forEach((a) => {
+      a.addEventListener('pointerenter', () => a.setAttribute('data-hover', ''));
+      a.addEventListener('pointerleave', () => a.removeAttribute('data-hover'));
+    });
+    // Mirror every change to the real header: hover marks, the current page, the magnetic button's inline transform.
+    const mo = new MutationObserver((list) => {
+      for (const m of list) {
+        const i = realEls.indexOf(m.target as HTMLElement), el = m.target === real ? copy : copyEls[i];
+        if (!el || !m.attributeName) continue;
+        const v = (m.target as HTMLElement).getAttribute(m.attributeName);
+        if (m.target === real && m.attributeName === 'class') { el.className = `${v ?? ''} hdr-hue`; continue; }
+        v === null ? el.removeAttribute(m.attributeName) : el.setAttribute(m.attributeName, v);
+      }
+    });
+    mo.observe(real, { attributes: true, subtree: true, attributeFilter: ['class', 'style', 'aria-current', 'data-hover', 'hidden'] });
+    document.addEventListener('astro:before-swap', () => mo.disconnect(), { once: true });
+  });
+</script>

@@ -107,6 +107,7 @@ const canonical = new URL(Astro.props.canonical ?? Astro.url.pathname, Astro.sit
     data-home-title={`${site.name} | ${t(lang, 'nav.home')}`}
     data-ix={Object.entries(site.interactive).filter(([, on]) => on).map(([k]) => k).join(' ')}
     data-loader={String(site.features.loader)}
+    data-ink={site.theme.ink}
   >
     <a class="skip-link" href="#main">{t(lang, 'nav.skip')}</a>
     {site.features.loader && <Loader lang={lang} />}

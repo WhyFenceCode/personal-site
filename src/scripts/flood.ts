@@ -12,8 +12,15 @@ function ensure() {
     try {
       FL = makeGL(el, `uniform vec2 uRes, uO; uniform float uR, uT, uMode, uRim; uniform vec3 uAccent;
         void main(){ vec2 frag = vUv * uRes; float d = distance(frag, uO);
-          float n = fbm(frag / uRes.y * 2.6 + vec2(uT * .5, uT * .3));
+        #ifdef INK_BLOTCH
+          float n = inkWob(frag / uRes.y, uT);
           float edge = uR * (1. + .22 * (n - .5)) + (n - .5) * 40.;
+        #else
+          // Smooth: the bulge depends only on the direction from the centre, so the edge is one clean rolling curve
+          // that can't fold back on itself into notches.
+          float n = inkWob(normalize(frag - uO + vec2(1e-4)) * .95, uT);
+          float edge = uR * (1. + .4 * (n - .5)) + (n - .5) * 56.;
+        #endif
           float a = 1. - smoothstep(edge - 1.5, edge + 1.5, d); if (uMode > .5) a = 1. - a;
           // A thin accent rim along the ink's edge as it spreads.
           float rim = (1. - smoothstep(0., 7., abs(d - edge))) * step(.5, 1. - uMode) * uRim;
@@ -46,7 +53,7 @@ export function floodDraw(mode: 'cover' | 'reveal', r: number, ox: number, oy: n
   if (cv.width < 2) size();
   const d = cv.width / Math.max(1, innerWidth);
   G.set2('uRes', cv.width, cv.height); G.set2('uO', ox * d, (innerHeight - oy) * d);
-  G.set1('uR', r * d); G.set1('uT', performance.now() / 1000); G.set1('uMode', mode === 'reveal' ? 1 : 0);
+  G.set1('uR', r * d); G.set1('uT', (performance.now() / 1000) % 600); // kept small: big numbers lose precision on the GPU G.set1('uMode', mode === 'reveal' ? 1 : 0);
   G.set3('uAccent', ...accentRGB()); G.set1('uRim', document.documentElement.dataset.page === 'build' ? 0 : 1); G.draw();
 }
 

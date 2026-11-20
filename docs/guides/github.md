@@ -1,4 +1,4 @@
-# Shipping (GitHub commit tracker)
+# Programming (GitHub commit tracker)
 
 Shows your contribution calendar, current and longest streak, three recently pushed repositories and your
 latest pushes. Public data only: no token, nothing private.

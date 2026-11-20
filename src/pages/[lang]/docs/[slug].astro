@@ -1,0 +1,12 @@
+---
+import { getCollection } from 'astro:content';
+import DocsPage from '../../../components/DocsPage.astro';
+import { languages } from '../../../lib/i18n';
+
+export async function getStaticPaths() {
+  const ids = (await getCollection('docs')).map((d) => d.id).filter((id) => id !== 'overview');
+  return languages.flatMap((lang) => ids.map((slug) => ({ params: { lang, slug } })));
+}
+const { lang, slug } = Astro.params as { lang: string; slug: string };
+---
+<DocsPage lang={lang} slug={slug} />

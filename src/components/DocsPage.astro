@@ -1,0 +1,68 @@
+---
+/* One page of the site's documentation (README.md and docs/guides/*.md), with every guide listed on the left.
+   Like the brand kit it's an internal reference: not in the sitemap, not indexed. */
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHead from './PageHead.astro';
+import { t, href, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; slug: string }
+const { lang, slug } = Astro.props;
+const titleOf = (d: CollectionEntry<'docs'>) => d.body?.match(/^#\s+(.+)$/m)?.[1]?.trim() ?? d.id;
+const all = await getCollection('docs');
+const pinned = ['overview', 'guides'];
+const docs = [...pinned.map((id) => all.find((d) => d.id === id)!).filter(Boolean), ...all.filter((d) => !pinned.includes(d.id)).sort((a, b) => titleOf(a).localeCompare(titleOf(b)))];
+const entry = docs.find((d) => d.id === slug)!;
+const { Content, headings } = await render(entry);
+const urlOf = (id: string) => href(lang, id === 'overview' ? 'docs' : `docs/${id}`);
+const label = (d: CollectionEntry<'docs'>) => (d.id === 'overview' ? 'Overview' : d.id === 'guides' ? 'All guides' : titleOf(d));
+const source = entry.id === 'overview' ? 'README.md' : `docs/guides/${entry.id === 'guides' ? 'README' : entry.id}.md`;
+---
+<Base lang={lang} page="docs" title={`${t(lang, 'nav.docs')}: ${label(entry)}`} description={`How ${titleOf(docs[0])} is put together and how to change it.`} noindex>
+  <div class="wrap">
+    <PageHead title={t(lang, 'nav.docs')} metaLeft="Documentation" metaRight={String(docs.length).padStart(2, '0')} compact>
+      <p class="mono muted docs-note">Every guide for running and editing this site. The look and rules are in the <a class="link" href={href(lang, 'brand')}>brand kit</a>.</p>
+    </PageHead>
+    <div class="docs">
+      <nav aria-label={t(lang, 'nav.docs')}>
+        <ul>{docs.map((d) => <li><a href={urlOf(d.id)} aria-current={d === entry ? 'page' : undefined}>{label(d)}</a></li>)}</ul>
+      </nav>
+      <article class="prose-site docs-prose">
+        <p class="mono muted docs-src">{source}</p>
+        <h2 class="docs-title">{titleOf(entry)}</h2>
+        {headings.filter((h) => h.depth === 2).length >= 3 && (
+          <ol class="docs-toc">{headings.filter((h) => h.depth === 2).map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+        )}
+        <Content />
+      </article>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .docs-note { margin: 0; text-transform: none; letter-spacing: .04em; font-size: 13px; }
+  .docs { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 48px; padding-block: 48px 112px; }
+  nav ul { list-style: none; margin: 0; padding: 0; position: sticky; top: calc(var(--header-h) + 24px); max-height: calc(100svh - var(--header-h) - 48px); overflow-y: auto; }
+  nav a { display: block; padding: 11px 0; border-bottom: 1px solid var(--line); text-decoration: none; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); transition: color .2s; }
+  nav a:hover, nav a[aria-current="page"] { color: var(--fg); }
+  nav a[aria-current="page"]::before { content: "■ "; color: var(--accent); }
+  .docs-prose { max-width: 78ch; min-width: 0; }
+  .docs-src { margin: 0 0 12px; text-transform: none; letter-spacing: .04em; }
+  .docs-title { margin-top: 0 !important; font-size: clamp(34px, 4vw, 56px) !important; }
+  .docs-toc { margin: 0 0 32px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+  .docs-toc a { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 13px; background: none; color: var(--fg); }
+  .docs-toc a:hover { border-color: var(--fg); }
+  .docs-prose :global(:is(h2, h3, h4)) { scroll-margin-top: calc(var(--header-h) + 24px); }
+  .docs-prose :global(h3) { color: var(--fg); }
+  .docs-prose :global(.h-anchor) { margin-left: .3em; text-decoration: none; background: none; color: var(--accent); opacity: 0; transition: opacity .2s; }
+  .docs-prose :global(.has-anchor:hover .h-anchor), .docs-prose :global(.has-anchor:target .h-anchor) { opacity: 1; }
+  .docs-prose :global(li) { margin-bottom: 4px; }
+  .docs-prose :global(:not(pre) > code) { background: color-mix(in srgb, var(--fg) 8%, transparent); padding: .1em .35em; border-radius: 4px; color: var(--fg); }
+  .docs-prose :global(pre) { margin: 16px 0 24px; padding: 16px 18px; border-radius: 6px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; }
+  .docs-prose :global(td code) { white-space: nowrap; }
+  @media (max-width: 760px) {
+    .docs { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    nav ul { position: static; display: flex; gap: 16px; overflow-x: auto; max-height: none; }
+    nav a { white-space: nowrap; }
+  }
+</style>

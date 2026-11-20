@@ -143,7 +143,7 @@ function blocks(): HTMLElement[] {
     if (((d.includes('grid') || d.includes('flex')) || alike) && kids.length >= 2 && kids.length <= 24) kids.forEach(add);
     else add(el);
   };
-  $$('.site-header > *').forEach(add);
+  $$('.site-header:not(.hdr-hue) > *').forEach(add);
   $$('.hero > *').forEach((el) => { if (getComputedStyle(el).position !== 'absolute') add(el); });
   for (const sec of $$('main > *')) {
     if (sec.classList.contains('hero')) continue;

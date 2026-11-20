@@ -53,3 +53,11 @@
 /blog                      /en/blog/              302
 /blog/newest               /en/blog/newest/       302
 /blog/*                    /en/blog/:splat        302
+
+# The site's documentation, next to the brand kit.
+/docs                      /en/docs/              302
+/docs/*                    /en/docs/:splat        302
+/documentation             /en/docs/              302
+/guides                    /en/docs/guides/       302
+/:lang/documentation       /:lang/docs/           302
+/:lang/guides              /:lang/docs/guides/    302

@@ -159,6 +159,7 @@ async function runIntro() {
   const root = document.documentElement;
   if (!root.classList.contains('intro')) return;
   const num = $('#ld-num'), log = $('#ld-log'), ui = $('#ld-ui');
+  if (ui?.dataset.style === 'console') return runConsoleIntro(ui);
   if (!num || !ui) { root.classList.remove('intro'); return; }
   const steps: string[] = JSON.parse(ui.dataset.steps || '[]');
   let skip = false;
@@ -175,6 +176,49 @@ async function runIntro() {
   }
   try { await flood('cover', cx, cy, 480, base); root.classList.remove('intro'); await flood('reveal', cx, cy, 800); }
   finally { root.classList.remove('intro'); floodClear(); }
+  window.dispatchEvent(new CustomEvent('site:intro-done'));
+}
+
+/* The console intro (site.yaml features.loaderStyle: console), shorter than the count: the welcome line types out
+   behind a block cursor while the steps tick off below, then the ink spreads from the cursor and opens the page. */
+async function runConsoleIntro(ui: HTMLElement) {
+  const root = document.documentElement;
+  const text = $('#ld-text'), caret = $('#ld-caret'), list = $('#ld-steps'), pct = $('#ld-pct'), log = $('#ld-log');
+  const welcome = ui.dataset.welcome || '';
+  const steps: string[] = JSON.parse(ui.dataset.steps || '[]');
+  let skip = false;
+  $('#ld-skip')?.addEventListener('click', () => (skip = true), { once: true });
+  floodPrepare();
+  // Timers rather than frames, so the typing keeps its pace even when frames are slow; Skip cuts any wait short.
+  const wait = (ms: number) => new Promise<void>((r) => { const end = performance.now() + ms; const f = () => (skip || performance.now() >= end ? r() : setTimeout(f, Math.min(30, end - performance.now()))); f(); });
+  try {
+    caret?.classList.add('blink');
+    await wait(260);
+    caret?.classList.remove('blink');
+    const total = welcome.length, perChar = Math.min(55, 900 / Math.max(1, total));
+    for (let i = 1; i <= total && !skip; i++) {
+      if (text) text.textContent = welcome.slice(0, i);
+      const p = i / total;
+      if (pct) pct.textContent = `${Math.round(p * 100)}%`;
+      // Tick off the steps as the line types; the last one ("Ready") is left for the end.
+      const done = Math.floor(p * (steps.length - 1));
+      if (list && list.children.length < done) { const li = document.createElement('li'); li.textContent = steps[list.children.length]; list.append(li); }
+      if (log) log.textContent = `${steps[Math.min(done, steps.length - 1)] ?? ''}…`;
+      // A human rhythm: a little jitter, and a beat after spaces and punctuation.
+      await wait(perChar * (0.6 + Math.random() * 0.8) + (/[\s.,]/.test(welcome[i - 1]) ? perChar : 0));
+    }
+    if (text) text.textContent = welcome;
+    if (pct) pct.textContent = '100%';
+    if (log) log.textContent = steps[steps.length - 1] ?? '';
+    caret?.classList.add('blink');
+    await wait(380);
+    // The ink starts at the cursor block.
+    const r = caret?.getBoundingClientRect();
+    const cx = r ? r.left + r.width / 2 : innerWidth / 2, cy = r ? r.top + r.height / 2 : innerHeight / 2;
+    await flood('cover', cx, cy, 420, 0);
+    root.classList.remove('intro');
+    await flood('reveal', cx, cy, 650);
+  } finally { root.classList.remove('intro'); floodClear(); }
   window.dispatchEvent(new CustomEvent('site:intro-done'));
 }
 

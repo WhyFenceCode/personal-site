@@ -182,7 +182,11 @@ function start(cv: HTMLCanvasElement, { layers, autoplay, dive, labels }: Props)
       void main(){
         float m = inkMask(tField, vUv, uRes, uT);
         vec2 p = vUv * uRes;
-        float n = fbm(p / uRes.y * 2.6 + vec2(uT * .5, uT * .3));
+        #ifdef INK_BLOTCH
+        float n = inkWob(p / uRes.y, uT);
+        #else
+        float n = inkWob(normalize(p - uCommit.xy + vec2(1e-4)) * .95, uT);
+        #endif
         float cr = uCommit.z * (1. + .22 * (n - .5));
         float c = 1. - smoothstep(cr - 1.5, cr + 1.5, distance(p, uCommit.xy));
         m = max(m, step(.5, uCommit.z) * c);

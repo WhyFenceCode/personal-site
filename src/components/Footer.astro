@@ -22,7 +22,7 @@ const legal = ['privacy', 'cookies', ...(site.legal.imprint ? ['imprint'] : []),
   <div class="foot-cols">
     <div><div class="mono muted">{t(lang, 'footer.say')}</div><p class="foot-mail"><a href={`mailto:${site.email}`}>{site.email}</a></p></div>
     <div><div class="mono muted">{t(lang, 'footer.site')}</div><ul>
-      {['projects', 'blog', 'resume', 'about', 'brand'].map((k) => <li><a href={href(lang, k)}>{t(lang, `nav.${k}`)}</a></li>)}
+      {['projects', 'blog', 'resume', 'about', 'brand', 'docs'].map((k) => <li><a href={href(lang, k)}>{t(lang, `nav.${k}`)}</a></li>)}
     </ul></div>
     <div><div class="mono muted">{t(lang, 'footer.elsewhere')}</div><ul>
       {site.socials.map((s) => <li><a href={s.url} rel="noopener me">{s.label}</a></li>)}
