@@ -10,6 +10,11 @@ art: strata
 featured: true
 order: 2
 live: "https://torstenyoung.com"
-repo: WhyFenceCode/personal-site
 ---
 Designing and building out my custom website to show off my skills and resume. The design uses 3js to create ink interaction and the 3d renders, which makes the page feel unique and memorable.
+
+## Source code
+
+The whole site is open source. Pick a file to read it:
+
+::repo{name="WhyFenceCode/personal-site"}

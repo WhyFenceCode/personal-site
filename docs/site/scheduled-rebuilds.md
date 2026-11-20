@@ -1,8 +1,11 @@
 # Scheduled rebuilds
 
-The site is static: GitHub activity, the place lookups and the "this year" reading count are
-worked out when the site **builds**, not when someone visits. To keep them fresh, rebuild on a schedule.
-Daily is plenty.
+The site is static: GitHub activity, the code viewers' repositories, the place lookups, the newest blog post and
+the "this year" reading count are worked out when the site **builds**, not when someone visits. To keep them fresh,
+rebuild on a schedule. Daily is plenty.
+
+**This is already set up:** `.github/workflows/rebuild.yml` runs every day at 09:17 UTC once the `CF_DEPLOY_HOOK`
+secret exists (until then it skips quietly). The steps below are how it was made, and what to check if it stops.
 
 ## Cloudflare Pages (recommended if you host there)
 

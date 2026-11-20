@@ -5,12 +5,8 @@
  * that pages contact no other company). The README and the tree go into the page; each file becomes its own small
  * page on this site (/repos/<owner>/<name>/<path>.html, made by src/pages/repos/), fetched only when it's opened.
  *
- * Use it two ways (see docs/guides/repos.md):
- *   - a project's frontmatter:  repo: owner/name
- *   - anywhere in Markdown (projects, blog posts), a fenced block:
- *       ```repo
- *       owner/name
- *       ```
+ * Place it anywhere in Markdown (blog posts, case studies) with ::repo{name="owner/name"} (lib/embeds.mjs), or at
+ * the top of a project page with `showcase: repo` and `repo: owner/name`. See docs/writing/embeds.md.
  *
  * Public repos only. Without a token GitHub allows 60 API calls an hour; each repo takes two, and results are cached
  * in node_modules/.cache/site-repos for 10 minutes (file contents for good, by their hash). Set GITHUB_TOKEN as a
@@ -266,7 +262,7 @@ export async function viewerHtml(spec) {
 }
 
 /* ---------- Which repos the site uses ---------- */
-/** Every repo named in the content (project `repo:` fields and ```repo blocks), so their file pages can be built. */
+/** Every repo named in the content (project `repo:` fields, ::repo directives, ```repo blocks), so their file pages can be built. */
 export function reposInContent(root = join(process.cwd(), 'src', 'content')) {
   const found = new Set();
   const walk = (d) => {
@@ -278,25 +274,13 @@ export function reposInContent(root = join(process.cwd(), 'src', 'content')) {
         const fm = s.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? '';
         const r = fm.match(/^repo:\s*["']?([^"'\s#]+)/m)?.[1]; if (r) found.add(r);
         for (const m of s.matchAll(/^(`{3,}|~{3,})repo[ \t]*\r?\n[ \t]*([^\s`~]+)/gm)) found.add(m[2]);
+        for (const m of s.matchAll(/^::repo(?:\[([^\]]+)\])?(?:\{([^}]*)\})?/gm)) {
+          const name = m[2]?.match(/(?:name|repo)=["']([^"']+)/)?.[1] ?? m[1];
+          if (name) found.add(name.trim());
+        }
       }
     }
   };
   walk(root);
   return [...found].filter((s) => parseSpec(s));
-}
-
-/* ---------- Markdown: ```repo blocks ---------- */
-/** remark plugin: a fenced code block in the language "repo" holding owner/name becomes the viewer. */
-export function remarkRepoBlocks() {
-  return async (tree) => {
-    const jobs = [];
-    const visit = (node) => {
-      for (const [i, c] of (node.children ?? []).entries()) {
-        if (c.type === 'code' && c.lang === 'repo') jobs.push(viewerHtml(c.value.trim().split(/\s+/)[0]).then((html) => { node.children[i] = { type: 'html', value: html }; }));
-        else visit(c);
-      }
-    };
-    visit(tree);
-    await Promise.all(jobs);
-  };
 }

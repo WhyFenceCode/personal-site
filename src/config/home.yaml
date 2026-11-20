@@ -31,7 +31,7 @@ sections:
 
   - type: activities
     # Blocks in display order. size: 1 or 2 columns, or 4 for a full row.
-    # Block ids: reading, listening, training, photography, languages, uses (places has its own section below).
+    # Block ids: reading, listening, training, photography, languages (places has its own section below).
     # training (distance from all activities) hides itself when there's no recent activity (see activities.yaml).
     blocks:
       - { id: reading, size: 1 }
@@ -39,7 +39,6 @@ sections:
       - { id: training, size: 2 }
       - { id: photography, size: 2 }
       - { id: languages, size: 2 }
-      # - { id: uses, size: 2 }
     cta: { label: cta.aboutMe, to: about }
 
   # The dot globe of places you've been (src/data/places.txt). Kept light so the globe reads well.

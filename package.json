@@ -28,6 +28,7 @@
     "d3-geo": "^3.1.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "remark-directive": "^4.0.0",
     "tailwindcss": "^4.3.3",
     "three": "^0.186.1",
     "topojson-client": "^3.1.0",

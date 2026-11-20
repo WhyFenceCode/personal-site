@@ -1,3 +1,4 @@
+export {}; // a module, so its names stay its own
 /**
  * Repo viewers (src/lib/repos.mjs): click a file in the tree to open it. Files are small HTML pages on this site,
  * made at build time, fetched the first time they're opened and kept for the rest of the visit. Links inside a README

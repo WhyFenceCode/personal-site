@@ -78,17 +78,17 @@ it next to the post instead.
 | `[see above](#the-hull)` | A section of this post |
 | `[projects](/en/projects/)` | Any page on the site |
 
-### A GitHub repository
+### Websites and repositories
 
-A fenced block in the language `repo` shows a repository's files and README in a viewer:
+Place a live website or a GitHub repository anywhere in the post, each on its own line:
 
-````markdown
-```repo
-WhyFenceCode/personal-site
+```markdown
+::site[A caption]{url="https://shaders.properties"}
+
+::repo{name="WhyFenceCode/personal-site"}
 ```
-````
 
-See [repos.md](repos.md) for what it shows and how.
+Outside websites only load after the reader presses Continue. See [embeds.md](embeds.md) for everything they can do.
 
 ## 4. Check it
 

@@ -23,7 +23,7 @@ Postal address: {{address}}
 | --- | --- | --- | --- |
 | Server logs: IP address, browser type, page requested, date and time | To deliver the site and keep it secure | Necessary to run the site (PIPEDA: implied consent; GDPR: legitimate interests, Art. 6(1)(f)) | Deleted by the host after a short period, normally within 30 days |
 | Preferences stored in your browser: language and motion setting | To remember your choices | Strictly necessary | Until you clear your browser storage. Never sent anywhere |
-| Connection data sent to an embedded project website (IP address, browser type, referring page) when you press Continue on its live preview | To show the project as it really works | Your consent (Art. 6(1)(a)), given by pressing Continue | Set by that website; see its own policy |
+| Connection data sent to an embedded website (IP address, browser type, referring page) when you press Continue on its live preview | To show the website as it really works | Your consent (Art. 6(1)(a)), given by pressing Continue | Set by that website; see its own policy |
 | Emails you send | To reply to you | Your consent (Art. 6(1)(a)) | Deleted once the conversation is finished, and within 24 months at most |
 
 **Statistics.** {{analytics}}
@@ -32,13 +32,13 @@ Postal address: {{address}}
 No accounts, no forms, no comments, no newsletter, no advertising, no tracking cookies, and no selling, renting or
 sharing of personal information. All fonts, scripts, images and 3D graphics are served from this website itself,
 including the images in blog posts, so loading a page does not contact any other company, unless you choose to load
-another website's live preview on a project page (see section 4).
+another website's live preview on a project page or in a blog post (see section 4).
 
 ## 4. Other parties
 - **Hosting.** The site is served by {{hosting}}, which processes server logs on the site's behalf. Its servers
   may be outside Canada, so this information may be subject to the laws of that country.
-- **Live project previews.** Some project pages can show the real website of that project inside a window on
-  the page. Nothing from that website loads until you press **Continue** on that window. Then your browser
+- **Live website previews.** Some project pages and blog posts can show a real website inside a window on the
+  page. Nothing from that website loads until you press **Continue** on that window. Then your browser
   connects to it directly: it receives your IP address, browser type and the fact that you viewed it (with this
   site as the referring address), and it may set its own cookies or storage. That website's own privacy and
   cookie policies apply. Websites that can be shown this way: **{{embeds}}**.

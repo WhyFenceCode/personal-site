@@ -5,15 +5,19 @@
 //   <slug>-tablet.jpg  768×1024, in the browser frame on phones
 // They become the project's cover when it has no `cover:` of its own.
 //
+// It also captures every website placed in Markdown with ::site{url="…"} that has no image="…" of its own:
+//   sites/<address>.jpg  1440×900, shown in that browser frame (see docs/writing/embeds.md)
+//
 //   pnpm shots            capture missing screenshots
 //   pnpm shots --all      re-capture every live project
-//   pnpm shots orbit      re-capture one project by its file name
+//   pnpm shots orbit      re-capture one project by its file name (or a ::site by its sites/ file name)
 //
 // Commit the images. This runs on your machine (not during the hosted build), so builds stay fast.
 import { readdirSync, readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { parse } from 'yaml';
 import { chromium } from 'playwright';
+import { sitesInContent, siteShotName, SHOTS_DIR } from '../src/lib/embeds.mjs';
 
 const ROOT = 'src/content/projects';
 const OUT = 'src/assets/screenshots';
@@ -33,7 +37,10 @@ for (const lang of readdirSync(ROOT)) {
 
 const missing = (slug) => ['', '-card', '-tablet'].some((s) => !existsSync(join(OUT, `${slug}${s}.jpg`)));
 const todo = [...projects].filter(([slug]) => (only.length ? only.includes(slug) : all || missing(slug)));
-if (!todo.length) { console.log('[shots] nothing to do (use --all to re-capture)'); process.exit(0); }
+// ::site embeds without their own image: one desktop screenshot each.
+const sites = [...new Map(sitesInContent().filter((x) => !x.image).map((x) => [siteShotName(x.url), x.url]))]
+  .filter(([name]) => (only.length ? only.includes(name) || only.includes(name.replace(/\.jpg$/, '')) : all || !existsSync(join(SHOTS_DIR, name))));
+if (!todo.length && !sites.length) { console.log('[shots] nothing to do (use --all to re-capture)'); process.exit(0); }
 
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch();
@@ -61,6 +68,18 @@ for (const [slug, url] of todo) {
   } catch (e) {
     failed++;
     console.warn(`[shots] ${slug} failed: ${e.message.split('\n')[0]}`);
+  }
+}
+mkdirSync(SHOTS_DIR, { recursive: true });
+for (const [name, url] of sites) {
+  try {
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: join(SHOTS_DIR, name), type: 'jpeg', quality: 82 });
+    console.log(`[shots] sites/${name} ← ${url}`);
+  } catch (e) {
+    failed++;
+    console.warn(`[shots] sites/${name} failed: ${e.message.split('\n')[0]}`);
   }
 }
 await browser.close();

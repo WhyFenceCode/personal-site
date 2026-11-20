@@ -10,7 +10,8 @@ import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import { remarkSiteTokens } from './src/lib/remark-site-tokens.mjs';
 import { remarkSiteLinks, rehypeBlogDemote, rehypeBlogAnchors } from './src/lib/markdown-blog.mjs';
 import { execSync } from 'node:child_process';
-import { remarkRepoBlocks } from './src/lib/repos.mjs';
+import remarkDirective from 'remark-directive';
+import { remarkEmbeds } from './src/lib/embeds.mjs';
 
 const site = parse(readFileSync(new URL('./src/config/site.yaml', import.meta.url), 'utf8'));
 // The GitHub repo, so links in the docs pages to files that aren't docs (e.g. src/config/site.yaml) open on GitHub.
@@ -43,9 +44,10 @@ export default defineConfig({
   integrations: [
     react(),
     // /sitemap.xml (merged by singleSitemap below), linked from robots.txt. The root language redirect and the 404 aren't real pages.
-    // The brand kit (/<lang>/brand/) is an internal reference page, so it stays out too, as do the docs (/<lang>/docs/), and /blog/newest is a copy of the latest post.
+    // The docs and the brand kit in them (/<lang>/docs/) are internal references, so they stay out too; /blog/newest is
+    // a copy of the latest post, and /repos/ holds the code viewers' files.
     sitemap({
-      filter: (page) => { const p = new URL(page).pathname; return p !== '/' && !p.startsWith('/404') && !/^\/[a-z]{2}\/brand\//.test(p) && !/^\/[a-z]{2}\/(blog\/newest|docs)\//.test(p) && !p.startsWith('/repos/'); },
+      filter: (page) => { const p = new URL(page).pathname; return p !== '/' && !p.startsWith('/404') && !/^\/[a-z]{2}\/(blog\/newest|docs)\//.test(p) && !p.startsWith('/repos/'); },
       i18n: site.languages.length > 1
         ? { defaultLocale: site.languages[0], locales: Object.fromEntries(site.languages.map((/** @type {string} */ l) => [l, l])) }
         : undefined,
@@ -58,7 +60,8 @@ export default defineConfig({
   // Blog posts and docs: links between .md files, heading levels, and a "#" link on each heading (src/lib/markdown-blog.mjs).
   // rehypeHeadingIds is listed so the ids exist before the anchors are added; Astro then doesn't add it again.
   markdown: {
-    remarkPlugins: [remarkSiteTokens(site), remarkSiteLinks({ lang: site.languages[0], repo }), remarkRepoBlocks], // ```repo blocks → GitHub repo viewer (src/lib/repos.mjs)
+    // remarkDirective + remarkEmbeds: ::site{…} and ::repo{…} placed anywhere in Markdown (src/lib/embeds.mjs).
+    remarkPlugins: [remarkDirective, remarkSiteTokens(site), remarkSiteLinks({ lang: site.languages[0], repo }), remarkEmbeds],
     rehypePlugins: [rehypeBlogDemote, rehypeHeadingIds, rehypeBlogAnchors],
   },
   vite: { plugins: [tailwindcss()] },

@@ -31,5 +31,9 @@ Untick it if you want the calendar to show public work only. Private repo names 
 ```
 
 ## Freshness
-Updates on every build. See [scheduled-rebuilds.md](scheduled-rebuilds.md) for a daily rebuild.
-GitHub's unauthenticated API allows 60 requests an hour per IP; a build uses 2, so this is never an issue.
+Updates on every build. See [scheduled-rebuilds.md](../site/scheduled-rebuilds.md) for a daily rebuild.
+GitHub's unauthenticated API allows 60 requests an hour per IP. This block uses 2 per build, and each code viewer
+([embeds.md](../writing/embeds.md)) 2 more, so it's never an issue in practice.
+
+## Not to be confused with
+The **code viewer** shows one repository's files on a project page or in a post: [embeds.md](../writing/embeds.md).

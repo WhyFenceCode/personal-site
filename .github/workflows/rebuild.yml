@@ -1,6 +1,6 @@
 # Rebuilds the site once a day so GitHub, Strava and reading data stay fresh.
 # Needs one repository secret, CF_DEPLOY_HOOK (Settings → Secrets and variables → Actions): the Cloudflare
-# Pages deploy hook URL. Until it's set, the job skips quietly. See docs/guides/scheduled-rebuilds.md.
+# Pages deploy hook URL. Until it's set, the job skips quietly. See docs/site/scheduled-rebuilds.md.
 name: Daily rebuild
 on:
   schedule:

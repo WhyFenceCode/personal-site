@@ -3,45 +3,45 @@
 /sitemap-index.xml  /sitemap.xml  301
 /sitemap-0.xml      /sitemap.xml  301
 
-# Short addresses for the brand kit, with and without the language. Temporary (302), so they can change later
-# without browsers remembering them. /brand on its own would otherwise land on the 404 page first.
-/brand                     /en/brand/    302
-/brand-kit                 /en/brand/    302
-/brandkit                  /en/brand/    302
-/branding                  /en/brand/    302
-/brand-identity            /en/brand/    302
-/brandidentity             /en/brand/    302
-/brand-guidelines          /en/brand/    302
-/brandguidelines           /en/brand/    302
-/brand-guide               /en/brand/    302
-/brandguide                /en/brand/    302
-/brand-assets              /en/brand/    302
-/brandassets               /en/brand/    302
-/style-guide               /en/brand/    302
-/styleguide                /en/brand/    302
-/design-system             /en/brand/    302
-/designsystem              /en/brand/    302
-/identity                  /en/brand/    302
-/logo                      /en/brand/    302
-/logos                     /en/brand/    302
-/:lang/brand-kit           /:lang/brand/ 302
-/:lang/brandkit            /:lang/brand/ 302
-/:lang/branding            /:lang/brand/ 302
-/:lang/brand-identity      /:lang/brand/ 302
-/:lang/brandidentity       /:lang/brand/ 302
-/:lang/brand-guidelines    /:lang/brand/ 302
-/:lang/brandguidelines     /:lang/brand/ 302
-/:lang/brand-guide         /:lang/brand/ 302
-/:lang/brandguide          /:lang/brand/ 302
-/:lang/brand-assets        /:lang/brand/ 302
-/:lang/brandassets         /:lang/brand/ 302
-/:lang/style-guide         /:lang/brand/ 302
-/:lang/styleguide          /:lang/brand/ 302
-/:lang/design-system       /:lang/brand/ 302
-/:lang/designsystem        /:lang/brand/ 302
-/:lang/identity            /:lang/brand/ 302
-/:lang/logo                /:lang/brand/ 302
-/:lang/logos               /:lang/brand/ 302
+# Short addresses for the brand kit (now part of the docs, at /<lang>/docs/brand/), with and without the language.
+# Temporary (302), so they can change later without browsers remembering them. The old /<lang>/brand/ moved for good (end of file).
+/brand                     /en/docs/brand/ 302
+/brand-kit                 /en/docs/brand/ 302
+/brandkit                  /en/docs/brand/ 302
+/branding                  /en/docs/brand/ 302
+/brand-identity            /en/docs/brand/ 302
+/brandidentity             /en/docs/brand/ 302
+/brand-guidelines          /en/docs/brand/ 302
+/brandguidelines           /en/docs/brand/ 302
+/brand-guide               /en/docs/brand/ 302
+/brandguide                /en/docs/brand/ 302
+/brand-assets              /en/docs/brand/ 302
+/brandassets               /en/docs/brand/ 302
+/style-guide               /en/docs/brand/ 302
+/styleguide                /en/docs/brand/ 302
+/design-system             /en/docs/brand/ 302
+/designsystem              /en/docs/brand/ 302
+/identity                  /en/docs/brand/ 302
+/logo                      /en/docs/brand/ 302
+/logos                     /en/docs/brand/ 302
+/:lang/brand-kit           /:lang/docs/brand/ 302
+/:lang/brandkit            /:lang/docs/brand/ 302
+/:lang/branding            /:lang/docs/brand/ 302
+/:lang/brand-identity      /:lang/docs/brand/ 302
+/:lang/brandidentity       /:lang/docs/brand/ 302
+/:lang/brand-guidelines    /:lang/docs/brand/ 302
+/:lang/brandguidelines     /:lang/docs/brand/ 302
+/:lang/brand-guide         /:lang/docs/brand/ 302
+/:lang/brandguide          /:lang/docs/brand/ 302
+/:lang/brand-assets        /:lang/docs/brand/ 302
+/:lang/brandassets         /:lang/docs/brand/ 302
+/:lang/style-guide         /:lang/docs/brand/ 302
+/:lang/styleguide          /:lang/docs/brand/ 302
+/:lang/design-system       /:lang/docs/brand/ 302
+/:lang/designsystem        /:lang/docs/brand/ 302
+/:lang/identity            /:lang/docs/brand/ 302
+/:lang/logo                /:lang/docs/brand/ 302
+/:lang/logos               /:lang/docs/brand/ 302
 
 # The work section is now called projects. Old links keep working (permanent, 301).
 /work                      /en/projects/          301
@@ -67,3 +67,7 @@
 /guides                    /en/docs/guides/       302
 /:lang/documentation       /:lang/docs/           302
 /:lang/guides              /:lang/docs/guides/    302
+
+# The brand kit's old address, /<lang>/brand/. Last, so /docs/… and the short addresses above match first.
+/:lang/brand               /:lang/docs/brand/ 301
+/:lang/brand/              /:lang/docs/brand/ 301

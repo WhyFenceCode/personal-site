@@ -29,7 +29,7 @@ export function t(lang: Lang, key: string, vars: Record<string, string | number>
 export const useT = (lang: Lang) => (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
 
 /** Pages that CTAs and nav can point at. */
-const PAGES: Record<string, string> = { home: '', projects: 'projects/', blog: 'blog/', docs: 'docs/', brand: 'brand/', resume: 'resume/', about: 'about/', contact: '#contact' };
+const PAGES: Record<string, string> = { home: '', projects: 'projects/', blog: 'blog/', docs: 'docs/', brand: 'docs/brand/', resume: 'resume/', about: 'about/', contact: '#contact' };
 
 /** Build a localised URL. `to` is a page key, a page key with a slug ("projects/orbit"), or a full URL. */
 export function href(lang: Lang, to: string): string {

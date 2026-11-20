@@ -13,8 +13,8 @@ This site sets no cookies. A few preferences are kept in your browser's local st
 None of these are sent anywhere. The intro animation, the blog and the documentation pages store nothing at all;
 the intro plays again on each fresh visit because it remembers nothing between visits.
 
-## Embedded project websites
-Some project pages can show the project's real website inside a frame on the page ({{embeds}}). Nothing
+## Embedded websites
+Some project pages and blog posts can show a real website inside a frame on the page ({{embeds}}). Nothing
 from it loads until you press Continue. Then that website loads in your browser as if you had visited it, and it may set its own
 cookies or local storage under its own address. This site can't read or control them. They're covered by
 that website's own cookie and privacy policy, and you can clear them in your browser's settings for that

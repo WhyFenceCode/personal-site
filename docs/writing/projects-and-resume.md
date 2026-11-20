@@ -1,4 +1,4 @@
-# Education, projects and experience
+# Projects, education and experience
 
 Each entry is one Markdown file inside a language folder. The frontmatter (between the `---` lines) fills the
 cards and tables; the body becomes the detail text.
@@ -52,6 +52,9 @@ summary: One sentence for cards and the page intro.
 cover: ./orbit.jpg       # optional image next to this file; otherwise the live-site screenshot, then placeholder art
 live: https://example.com   # optional: "Visit the site" button, screenshot cover and live preview
 preview: true            # set false to never offer the interactive live preview
+showcase: site           # the wide window under the title: site (default) | repo | none
+repo: owner/name         # a public GitHub repository, shown in that window with showcase: repo
+model: /models/orbit.glb # optional 3D model, pinned beside the story (see 3d-models.md)
 client: Example Club     # optional facts shown beside the write-up
 services: [Design, Development]
 metrics:                 # optional big numbers above the write-up
@@ -62,17 +65,29 @@ order: 1
 links:
   - { label: Live site, url: "https://example.com" }
 ---
-The case study, in Markdown. Headings, lists, images and tables all work.
+The case study, in Markdown. Headings, lists, images and tables all work, anywhere in the text.
+
+::site{url="https://example.com"}
+
+::repo{name="owner/name"}
 ```
 The file name becomes the URL: `orbit.md` → `/en/projects/orbit/`.
 
+### What goes where
+- **The wide window under the title** is set by `showcase`: the live site or its screenshot (`site`), the GitHub
+  repository viewer (`repo`, with `repo:` set), or nothing (`none`).
+- **Everything else is placed in the case study**, wherever you want it: images (`![alt](./photo.jpg)`, next to the
+  file), websites (`::site{…}`) and repositories (`::repo{…}`). See [embeds.md](embeds.md).
+
 ### Live sites: screenshots and the interactive preview
-- Run `pnpm shots` after adding a project with `live:`. It opens the site in a headless browser and saves a
-  1440×900 screenshot to `src/assets/screenshots/<slug>.jpg`, which becomes the cover. Commit the image.
-  `pnpm shots --all` re-captures every project; `pnpm shots <slug>` re-captures one.
+- Run `pnpm shots` after adding a project with `live:`. It opens the site in a headless browser and saves three
+  screenshots to `src/assets/screenshots/`: `<slug>.jpg` (1440×900, the project page's window), `<slug>-card.jpg`
+  (1200×900, the 4:3 project cards, so responsive sites lay out to the card's shape) and `<slug>-tablet.jpg`
+  (768×1024, the window on phones). Commit the images. `pnpm shots --all` re-captures every project;
+  `pnpm shots <slug>` re-captures one. It also screenshots every `::site` embed that has no image of its own.
 - On the project page a browser frame shows the project. If the live site allows being framed, the real site
   loads straight into the frame (visitors click once to interact with it); otherwise the screenshot is shown.
-  Embedded sites are listed automatically in the privacy and cookie policies.
+  Embedded sites (here and in `::site` embeds) are listed automatically in the privacy and cookie policies.
 - In `pnpm dev` the check runs against `localhost`, so a site that only allows your real domain shows the
   screenshot locally. Add `http://localhost:4321` to its `frame-ancestors` if you want to see it live in dev.
 - Whether a site can be framed is checked at build time from its `X-Frame-Options` and `Content-Security-Policy`

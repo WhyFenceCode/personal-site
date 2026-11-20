@@ -1,7 +1,9 @@
 # Places
 
-A world map with a pin for each place you've been, the countries filled in, and a count. Drawn as a static
-image at build time: no map service or tiles load in visitors' browsers.
+A globe made of small dots that visitors drag to spin, with a count of places and countries. Countries you've been
+to are a darker shade (hover one for a card), each place is a larger dot, and clicking a place (on the globe or in
+the list beside it) turns it accent and turns the globe to face it. The dots are worked out when the site builds and
+the globe is drawn in the browser from them: no map service or tiles load in visitors' browsers.
 
 ## The file: `src/data/places.txt`
 ```text
@@ -10,7 +12,7 @@ Tokyo, Japan | 2023
 Reykjavik, Iceland
 ```
 
-`City, Country | year | note`. Year and note are optional. The note shows when someone hovers the pin.
+`City, Country | year | note`. Year and note are optional. The note shows in the place's card.
 
 ## How the coordinates are found
 At build time each new place is looked up once on OpenStreetMap (Nominatim) and saved in
@@ -32,5 +34,6 @@ public.
 The hero clock's time zone comes from `location.city` in `site.yaml` when `timezone: auto`. If it guesses
 wrong, set it directly, e.g. `timezone: America/Toronto`.
 
-## Size
-In `home.yaml`, `{ id: places, size: 4 }` gives it a full row; `size: 2` works but the map gets small.
+## On the home page
+Places is a section of its own in `home.yaml` (`- type: places`), not a hobby block. Move it like any other section
+([sections.md](sections.md)); `tone: light` keeps the globe easy to read.

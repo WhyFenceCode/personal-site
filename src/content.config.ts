@@ -22,9 +22,9 @@ const projects = defineCollection({
     cover: image().optional(),              // falls back to a `pnpm shots` screenshot, then to placeholder art
     live: z.url().optional(),      // the live site: "Visit the site" button, screenshot cover, live preview
     preview: z.boolean().default(true),     // false = never offer the interactive live preview
-    model: z.string().optional(),           // a 3D model to spin, e.g. /models/foil.glb (file in public/models/); see docs/guides/3d-models.md
+    model: z.string().optional(),           // a 3D model to spin, e.g. /models/foil.glb (file in public/models/); see docs/writing/3d-models.md
     // How the model is turned on its project card (and where the project page's viewer starts), in degrees:
-    // turn = spin around the vertical axis, tilt = tip the top towards you. See docs/guides/3d-models.md
+    // turn = spin around the vertical axis, tilt = tip the top towards you. See docs/writing/3d-models.md
     modelAngle: z.object({ turn: z.number().default(54), tilt: z.number().default(26) }).default({ turn: 54, tilt: 26 }),
     client: z.string().optional(),
     services: z.array(z.string()).default([]),
@@ -33,7 +33,10 @@ const projects = defineCollection({
     featured: z.boolean().default(false),   // featured projects show on the home page first
     order: z.number().default(100),
     links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
-    repo: z.string().optional(),            // a public GitHub repo (owner/name): its files and README in a viewer on the project page
+    repo: z.string().optional(),            // a public GitHub repo (owner/name), shown at the top with showcase: repo
+    // What fills the wide window at the top of the project page: site = the browser frame (live site, screenshot or
+    // art), repo = the GitHub repo viewer (needs repo:), none = nothing. Anything else goes in the Markdown: ::site, ::repo.
+    showcase: z.enum(['site', 'repo', 'none']).default('site'),
   }),
 });
 
@@ -97,15 +100,16 @@ const blog = defineCollection({
   }),
 });
 
-// The site's own documentation (README.md and docs/guides/), shown at /<lang>/docs/ beside the brand kit.
+// The site's own documentation, shown at /<lang>/docs/ (with the brand kit at /<lang>/docs/brand/):
+//   docs/README.md → the docs home · docs/<folder>/<name>.md → /docs/<folder>/<name>/ · README.md → /docs/overview/
 // No frontmatter needed: the title is the file's first `# Heading`.
 const docs = defineCollection({
   loader: glob({
-    pattern: ['README.md', 'docs/guides/*.md'],
+    pattern: ['README.md', 'docs/**/*.md'],
     base: '.',
     generateId: ({ entry }) => {
       const e = entry.replace(/\\/g, '/');
-      return e === 'README.md' ? 'overview' : e === 'docs/guides/README.md' ? 'guides' : e.replace(/^docs\/guides\//, '').replace(/\.md$/, '').toLowerCase();
+      return e === 'README.md' ? 'overview' : e === 'docs/README.md' ? 'index' : e.replace(/^docs\//, '').replace(/\.md$/, '').toLowerCase();
     },
   }),
   schema: z.object({}).passthrough(),

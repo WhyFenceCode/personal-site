@@ -34,6 +34,6 @@ reading:
 
 ## Workflow tip
 Update the page number when you sit down to read and the site is current. With a daily rebuild
-([scheduled-rebuilds.md](scheduled-rebuilds.md)) you can even edit the file on GitHub from your phone.
+([scheduled-rebuilds.md](../site/scheduled-rebuilds.md)) you can even edit the file on GitHub from your phone.
 
 A badly formatted line is skipped and named in the build log; it never breaks the build.

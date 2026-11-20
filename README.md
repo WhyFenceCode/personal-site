@@ -17,27 +17,29 @@ pnpm check       # type check
 | Name, email, socials, languages, GitHub user, features, legal address | `src/config/site.yaml` |
 | The name block: layers you dive through, autoplay | `src/config/hero.yaml` |
 | **Home page order** (everything below the name) | `src/config/home.yaml` |
-| Hobby blocks (listening, running/cycling, photography link, languages, uses) | `src/config/activities.yaml` |
+| Hobby blocks (listening, running/cycling, photography link, languages) | `src/config/activities.yaml` |
 | Books (plain text, one per line) | `src/data/reading.txt` |
 | Places visited (plain text, one per line) | `src/data/places.txt` |
 | Resume timeline range and skills | `src/config/resume.yaml` |
 | Interface text per language | `src/i18n/<lang>.yaml` |
 | Projects (`/<lang>/projects/`) | `src/content/projects/<lang>/<slug>.md` |
-| A GitHub repo viewer on a project or in a post | `repo: owner/name` in a project, or a ```` ```repo ```` block; see `docs/guides/repos.md` |
-| Blog posts (`/<lang>/blog/`, latest at `/blog/newest`) | `src/content/blog/<lang>/<slug>.md` or `<slug>/index.md`; see the draft post `writing-posts` in `pnpm dev` |
+| Blog posts (`/<lang>/blog/`, latest at `/blog/newest`, RSS at `/rss.xml`) | `src/content/blog/<lang>/<slug>.md` or `<slug>/index.md` |
+| A website or a GitHub repository inside a post or case study | `::site{url="…"}` and `::repo{name="owner/name"}` in the Markdown |
+| Docs (`/<lang>/docs/`) and the brand kit (`/<lang>/docs/brand/`) | `docs/` and `src/pages/[lang]/docs/brand.astro` |
 | Roles | `src/content/experience/<lang>/<slug>.md` |
 | Education (set `featured: true` for the home page) | `src/content/education/<lang>/<slug>.md` |
 | About page | `src/content/pages/<lang>/about.md` |
 | Privacy, cookies, imprint, accessibility | `src/content/legal/<lang>/*.md` |
 | Portrait | `public/portrait.jpg`; turn on/off under `portrait` in `site.yaml` |
 | Top banner (e.g. link to your photo site) | `banner` in `site.yaml` |
-| Resume PDF | `public/resume.pdf` |
+| Resume PDF | `public/resume_torstenyoung.pdf`, set as `resume.pdf` in `site.yaml` |
 
 Every YAML file is validated at build time; a typo fails the build with the file and key named.
 
 ### Reordering the home page
 Move, delete or repeat entries in `src/config/home.yaml`. Sections alternate dark/light automatically;
 set `tone: light|dark` to pin one. Each section takes an optional `cta: { label, to }`.
+See [docs/home-page/sections.md](docs/home-page/sections.md).
 
 ### Adding a language
 Add the code to `languages` in `site.yaml` and create `src/i18n/<code>.yaml`. Missing strings and
@@ -45,7 +47,7 @@ untranslated Markdown fall back to the first language. Two languages show a togg
 
 ### Project screenshots
 `pnpm shots` captures each `live:` project three ways: 16:10 for the project page, 4:3 (the cards' shape) for the
-project cards, and a portrait tablet view for phones.
+project cards, and a portrait tablet view for phones. It also screenshots every `::site` embed without an image.
 
 ### Adding a project image
 Put the image next to the Markdown file and set `cover: ./cover.jpg` in its frontmatter. Without a cover,
@@ -55,9 +57,10 @@ generated placeholder art is shown.
 Create a component in `src/sections/`, register it in `src/sections/index.ts`, and add its schema to
 `sectionSchema` in `src/lib/config.ts`.
 
-## Setup guides
-Step-by-step guides for every block (including Strava and scheduled rebuilds) are in
-[docs/guides/](docs/guides/README.md). The site shows all of them at `/en/docs/`, next to the brand kit.
+## Docs
+Step-by-step guides are in [docs/](docs/README.md), in three folders: **writing** (blog posts, embeds, projects,
+3D models), **home-page** (every block's data) and **site** (look and feel, launching, scheduled rebuilds). The site
+shows all of them at `/en/docs/`, with the brand kit at `/en/docs/brand/`.
 
 ## GitHub activity
 Set `github.username` in `site.yaml`. Public data only, fetched at build time, no token. If your GitHub
@@ -69,18 +72,11 @@ Places in `src/data/places.txt` and your city (for the hero clock, when `timezon
 OpenStreetMap at build time and cached in `src/data/places.cache.json`. Commit that file. Pin a place with
 `@lat,lng` if a lookup is wrong.
 
-## Strava (running and cycling)
-Off by default (`training.source: static` uses the numbers in `activities.yaml`). To switch on:
-1. Create an API application at strava.com/settings/api.
-2. Authorise it for your own account with the **`activity:read`** scope only (not `activity:read_all`), and keep
-   the refresh token it returns.
-3. Add `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET` and `STRAVA_REFRESH_TOKEN` as **build secrets** on your host.
-   Never commit them; `.env*` files are git-ignored for local testing.
-4. Set `training.source: strava`.
-
-Only distance and date are used; routes, maps, start points, times and names are never read or published.
-Each block hides itself when nothing was logged in `activeWithinDays`. Check Strava's current API agreement
-before enabling: it restricts how Strava data may be shown to other people.
+## Strava (distance moved)
+`training.source: import` reads `src/data/training.json`, written by `pnpm strava:import` from Strava's free data
+export; `static` uses the numbers in `activities.yaml`. No API keys, nothing fetched at build time. Only weekly
+distances, the longest effort and the last activity's date are kept. See
+[docs/home-page/running-and-cycling.md](docs/home-page/running-and-cycling.md).
 
 ## Analytics
 `analytics.provider` in `site.yaml`: `none`, `cloudflare`, `plausible`, `umami` or `goatcounter`.
@@ -88,8 +84,10 @@ All four supported providers are cookieless. Set `consent: true` to show the ban
 the visitor allows it.
 
 ## Accessibility & privacy
-- System cursor is never hidden; the circle only appears over interactive elements.
+- The mouse pointer becomes an inverting dot (`features.cursorRing`); the system cursor comes back over embedded
+  sites and in high or increased contrast modes.
 - All motion (ink, 3D, transitions, intro, marquee) respects `prefers-reduced-motion` and the footer "Motion" toggle.
 - Fonts, Three.js and all scripts are bundled and served from the site; pages make no third-party requests
-  unless you enable an analytics provider.
+  unless you enable an analytics provider, or a visitor presses Continue on an embedded website. GitHub data and
+  the code viewers' files are fetched at build time and served from the site.
 - Legal texts are templates: fill in your details and have them checked.

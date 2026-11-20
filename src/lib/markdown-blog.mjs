@@ -1,5 +1,5 @@
 /**
- * Markdown tweaks for blog posts (src/content/blog/) and the documentation pages (README.md and docs/guides/,
+ * Markdown tweaks for blog posts (src/content/blog/) and the documentation pages (README.md and docs/,
  * shown at /<lang>/docs/). Other Markdown (projects, legal…) is left alone.
  *
  * remarkSiteLinks
@@ -25,15 +25,15 @@ const blogFile = (file) => {
   const i = p.indexOf(BLOG);
   return i < 0 ? null : p.slice(i + BLOG.length); // "en/my-post.md" or "en/my-post/index.md"
 };
-/** Repo-relative path of a docs file ("README.md", "docs/guides/blog.md"), or null. */
+/** Repo-relative path of a docs file ("README.md", "docs/writing/blog.md"), or null. */
 const docsFile = (file) => {
   const p = norm(file); if (!p) return null;
   const rel = relative(process.cwd(), p).replace(/\\/g, '/');
-  return rel === 'README.md' || /^docs\/guides\/[^/]+\.md$/.test(rel) ? rel : null;
+  return rel === 'README.md' || /^docs\/.+\.md$/.test(rel) ? rel : null;
 };
-/** The docs page slug for a repo-relative Markdown path, or null when it isn't one of the docs. */
+/** The docs page path for a repo-relative Markdown path ('' for the docs home), or null when it isn't one of the docs. */
 export const docsSlug = (rel) =>
-  rel === 'README.md' ? 'overview' : rel === 'docs/guides/README.md' ? 'guides' : (rel.match(/^docs\/guides\/([^/]+)\.md$/)?.[1]?.toLowerCase() ?? null);
+  rel === 'README.md' ? 'overview' : rel === 'docs/README.md' ? '' : (rel.match(/^docs\/(.+)\.md$/)?.[1]?.toLowerCase() ?? null);
 
 const visit = (node, fn, parent = null) => {
   fn(node, parent);
@@ -48,7 +48,7 @@ export function remarkSiteLinks({ lang = 'en', repo = '' } = {}) {
       // The privacy policy promises that reading a page contacts no other company, so posts can't load images from
       // other sites. Save the image next to the post instead.
       if (blog && (node.type === 'image' || node.type === 'html') && /(^|src=["'])(https?:)?\/\//i.test(node.url ?? node.value ?? '')) {
-        throw new Error(`[blog] ${blog}: images from other websites aren't allowed (${(node.url ?? '').slice(0, 80) || 'an <img> tag'}). Download the image, put it next to the post and use ./name.jpg. See docs/guides/blog.md.`);
+        throw new Error(`[blog] ${blog}: images from other websites aren't allowed (${(node.url ?? '').slice(0, 80) || 'an <img> tag'}). Download the image, put it next to the post and use ./name.jpg. See docs/writing/blog.md.`);
       }
       if (node.type !== 'link' || typeof node.url !== 'string') return;
       if (/^([a-z]+:|#|\/)/i.test(node.url)) return; // absolute, mailto, in-page or site-root links stay
@@ -64,7 +64,7 @@ export function remarkSiteLinks({ lang = 'en', repo = '' } = {}) {
       const target = posix.normalize(posix.join(posix.dirname(doc), path)).replace(/\/$/, '');
       if (target.startsWith('..')) return;
       const slug = docsSlug(target);
-      if (slug) node.url = `/${lang}/docs/${slug === 'overview' ? '' : `${slug}/`}${hash}`;
+      if (slug !== null) node.url = `/${lang}/docs/${slug ? `${slug}/` : ''}${hash}`;
       else if (repo) node.url = `${repo}/blob/main/${target}${hash}`;
     });
   };

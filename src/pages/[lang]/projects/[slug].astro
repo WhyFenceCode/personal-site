@@ -54,7 +54,10 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
     </header>
 
     {/* The big window only for a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
-    {(cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} tablet={tablet} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
+    {/* The wide window under the title (showcase in the frontmatter): the site, its repository, or nothing. The site
+        frame needs a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
+    {d.showcase === 'site' && (cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} tablet={tablet} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
+    {d.showcase === 'repo' && d.repo && <div class="case-showcase"><RepoViewer repo={d.repo} /></div>}
     <div class="case-body" id="case-body">
       <aside class="facts">
         <dl>
@@ -73,13 +76,6 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
         <div class="prose-site case-prose"><Content /></div>
       </div>
     </div>
-    {/* The project's code (repo: in its frontmatter), full width under the story. */}
-    {d.repo && (
-      <section class="case-repo" aria-labelledby="case-repo-t">
-        <h2 class="overview" id="case-repo-t">{t(lang, 'projects.source')}</h2>
-        <RepoViewer repo={d.repo} />
-      </section>
-    )}
    </div>
     {d.model && <div class="case-side"><ProjectModel client:visible src={d.model} title={d.title} hint={t(lang, 'projects.modelHint')} angle={d.modelAngle} fill /></div>}
   </article>
@@ -147,8 +143,9 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
   /* Sub-sections (### in Markdown): clearly a step below the h2, but still above the body text. */
   .case-prose :global(h3) { font-family: var(--font-display); font-weight: 700; font-stretch: 90%; letter-spacing: -.02em; font-size: clamp(22px, 1.8vw, 27px); line-height: 1.1; margin: 36px 0 10px; }
   .case-prose { max-width: 62ch; }
-  .case-repo { margin-top: clamp(64px, 8vw, 112px); scroll-margin-top: calc(var(--header-h) + 24px); }
-  .case-repo :global(.rv) { margin-top: 24px; }
+  .case-showcase :global(.rv) { margin: 0; }
+  /* Images and embeds placed in the case study get the full text width. */
+  .case-prose :global(img) { max-width: 100%; height: auto; border-radius: 4px; }
   .case-prose :global(h2) { margin-top: 56px; }
   .case-prose :global(h2:first-child) { margin-top: 0; }
   .case-prose :global(p) { font-size: 19px; line-height: 1.65; color: var(--fg); }

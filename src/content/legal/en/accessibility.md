@@ -14,6 +14,10 @@ This site aims to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at le
 - Every page works with a keyboard alone, with visible focus.
 - Blog posts and the documentation use real headings in order, each with its own link, and a contents list to jump
   between sections. Images in posts are written with text alternatives.
+- Embedded websites never load by themselves: a Continue button, reachable by keyboard, says what loading one means
+  first. Embedded sites are other people's pages and may not meet this standard.
+- Code viewers list their files as buttons in a labelled list; the open file's name is announced when it changes,
+  and every file also has a link to the same file on GitHub.
 - Links to other websites open in a new tab and say so to screen readers.
 
 If something doesn't work for you, write to **{{email}}** and you'll get a reply within five working days.

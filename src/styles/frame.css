@@ -1,0 +1,54 @@
+/* The browser frame (src/lib/frame.mjs): at the top of project pages and wherever Markdown has ::site{…}.
+   Follows the section's tone through --bg/--fg/--line. 10px corners, a thin line, the screen at 16:10. */
+.bf { margin: 0 auto; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg); color: var(--fg); scroll-margin-top: calc(var(--header-h, 64px) + 24px);
+  /* Never taller than the screen: the width shrinks so the whole 16:10 window (bar included) fits below the header. */
+  width: min(100%, calc((100svh - var(--header-h, 64px) - var(--banner-h, 0px) - 48px - 48px) * 1.6)); }
+.bf-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.bf-dots { display: inline-flex; gap: 6px; }
+.bf-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.bf-url { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; text-transform: none; letter-spacing: .04em; font-size: 12px; text-decoration: none; background: none !important; transition: border-color .3s; }
+.bf-url:hover { border-color: var(--fg); }
+.bf-url i { width: 6px; height: 6px; border-radius: 50%; background: var(--fg); }
+.bf-end { justify-self: end; }
+.bf-state { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; }
+.bf-state i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: bf-pulse 2s ease-in-out infinite; }
+@keyframes bf-pulse { 50% { opacity: .25; } }
+.bf-view { position: relative; aspect-ratio: 16 / 10; max-width: 100%; overflow: hidden; background: #D6D6D6; }
+/* Phones: a portrait, tablet-shaped screen (3:4), still never taller than the space under the header. */
+@media (max-width: 700px) {
+  .bf { width: min(100%, calc((100svh - var(--header-h, 64px) - var(--banner-h, 0px) - 48px - 48px) * .75)); }
+  .bf-view { aspect-ratio: 3 / 4; }
+}
+/* Screenshots and placeholder art fill the screen from the top. The !important beats prose image styles in posts. */
+.bf-view :is(img, canvas), .bf-view picture img { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; max-width: none !important; margin: 0 !important; object-fit: cover; object-position: top; border-radius: 0 !important; filter: none !important; }
+.bf-view p:has(> img:only-child) { margin: 0 !important; }
+.bf-under { position: absolute; inset: 0; }
+.bf-live { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; background: #fff; }
+.bf-open { position: absolute; inset: 0; display: grid; place-items: center; color: #0B0B0B; text-decoration: none; text-transform: none; letter-spacing: .04em; font-size: 14px; background: none !important; }
+.bf-open:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+.bf-dev-note { position: absolute; left: 16px; right: 16px; top: 16px; z-index: 1; margin: 0; padding: 12px 14px; border-radius: 8px; background: #FFF6D6; color: #3A2E00;
+  font-size: 11px; line-height: 1.5; text-transform: none; letter-spacing: .02em; }
+/* Until Continue is pressed, a solid grey cover sits over the empty window (nothing from the other site has
+   loaded yet), with the card in the middle. Over a screenshot (served from this site) the cover is see-through. */
+.bf-shield { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: #CFCFCF; }
+.bf-shield.bf-over-shot { background: rgb(207 207 207 / .55); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.bf-shield[hidden] { display: none; }
+.bf.is-live .bf-under { display: none; }
+.bf-card { display: grid; gap: 10px; justify-items: start; width: min(380px, 100%); padding: 20px 22px; border-radius: 14px; border: 1px solid rgb(255 255 255 / .16);
+  background: rgb(11 11 11 / .86); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 18px 44px -16px rgb(0 0 0 / .55); }
+.bf-card[hidden] { display: none; }
+.bf-card p { margin: 0 !important; color: inherit !important; }
+.bf-card .bf-card-title { font-size: 12px !important; letter-spacing: .14em; text-transform: uppercase; }
+.bf-card .bf-card-note { font-size: 13px !important; line-height: 1.5 !important; color: rgb(255 255 255 / .72) !important; text-wrap: pretty; }
+.bf-go { --fg: #fff; --bg: #0B0B0B; margin-top: 6px; padding: 0; border: 0; background: none; cursor: pointer; }
+.bf-go .cbtn-label { height: 44px; padding: 0 20px; }
+.bf-go .cbtn-disc { width: 44px; height: 44px; }
+.bf-go:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 999px; }
+@media (max-width: 520px) { .bf-card { padding: 14px 16px; gap: 8px; } .bf-card .bf-card-note { font-size: 12px !important; } }
+@media (max-width: 640px) { .bf-bar { grid-template-columns: auto 1fr; } .bf-end { display: none; } .bf-url { justify-self: end; } }
+
+/* In Markdown (posts, case studies): a little air around it, and a caption underneath when given. */
+.bf-embed { margin: 40px 0; }
+.bf-embed .bf { width: 100%; }
+.bf-embed .bf-caption { margin: 10px 0 0 !important; font-size: 14px !important; color: var(--muted) !important; text-align: center; }

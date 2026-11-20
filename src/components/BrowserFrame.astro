@@ -1,144 +1,28 @@
 ---
-/* A browser window around a project. When the live site allows framing, the real site fills the window
-   (rendered at desktop width and scaled to fit). A shield on top keeps page scrolling working until the
-   visitor clicks to interact. Otherwise the screenshot, or placeholder art, is shown instead.
-   On phones the window turns into a portrait, tablet-shaped screen: the live site renders at tablet width and
-   the tablet screenshot (<slug>-tablet.jpg from `pnpm shots`) replaces the desktop one when there is one. */
-import { Image, getImage } from 'astro:assets';
+/* The browser window at the top of a project page: the live site when it allows being framed (after Continue for
+   outside sites), else its screenshot, else placeholder art. The same frame appears in Markdown via ::site{…};
+   both come from src/lib/frame.mjs. On phones the window is portrait and uses the tablet screenshot
+   (<slug>-tablet.jpg from `pnpm shots`) when there is one. */
+import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { frameHtml } from '../lib/frame.mjs';
 import { t, type Lang } from '../lib/i18n';
 import { site } from '../lib/config';
 
 interface Props { lang: Lang; title: string; live?: string; cover?: ImageMetadata; tablet?: ImageMetadata; art: string; interactive: boolean; devBlocked?: boolean }
 const { lang, title, live, cover, tablet, art, interactive, devBlocked = false } = Astro.props;
-const tab = tablet ? await getImage({ src: tablet, width: 900, format: 'webp' }) : null;
 const host = live ? new URL(live).host : '';
-const embed = !!live && interactive;
-// Another website, not this one: the button says so before anything from it can be used.
-const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
+let image = '';
+if (cover && !(live && interactive)) {
+  const main = await getImage({ src: cover, widths: [800, 1440, 2000], sizes: '(max-width: 1600px) 100vw, 1600px', format: 'webp' });
+  const tab = tablet ? await getImage({ src: tablet, width: 900, format: 'webp' }) : null;
+  const alt = live ? `${t(lang, 'projects.preview.alt')} ${host}` : '';
+  image = `<picture>${tab ? `<source media="(max-width: 700px)" srcset="${tab.src}">` : ''}<img src="${main.src}" srcset="${main.srcSet.attribute}" sizes="(max-width: 1600px) 100vw, 1600px" width="${cover.width}" height="${cover.height}" alt="${alt}" loading="eager" decoding="async"></picture>`;
+}
+const devNote = devBlocked
+  ? `<p class="bf-dev-note mono">Dev only: ${host} doesn't allow <code>${Astro.url.origin}</code> to frame it, so your browser blocks it here.
+      It will load on ${new URL(Astro.site ?? site.url).host}. To see it locally, add ${Astro.url.origin} to that site's <code>frame-ancestors</code>.</p>`
+  : '';
+const html = frameHtml({ url: live, title, siteUrl: site.url, interactive, image, art, devNote, lang });
 ---
-<figure class="frame" data-frame>
-  <div class="bar" aria-hidden={live ? undefined : 'true'}>
-    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-    {live && <span class="url mono"><i aria-hidden="true"></i>{host}</span>}
-    <span class="bar-end">
-      {embed && <span class="mono muted state" data-state data-on={t(lang, 'projects.preview.interactive')}><i aria-hidden="true"></i>{t(lang, 'projects.preview.on')}</span>}
-    </span>
-  </div>
-  <div class="view" data-view>
-    {embed ? (
-      <>
-        {/* src is set by the script below, so this site never loads itself inside its own preview. */}
-        <iframe class="live" data-src={live} data-self={outside ? undefined : ''} title={`${title}: ${t(lang, 'projects.preview.live')}`}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-          referrerpolicy="strict-origin-when-cross-origin" tabindex="-1" data-live></iframe>
-        {devBlocked && (
-          <p class="dev-note mono">Dev only: {host} doesn't allow <code>{Astro.url.origin}</code> to frame it, so your browser blocks it here.
-            It will load on {new URL(Astro.site ?? 'https://example.com').host}. To see it locally, add {Astro.url.origin} to that site's <code>frame-ancestors</code>.</p>
-        )}
-        {/* Outside sites: a solid cover and nothing loaded until Continue. This site's own preview loads straight
-            away with no cover; the cover only appears to stop it nesting inside itself. */}
-        <div class="shield" data-shield hidden={!outside}>
-          {outside && <div class="card" role="group" aria-labelledby="frame-card-title" data-card>
-            <p class="card-title mono" id="frame-card-title">{t(lang, 'projects.preview.title')}</p>
-            <p class="card-note">{t(lang, 'projects.preview.outside', { host })}</p>
-            {/* The same split pill as the contact buttons (global .cbtn), in white on the dark card. */}
-            <button type="button" class="cbtn card-go" data-go>
-              <span class="cbtn-label"><span>{t(lang, 'projects.preview.continue')}</span><span aria-hidden="true">{t(lang, 'projects.preview.continue')}</span></span>
-              <span class="cbtn-disc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
-            </button>
-          </div>}
-          <div class="card" role="note" data-nested hidden>
-            <p class="card-title mono">{t(lang, 'projects.preview.nestedTitle')}</p>
-            <p class="card-note">{t(lang, 'projects.preview.nested', { host })}</p>
-          </div>
-        </div>
-      </>
-    ) : cover
-      ? <picture>
-          {tab && <source media="(max-width: 700px)" srcset={tab.src} />}
-          <Image src={cover} alt={live ? `${t(lang, 'projects.preview.alt')} ${host}` : ''} widths={[800, 1440, 2000]} sizes="(max-width: 1600px) 100vw, 1600px" class="shot" loading="eager" />
-        </picture>
-      : <canvas width="1280" height="800" data-art={art} aria-hidden="true"></canvas>}
-  </div>
-</figure>
-
-<script>
-  document.addEventListener('astro:page-load', () => {
-    document.querySelectorAll<HTMLElement>('[data-frame]').forEach((frame) => {
-      const iframe = frame.querySelector<HTMLIFrameElement>('[data-live]'); if (!iframe) return;
-      const view = frame.querySelector<HTMLElement>('[data-view]')!, shield = frame.querySelector<HTMLElement>('[data-shield]');
-      const state = frame.querySelector<HTMLElement>('[data-state]');
-      // Already inside a preview of this site? Then this is the preview's own project page: loading the site again
-      // would nest it forever, so it stops here with a note instead.
-      let framed = true;
-      try { framed = window.self !== window.top; } catch {}
-      if (framed && iframe.hasAttribute('data-self')) {
-        frame.classList.add('is-nested');
-        shield?.removeAttribute('hidden');
-        frame.querySelector('[data-nested]')?.removeAttribute('hidden');
-        return;
-      }
-      const start = () => {
-        iframe.loading = 'lazy';
-        iframe.src = iframe.dataset.src!;
-        iframe.removeAttribute('tabindex');
-        frame.classList.add('is-live');
-        if (state) state.lastChild!.textContent = state.dataset.on ?? '';
-      };
-      // Render at desktop width (tablet width in the portrait phone window) and scale down, so the site shows its
-      // real layout for that screen.
-      const fit = () => {
-        const W = view.clientHeight > view.clientWidth ? 768 : 1440;
-        const k = view.clientWidth / W;
-        iframe.style.width = `${W}px`; iframe.style.height = `${view.clientHeight / k}px`; iframe.style.transform = `scale(${k})`;
-      };
-      fit(); new ResizeObserver(fit).observe(view);
-      // This site's own preview needs no consent; an outside site loads only once Continue is pressed.
-      if (iframe.hasAttribute('data-self')) { start(); return; }
-      frame.querySelector('[data-go]')?.addEventListener('click', () => { start(); shield?.remove(); iframe.focus(); });
-    });
-  });
-</script>
-
-<style>
-  .frame { margin: 0 auto; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg);
-    /* Never taller than the screen: the width shrinks so the whole 16:10 window (bar included) fits below the header. */
-    width: min(100%, calc((100svh - var(--header-h, 64px) - var(--banner-h, 0px) - 48px - 48px) * 1.6)); scroll-margin-top: calc(var(--header-h, 64px) + 24px); }
-  .bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
-  .dots { display: inline-flex; gap: 6px; }
-  .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
-  .url { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; text-transform: none; letter-spacing: .04em; font-size: 12px; }
-  .url i { width: 6px; height: 6px; border-radius: 50%; background: var(--fg); }
-  .bar-end { justify-self: end; }
-  .state { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; }
-  .state i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 50% { opacity: .25; } }
-  .view { position: relative; aspect-ratio: 16 / 10; max-width: 100%; overflow: hidden; background: #D6D6D6; }
-  /* Phones: a portrait, tablet-shaped screen (3:4), still never taller than the space under the header. */
-  @media (max-width: 700px) {
-    .frame { width: min(100%, calc((100svh - var(--header-h, 64px) - var(--banner-h, 0px) - 48px - 48px) * .75)); }
-    .view { aspect-ratio: 3 / 4; }
-  }
-  .view :global(.shot), .view canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
-  .live { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; background: #fff; }
-
-  .dev-note { position: absolute; left: 16px; right: 16px; top: 16px; z-index: 1; margin: 0; padding: 12px 14px; border-radius: 8px; background: #FFF6D6; color: #3A2E00;
-    font-size: 11px; line-height: 1.5; text-transform: none; letter-spacing: .02em; }
-  /* Until Continue is pressed, a solid grey cover sits over the empty window (nothing from the other site has
-     loaded yet), with the card in the middle. */
-  .shield { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: #CFCFCF; }
-  .shield[hidden] { display: none; }
-  .card { display: grid; gap: 10px; justify-items: start; width: min(380px, 100%); padding: 20px 22px; border-radius: 14px; border: 1px solid rgb(255 255 255 / .16);
-    background: rgb(11 11 11 / .86); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 18px 44px -16px rgb(0 0 0 / .55); }
-  .card[hidden] { display: none; }
-  .card p { margin: 0; }
-  .card-title { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
-  .card-note { font-size: 13px; line-height: 1.5; color: rgb(255 255 255 / .72); text-wrap: pretty; }
-  .card-go { --fg: #fff; --bg: #0B0B0B; margin-top: 6px; padding: 0; border: 0; background: none; cursor: pointer; }
-  .card-go :global(.cbtn-label) { height: 44px; padding: 0 20px; }
-  .card-go :global(.cbtn-disc) { width: 44px; height: 44px; }
-  .card-go:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 999px; }
-  @media (max-width: 520px) { .card { padding: 14px 16px; gap: 8px; } .card-note { font-size: 12px; } }
-  @media (max-width: 640px) { .bar { grid-template-columns: auto 1fr; } .bar-end { display: none; } .url { justify-self: end; } }
-</style>
+<Fragment set:html={html} />

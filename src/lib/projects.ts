@@ -24,32 +24,5 @@ export function tabletFor(p: CollectionEntry<'projects'>): ImageMetadata | undef
   return p.data.cover ? undefined : byslug.get(`${slugOf(p.id)}-tablet`);
 }
 
-const frameCache = new Map<string, Promise<boolean>>();
-/** True when `url` can be embedded in an <iframe> on another site. */
-export function canFrame(url: string, siteUrl: string): Promise<boolean> {
-  const key = `${url} ${siteUrl}`;
-  if (!frameCache.has(key)) frameCache.set(key, check(url, siteUrl));
-  return frameCache.get(key)!;
-}
-
-async function check(url: string, siteUrl: string): Promise<boolean> {
-  try {
-    const r = await fetch(url, { method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'personal-site-build' } });
-    const xfo = (r.headers.get('x-frame-options') ?? '').toLowerCase();
-    if (xfo.includes('deny') || xfo.includes('sameorigin')) return false;
-    const csp = r.headers.get('content-security-policy') ?? '';
-    const fa = csp.split(';').map((d) => d.trim()).find((d) => d.toLowerCase().startsWith('frame-ancestors'));
-    if (fa) {
-      const sources = fa.split(/\s+/).slice(1);
-      const origin = new URL(siteUrl).origin;
-      const host = new URL(siteUrl).host;
-      // 'self' allows pages from the framed site's own origin, e.g. this site's own project page.
-      const self = sources.includes("'self'") && new URL(r.url).origin === origin;
-      return self || sources.some((s) => s === '*' || s.replace(/\/$/, '') === origin || s === host || (s.startsWith('https://*.') && host.endsWith(s.slice(9))));
-    }
-    return true;
-  } catch (e) {
-    console.warn(`[projects] could not check ${url} for framing (${(e as Error).message}); showing the screenshot only`);
-    return false;
-  }
-}
+// Whether a live site can be shown in a frame: shared with ::site{…} embeds in Markdown (src/lib/frame.mjs).
+export { canFrame } from './frame.mjs';

@@ -3,18 +3,10 @@
 The site is fully static: `pnpm build` writes everything to `dist/`. Cloudflare Pages builds it from your
 GitHub repo on every push to `main` and serves it on torstenyoung.com.
 
-## 1. Put the code on GitHub
-The repo has no remote yet.
-
-1. On GitHub, create a new repository (e.g. `personal-site`). Leave it empty: no README, licence or .gitignore.
-   Private or public both work.
-2. In the project folder:
-   ```bash
-   git remote add origin https://github.com/WhyFenceCode/personal-site.git
-   git push -u origin main
-   ```
-3. Before the first push, check that nothing secret is staged. `.env`, `.dev.vars` and `private/` are git-ignored,
-   and `pnpm build` ends with a secret scan.
+## 1. The code on GitHub
+The code lives at github.com/WhyFenceCode/personal-site, and every push to `main` is what Cloudflare builds.
+Before pushing, check that nothing secret is staged: `.env`, `.dev.vars` and `private/` are git-ignored, and
+`pnpm build` ends with a secret scan.
 
 ## 2. Create the Pages project
 Cloudflare's **Create an app** screen now leads with Workers. Use Pages instead: click **Continue to Pages**
@@ -38,6 +30,7 @@ rebuild uses.)
    | --- | --- | --- |
    | `NODE_VERSION` | `24` | Astro 7 needs a current Node |
    | `PNPM_VERSION` | `11.20.0` | Matches `packageManager` in package.json |
+   | `GITHUB_TOKEN` | optional: a token with no scopes | Only if a build ever warns about GitHub's rate limit (the code viewers and the Programming block) |
 
 4. **Save and Deploy.** The first build takes a few minutes. You get a `*.pages.dev` address to check it on.
    The build log ends with `[check-secrets] ok`. If the scan fails, the deploy stops, which is what you want.
@@ -57,22 +50,23 @@ rebuild uses.)
 live-preview check use. If you ever use a different domain, change it there.
 
 ## 4. Check the launch
-- Open https://torstenyoung.com and click through: home, projects, a project, the blog, resume, about, legal pages.
+- Open https://torstenyoung.com and click through: home, projects, a project, the blog, a post, resume, about, docs,
+  legal pages.
 - The photo-site project page should show the live photo site in the frame. It only does that on
   torstenyoung.com (and www), because that's what photos.torstenyoung.com allows.
 - Response headers come from `public/_headers` (security headers, long caching for `/_astro/*`). Check with:
   ```bash
   curl -sI https://torstenyoung.com
   ```
-- In `site.yaml`, set `legal.hosting` to `Cloudflare, Inc.` so the privacy policy names the host.
+- `legal.hosting` in `site.yaml` is `Cloudflare, Inc.`, so the privacy policy names the host. Change it if you move.
+- Old addresses redirect: `/work/…` to `/projects/…`, `/brand` to the brand kit in the docs, `/rss.xml` and `/feed` to
+  the blog's feed (all in `public/_redirects`).
 
 ## 5. After launch
 - **Updates:** every push to `main` rebuilds and deploys. Pushes to other branches get preview addresses.
 - **Fresh data:** GitHub and place data only update on a build. Set up the daily rebuild in
   [scheduled-rebuilds.md](scheduled-rebuilds.md). Your Strava numbers update when you run
-  `pnpm strava:import` and push ([running-and-cycling.md](running-and-cycling.md)).
-- **Weekly reminder email:** a small worker that reminds you what to update and flags anything stale:
-  [reminders.md](reminders.md).
+  `pnpm strava:import` and push ([running-and-cycling.md](../home-page/running-and-cycling.md)).
 - **Analytics (optional):** Cloudflare Web Analytics is cookieless. Enable it in the dashboard, then set
   `analytics.provider: cloudflare` in `site.yaml`; the privacy policy updates itself.
 - **Rolling back:** Pages project → **Deployments** → pick an older one → **Rollback**.

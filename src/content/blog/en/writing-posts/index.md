@@ -50,19 +50,31 @@ Put the image next to the post and link it with a relative path. It's resized an
 
 Images in `public/` work too, with a path from the site root: `![Logo](/favicon.svg)`. Images from other websites (`https://…`) stop the build, because loading them would tell that website who is reading: download them instead. Photos are shown in greyscale, as the brand kit asks.
 
-# A GitHub repository
+# Embeds: websites and repositories
 
-A fenced block in the language `repo`, holding the repository's owner/name, shows its files and README, like opening it on GitHub. It works in project pages too (or set `repo:` in a project's frontmatter):
+Two kinds of object can go anywhere in a post, between paragraphs and images, as many as you like. Each is one line on its own.
 
-````markdown
-```repo
-WhyFenceCode/personal-site
+A website in a browser frame. Outside websites only load after the reader presses Continue, so nothing loads from them until they choose to:
+
+```markdown
+::site[The Iris shader docs]{url="https://shaders.properties"}
 ```
-````
 
-```repo
-WhyFenceCode/personal-site
+::site[The Iris shader docs]{url="https://shaders.properties"}
+
+The text in square brackets is an optional caption. Add `image="./shot.jpg"` to use your own screenshot (next to the post), or run `pnpm shots` to take one automatically. `live="false"` keeps it to the screenshot.
+
+A GitHub repository, with its files and README, like opening it on GitHub:
+
+```markdown
+::repo{name="WhyFenceCode/extracurricular-api"}
 ```
+
+::repo{name="WhyFenceCode/extracurricular-api"}
+
+Images keep working anywhere around them:
+
+![This site on a tablet](./phone.jpg)
 
 # Links
 

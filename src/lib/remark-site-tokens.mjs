@@ -3,14 +3,16 @@
  * details and facts about the site can never drift out of date.
  *
  *   {{owner}} {{email}} {{url}} {{city}} {{region}} {{country}} {{updated}} {{hosting}} {{analytics}}
- *   {{embeds}}   the other websites that project pages show in a live frame (from projects' `live:`), as a list
+ *   {{embeds}}   the other websites that can be shown in a live frame: projects' `live:` and ::site embeds in any Markdown
  *   {{address}}  replaced by the address; when site.yaml has no address, the whole paragraph containing it
  *                is dropped (so a line like "Postal address: {{address}}" disappears cleanly).
  */
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { sitesInContent } from './embeds.mjs';
 
-/** Hosts of every project with a `live:` site that may be shown in a frame (not `preview: false`, not this site). */
+/** Hosts of every website that may be shown in a live frame: projects' `live:` (not `preview: false`) and ::site
+ *  embeds (not `live="false"`), except this site itself. */
 function embedHosts(siteUrl) {
   const root = 'src/content/projects';
   if (!existsSync(root)) return [];
@@ -23,6 +25,10 @@ function embedHosts(siteUrl) {
       if (!live || /^preview:\s*false\b/m.test(fm)) continue;
       try { const h = new URL(live).host; if (h !== own) hosts.add(h); } catch {}
     }
+  }
+  for (const s of sitesInContent()) {
+    if (!s.live) continue;
+    try { const h = new URL(s.url).host; if (h !== own) hosts.add(h); } catch {}
   }
   return [...hosts].sort();
 }

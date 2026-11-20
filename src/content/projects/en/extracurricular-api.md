@@ -9,6 +9,7 @@ summary: A free JSON API of university clubs, design teams and competitions, ref
 art: ledger
 live: "https://whyfencecode.github.io/extracurricular-api/"
 repo: WhyFenceCode/extracurricular-api
+showcase: repo            # the repository at the top instead of the site
 order: 5
 metrics:
   - { value: 409, label: activities at Queen's }

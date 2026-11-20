@@ -1,15 +1,15 @@
 ---
 /* The brand kit: every rule the site follows, shown with the site's own tokens, fonts and components so it can't
-   drift from the real thing. Linked from the footer only, and kept out of search (noindex, left out of the sitemap).
+   drift from the real thing. Part of the docs (/<lang>/docs/brand/), and kept out of search (noindex, left out of the sitemap).
    Colours, the accent and the name come from site.yaml; change them there and this page follows. */
-import Base from '../../layouts/Base.astro';
-import PageHead from '../../components/PageHead.astro';
-import ContactButton from '../../components/ui/ContactButton.astro';
-import HeadingText from '../../components/ui/HeadingText.astro';
-import Signature from '../../components/ui/Signature.astro';
-import DoDont from '../../components/brand/DoDont.astro';
-import { site } from '../../lib/config';
-import { langStaticPaths, t, href } from '../../lib/i18n';
+import Base from '../../../layouts/Base.astro';
+import PageHead from '../../../components/PageHead.astro';
+import ContactButton from '../../../components/ui/ContactButton.astro';
+import HeadingText from '../../../components/ui/HeadingText.astro';
+import Signature from '../../../components/ui/Signature.astro';
+import DoDont from '../../../components/brand/DoDont.astro';
+import { site } from '../../../lib/config';
+import { langStaticPaths, t, href } from '../../../lib/i18n';
 // The script face is normally only baked into SVG; here it's shown as live text in the specimens.
 import '@fontsource/mrs-saint-delafield/400.css';
 
@@ -53,7 +53,7 @@ const pairs = [
 const tints = [
   { pct: 100, use: 'Markers, the logo full stop, focus rings, live dots, the pressed state of a place chip.' },
   { pct: 45, use: 'Thin edges on floating pills (the build hint, the loader), build wireframes mixed with grey.' },
-  { pct: 34, use: 'Text selection.' },
+  { pct: 34, use: 'Text selection (a neutral grey wash instead where the page inverts colours: header, name block bars).' },
   { pct: 22, use: 'The halo around a map pin.' },
   { pct: 5, use: 'The pointer sheen. Barely there on purpose.' },
 ];
@@ -71,8 +71,8 @@ const radii = [
   { r: '4px', css: '4px', where: 'Photos and thumbnails, the portrait, dashed notes in prose, the link peek.', rule: 'Images and content blocks. Reads as square from a distance.' },
   { r: '6px', css: '6px', where: 'Info cards for books and map pins.', rule: 'Small popovers.' },
   { r: '8px', css: '8px', where: 'Activity tiles on the home page.', rule: 'Grid cards.' },
-  { r: '10px', css: '10px', where: 'Browser frames, the globe card, 3D model stages.', rule: 'Framed media and larger floating cards.' },
-  { r: '14–16px', css: '16px', where: 'The large browser-frame card, the loader pill.', rule: 'Only for big surfaces that hold other rounded things.' },
+  { r: '10px', css: '10px', where: 'Browser frames, code viewers, the globe card, 3D model stages.', rule: 'Framed media and larger floating cards.' },
+  { r: '14–16px', css: '16px', where: 'The Continue card in a browser frame, the loader pill.', rule: 'Only for big surfaces that hold other rounded things.' },
   { r: '999px', css: '999px', where: 'Every button, nav link, language switch, place chip, hint, banner pill.', rule: 'Anything you press. Always a full pill.' },
   { r: '50%', css: '50%', where: 'Arrow discs, the cursor dot, the progress ring, live and map dots.', rule: 'Square elements that should be circles.' },
 ];
@@ -102,7 +102,7 @@ const motion = [
 <Base lang={lang} page="brand" title="Brand kit" description={`The design system behind ${site.name}'s site.`} noindex>
   <div class="wrap">
     <PageHead title="Brand kit" metaLeft="Design system" metaRight={`v${new Date().getFullYear()}`} lead="The rules behind this site. Follow them for anything that should look like it.">
-      <p class="mono muted bk-docs">How to run and edit the site: <a class="link" href={href(lang, 'docs')}>{t(lang, 'nav.docs')} →</a></p>
+      <p class="mono muted bk-docs"><a class="link" href={href(lang, 'docs')}>← {t(lang, 'nav.docs')}</a> · how to run and edit the site</p>
     </PageHead>
   </div>
 
@@ -702,9 +702,10 @@ const motion = [
       </table>
       <h3 class="bk-h3">Signature moments</h3>
       <ul class="bk-rules">
-        <li><b>Ink flood:</b> covers the screen between pages.</li>
+        <li><b>Ink flood:</b> covers the screen between pages, with smooth rolling edges (or blotchy ones, <code>theme.ink</code>).</li>
+        <li><b>Console intro:</b> the welcome line types out behind a solid accent block cursor; the ink spreads from it.</li>
         <li><b>Menu:</b> grows as a circle from the button.</li>
-        <li><b>Build mode:</b> cursors draw the home page as wireframes (Shift+B).</li>
+        <li><b>Build mode:</b> cursors draw the home page as wireframes (Shift+B), then type the text in with an accent block cursor.</li>
         <li><b>Tilt cards:</b> lean toward the pointer.</li>
         <li><b>Inverting cursor:</b> inverts what's under it.</li>
       </ul>
