@@ -16,7 +16,9 @@ const metaOf = (p: (typeof posts)[number]) => `${postDate(p.data.date, lang)} ·
 ---
 <Base lang={lang} page="blog" title={t(lang, 'nav.blog')} description={t(lang, 'blog.lead')}>
   <div class="wrap">
-    <PageHead title={t(lang, 'nav.blog')} metaLeft={[t(lang, 'blog.meta'), span].filter(Boolean).join(' ')} metaRight={String(posts.length).padStart(2, '0')} compact />
+    <PageHead title={t(lang, 'nav.blog')} metaLeft={[t(lang, 'blog.meta'), span].filter(Boolean).join(' ')} metaRight={String(posts.length).padStart(2, '0')} compact>
+      <a class="rss mono" href={`/${lang}/blog/rss.xml`} title={t(lang, 'blog.rssHint')}><span class="rss-dot" aria-hidden="true"></span>{t(lang, 'blog.rss')}</a>
+    </PageHead>
 
     {!latest && <p class="empty">{t(lang, 'blog.empty')}</p>}
 
@@ -86,6 +88,9 @@ const metaOf = (p: (typeof posts)[number]) => `${postDate(p.data.date, lang)} ·
 </script>
 
 <style>
+  .rss { justify-self: start; display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border: 1.5px solid var(--line); border-radius: 999px; text-decoration: none; transition: border-color .3s; }
+  .rss:hover { border-color: var(--fg); }
+  .rss-dot { width: 7px; height: 7px; background: var(--accent); }
   .empty { padding-block: 64px; font-size: clamp(20px, 2vw, 28px); color: var(--muted); }
   .eyebrow { margin: 0; font-weight: 400; }
   .latest { padding-block: clamp(32px, 4vw, 56px); display: grid; gap: 20px; }

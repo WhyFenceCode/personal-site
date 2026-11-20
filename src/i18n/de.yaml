@@ -120,6 +120,8 @@ blog:
   empty: Noch nichts hier. Der erste Beitrag ist unterwegs.
   shown: "{n} Beiträge angezeigt"
   newest: Das ist der neueste Beitrag.
+  rss: RSS-Feed
+  rssHint: Neue Beiträge in jedem Feedreader verfolgen
 
 resume:
   lead: Zieh an der Zeitleiste oder nutze die Pfeiltasten, um zu sehen, was ich in jedem Jahr gemacht habe.

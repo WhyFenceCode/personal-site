@@ -92,6 +92,12 @@ in use, so copy from it when unsure.
 Set `draft: false` (or remove the line), commit and push. The site rebuilds, the post appears at the top of the
 blog page, and `/blog/newest` moves to it.
 
+## RSS feed
+
+The blog has an RSS feed at `/en/blog/rss.xml` (also `/rss.xml` and `/feed`), linked from the blog page and
+found automatically by feed readers. It lists the 30 newest posts with their full text, and updates with every
+build, so a published post reaches subscribers on the next rebuild. Drafts are never in it.
+
 ## Changing the blog page text
 
 The labels ("Latest", "min read", the blog page lead…) are in `src/i18n/<lang>.yaml` under `blog:`.

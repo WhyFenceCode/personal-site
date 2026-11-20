@@ -48,9 +48,11 @@ export const MASK_GLSL = /* glsl */ `
   #else
     // A slow, broad warp (the ink drifting), then a small blur of the field so the edge is a clean curve, not the
     // stair-steps of the low-resolution field, and a soft threshold that anti-aliases it.
-    vec2 g = q * .55;
-    vec2 warp = vec2(vn(g), vn(g + 5.2)) - .5;
-    vec2 u = uv + warp * 34. / res, o = 3. / res;
+    // A big, slow warp (as large as the blotch one) gives the trail its gooey, lagging pull; built from two broad
+    // octaves it stays a smooth curve.
+    vec2 g = q * .8;
+    vec2 warp = vec2(.7 * vn(g) + .3 * vn(g * 2.1 + 9.4), .7 * vn(g + 5.2) + .3 * vn(g * 2.1 + 3.7)) - .5;
+    vec2 u = uv + warp * 85. / res, o = 3. / res;
     float f = (2. * texture2D(field, u).a + texture2D(field, u + vec2(o.x, 0.)).a + texture2D(field, u - vec2(o.x, 0.)).a
              + texture2D(field, u + vec2(0., o.y)).a + texture2D(field, u - vec2(0., o.y)).a) / 6.;
     return smoothstep(.45, .55, f - bias);
@@ -111,7 +113,7 @@ export function inkField(host: HTMLElement, opts: { wander?: boolean } = {}): In
       }
       const px = f.ax, py = f.ay;
       // A finger drags the ink almost directly; a mouse leaves a slower, smoother trail.
-      const follow = touching ? 0.4 : 0.09;
+      const follow = touching ? 0.4 : INK_BLOTCH ? 0.09 : 0.07;
       f.ax += (f.tx - f.ax) * follow; f.ay += (f.ty - f.ay) * follow;
       fx.globalCompositeOperation = 'destination-out'; fx.fillStyle = 'rgba(0,0,0,0.045)'; fx.fillRect(0, 0, field.width, field.height);
       fx.globalCompositeOperation = 'lighter';

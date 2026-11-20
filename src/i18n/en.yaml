@@ -120,6 +120,8 @@ blog:
   empty: Nothing here yet. The first post is on its way.
   shown: "{n} posts shown"
   newest: You're reading the newest post.
+  rss: RSS feed
+  rssHint: Follow new posts in any feed reader
 
 resume:
   lead: Drag the timeline, or use the arrow keys, to see what I was doing each year.

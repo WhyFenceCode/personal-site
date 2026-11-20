@@ -42,6 +42,8 @@ const canonical = new URL(Astro.props.canonical ?? Astro.url.pathname, Astro.sit
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="alternate" type="text/markdown" title="llms.txt" href="/llms.txt" />
+    {/* The blog's RSS feed, so feed readers and browsers can find it from any page. */}
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} · ${t(lang, 'nav.blog')}`} href={`/${lang}/blog/rss.xml`} />
     {languages.map((l) => <link rel="alternate" hreflang={l} href={new URL(switchPath(Astro.url.pathname, l), Astro.site ?? site.url).href} />)}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={desc} />

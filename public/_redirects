@@ -49,7 +49,13 @@
 /:lang/work                /:lang/projects/       301
 /:lang/work/*              /:lang/projects/:splat 301
 
-# Blog short addresses. /blog/newest always shows the latest post.
+# Blog short addresses. /blog/newest always shows the latest post; the RSS feed has the usual addresses too.
+/rss.xml                   /en/blog/rss.xml       301
+/rss                       /en/blog/rss.xml       301
+/feed                      /en/blog/rss.xml       301
+/feed.xml                  /en/blog/rss.xml       301
+/blog/rss.xml              /en/blog/rss.xml       301
+/blog/feed                 /en/blog/rss.xml       301
 /blog                      /en/blog/              302
 /blog/newest               /en/blog/newest/       302
 /blog/*                    /en/blog/:splat        302

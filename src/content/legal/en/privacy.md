@@ -46,6 +46,9 @@ another website's live preview on a project page (see section 4).
   is logged like any other page (section 2), and nothing else is recorded: there is no read tracking, no comments
   and no sign-up. Links from the documentation to the site's source code go to GitHub, whose own policy applies
   once you follow one.
+- **RSS feed.** The blog has a feed (/en/blog/rss.xml) that feed readers fetch like any page; those requests are
+  logged the same way (section 2). The feed carries the posts only and holds no tracking. Which reader you use, and
+  what it records, is up to you and its own policy.
 - **Links.** Links to other websites open in a new tab. Their own privacy policies apply.
 - **Content shown on this site** (GitHub activity, map locations) is fetched by the build
   server when the site is published, not by your browser. No information about visitors is sent to those services.
