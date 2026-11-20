@@ -23,6 +23,7 @@ pnpm check       # type check
 | Resume timeline range and skills | `src/config/resume.yaml` |
 | Interface text per language | `src/i18n/<lang>.yaml` |
 | Projects (`/<lang>/projects/`) | `src/content/projects/<lang>/<slug>.md` |
+| A GitHub repo viewer on a project or in a post | `repo: owner/name` in a project, or a ```` ```repo ```` block; see `docs/guides/repos.md` |
 | Blog posts (`/<lang>/blog/`, latest at `/blog/newest`) | `src/content/blog/<lang>/<slug>.md` or `<slug>/index.md`; see the draft post `writing-posts` in `pnpm dev` |
 | Roles | `src/content/experience/<lang>/<slug>.md` |
 | Education (set `featured: true` for the home page) | `src/content/education/<lang>/<slug>.md` |

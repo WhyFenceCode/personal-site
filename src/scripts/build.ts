@@ -65,7 +65,7 @@ type Block = {
   key: boolean;                // a showpiece (globe, calendar, timeline…), worth a longer pause
 };
 /** A typist's state: which text node, how far into it, any wrong letters on the end, a word it has selected to redo. */
-type Typer = { ti: number; pos: number; junk: string; typo: number; sel: number; since: number; pool?: string[]; drafted: number; draftLeft: string; mul: number; acc: number; rate: number; box?: HTMLElement; caret: number; cx: number; cy: number; ready: boolean };
+type Typer = { ti: number; pos: number; junk: string; typo: number; sel: number; since: number; pool?: string[]; drafted: number; draftLeft: string; mul: number; acc: number; rate: number; box?: HTMLElement; caret: number; cx: number; cy: number; ch: number; ready: boolean };
 type Job =
   | { kind: 'block'; b: Block; phase: 'fly' | 'drag' | 'type'; t0: number; dur: number; x0: number; y0: number; w: number; h: number; due: number; t1: number; top: boolean; ty: Typer }
   | { kind: 'sweep'; phase: 'fly' | 'swipe'; t0: number; x0: number; x1: number; y: number; host: HTMLElement };
@@ -179,7 +179,7 @@ function wrongWord(word: string, pool: string[]) {
   return word === word.toUpperCase() ? w.toUpperCase() : word[0] === word[0].toUpperCase() ? w[0].toUpperCase() + w.slice(1) : w;
 }
 
-const typer = (): Typer => ({ ti: 0, pos: 0, junk: '', typo: 0, sel: -1, since: 0, drafted: -1, draftLeft: '', mul: 1, acc: 0, rate: 20, caret: -1, cx: 0, cy: 0, ready: false });
+const typer = (): Typer => ({ ti: 0, pos: 0, junk: '', typo: 0, sel: -1, since: 0, drafted: -1, draftLeft: '', mul: 1, acc: 0, rate: 20, caret: -1, cx: 0, cy: 0, ch: 22, ready: false });
 
 /** Highlights characters [from, to) of a text node, like a drag-selection. */
 function select(ty: Typer, node: Text, from: number, to: number, layer: HTMLElement) {
@@ -404,7 +404,7 @@ function start() {
           else continue;
           ty.caret = key;
           const rect = range.getBoundingClientRect(), x = t.node.data.length ? rect.right + 2 : rect.left;
-          if (rect.height) { ty.cx = x; ty.cy = rect.top + rect.height / 2 + scrollY; }
+          if (rect.height) { ty.cx = x; ty.cy = rect.top + rect.height / 2 + scrollY; ty.ch = rect.height; }
         }
       }
 
@@ -454,6 +454,8 @@ function start() {
       for (const c of curs) {
         const j = c.job;
         c.el.classList.toggle('typing', j?.kind === 'block' && j.phase === 'type' && j.ty.ready);
+        // The text cursor is a block the height of the line being typed (like the intro's console cursor).
+        if (j?.kind === 'block' && j.phase === 'type') c.el.style.setProperty('--ch', `${Math.round(Math.min(120, Math.max(14, j.ty.ch * 0.82)))}px`);
         if (!j) {
           // Idle: drift for a moment, then leave by the nearest edge if nothing comes up (none hang about).
           c.idle += dt;

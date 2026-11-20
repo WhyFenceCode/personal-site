@@ -67,8 +67,6 @@ banner:
   close: Hide this message
 
 footer:
-  resumeTitle: The whole story, on one page.
-  resumeBody: Experience, education, skills and a timeline you can scrub through.
   say: Say hello
   site: Site
   elsewhere: Elsewhere
@@ -103,6 +101,7 @@ projects:
     alt: Screenshot of
   modelHint: Drag to spin
   scrollCue: Scroll for the story
+  source: Source code
 
 blog:
   meta: Notes

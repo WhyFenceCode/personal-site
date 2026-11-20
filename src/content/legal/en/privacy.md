@@ -50,8 +50,9 @@ another website's live preview on a project page (see section 4).
   logged the same way (section 2). The feed carries the posts only and holds no tracking. Which reader you use, and
   what it records, is up to you and its own policy.
 - **Links.** Links to other websites open in a new tab. Their own privacy policies apply.
-- **Content shown on this site** (GitHub activity, map locations) is fetched by the build
-  server when the site is published, not by your browser. No information about visitors is sent to those services.
+- **Content shown on this site** (GitHub activity, the code viewers on project pages and posts, map locations) is
+  fetched by the build server when the site is published, not by your browser. Opening a file in a code viewer
+  loads a copy kept on this site; images in a repository's README that are hosted on other websites are left out. No information about visitors is sent to those services.
 - **Exercise totals** come from a summary of my own Strava export that I import myself. Only weekly
   distances are published, and visitors' browsers never contact Strava.
 

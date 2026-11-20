@@ -123,9 +123,10 @@
   .bld-crowd { position: fixed; inset: 0; z-index: 96; pointer-events: none; --cur: var(--accent); }
   .bld-crowd.calm { --cur: color-mix(in srgb, var(--accent) 50%, #a0a0a0); }
   .bld-crowd i { position: absolute; left: 0; top: 0; will-change: transform; transition: opacity 1s; }
-  /* A dot, centred on its point; a plain vertical bar while typing. */
+  /* A dot, centred on its point; while typing, a solid block cursor the height of the text (--ch, set by build.ts),
+     always in the accent, like the console intro's. */
   .bld-crowd b { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--cur); transition: background 1.2s, width .2s, height .2s, border-radius .2s, left .2s, top .2s, scale .15s; }
-  .bld-crowd i.typing b { left: -1.5px; top: -11px; width: 3px; height: 22px; border-radius: 1px; }
+  .bld-crowd i.typing b { --h: var(--ch, 22px); left: 1px; top: calc(var(--h) / -2); width: calc(var(--h) * .55); height: var(--h); border-radius: 0; background: var(--accent); transition: background .2s, width .2s, height .2s, border-radius .2s, left .2s, top .2s, scale .15s; }
   .bld-crowd.leaving i { opacity: 0; }
   .bld.typing [aria-hidden="true"]:not([data-bld-type]) { visibility: hidden; }
   .bld-crowd.leaving i { opacity: 0; }

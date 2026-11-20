@@ -1,0 +1,102 @@
+/* Repo viewer (src/lib/repos.mjs, src/scripts/repo.ts). Follows the section's tone through --bg/--fg/--muted/--line,
+   so it reads on light and dark. A frame like the browser window: 10px corners, a 1.5px line, mono labels.
+   It can sit inside Markdown prose (blog posts, case studies), so the prose's own list bullets, heading sizes and
+   image filters are reset here (hence the !important on a few of them). */
+.rv { --rv-line: var(--line); --rv-soft: color-mix(in srgb, var(--fg) 5%, transparent); margin: 40px 0; max-width: none !important; border: 1.5px solid var(--rv-line); border-radius: 10px; overflow: hidden; background: var(--bg); color: var(--fg); font-size: 15px; line-height: 1.5; text-align: left; }
+.rv * { box-sizing: border-box; }
+.rv ul, .rv ol { list-style: none; margin: 0; padding: 0; }
+.rv li { margin: 0; padding: 0; font-size: inherit !important; line-height: inherit !important; color: inherit !important; }
+.rv li::before { content: none !important; display: none !important; }
+.rv p { margin: 0; font-size: inherit !important; line-height: inherit !important; color: inherit !important; }
+.rv a { color: inherit; }
+
+.rv-head { display: grid; gap: 10px; padding: 18px 20px; border-bottom: 1.5px solid var(--rv-line); }
+.rv-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 22px !important; font-weight: 500; letter-spacing: -.02em; }
+.rv-title a { text-decoration: none; background: none !important; }
+.rv-title a:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.rv-title span { color: var(--muted); }
+.rv-title b { font-weight: 800; }
+.rv-mark { flex: none; }
+.rv-desc { color: var(--muted) !important; max-width: 70ch; }
+.rv-sub { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rv-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); }
+.rv-meta li { display: inline-flex; align-items: center; gap: 6px; font-size: 11px !important; }
+.rv-dot { width: 7px; height: 7px; background: var(--accent); }
+.rv-open { padding: 7px 14px; border: 1.5px solid var(--rv-line); border-radius: 999px; text-decoration: none; background: none !important; transition: border-color .3s; }
+.rv-open:hover { border-color: var(--fg); }
+
+.rv-body { display: grid; grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); height: min(620px, 78svh); }
+.rv-tree { min-height: 0; border-right: 1.5px solid var(--rv-line); display: flex; flex-direction: column; }
+.rv-tree-in { overflow: auto; padding: 8px 0 16px; flex: 1; }
+.rv-tree ul ul { padding-left: 14px; margin-left: 12px; border-left: 1px solid var(--rv-line); }
+.rv-tree summary, .rv-file { display: block; width: 100%; padding: 4px 16px; font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .02em; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; border-radius: 0; }
+.rv-tree summary { list-style: none; color: var(--fg); }
+.rv-tree summary::-webkit-details-marker { display: none; }
+.rv-tree summary::before { content: "▸"; display: inline-block; width: 1.1em; color: var(--muted); transition: transform .2s; }
+.rv-tree details[open] > summary::before { transform: rotate(90deg); }
+.rv-file { background: none; border: 0; color: var(--muted); padding-left: calc(16px + 1.1em); }
+.rv-tree ul ul .rv-file, .rv-tree ul ul summary { padding-left: 8px; }
+.rv-tree ul ul .rv-file { padding-left: calc(8px + 1.1em); }
+.rv-tree summary:hover, .rv-file:hover { background: var(--rv-soft); color: var(--fg); }
+.rv-file[aria-current] { color: var(--fg); background: var(--rv-soft); box-shadow: inset 2px 0 var(--accent); }
+.rv-file[data-kind="big"], .rv-file[data-kind="bin"], .rv-file[data-kind="more"] { opacity: .55; }
+.rv-readme { color: var(--fg); margin-bottom: 4px; padding-left: 16px !important; text-transform: uppercase; letter-spacing: .14em; font-size: 11px; }
+.rv-toggle { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 12px 16px; background: none; border: 0; color: inherit; cursor: pointer; }
+.rv-toggle::after { content: "▸"; transition: transform .2s; }
+.rv-toggle[aria-expanded="true"]::after { transform: rotate(90deg); }
+
+.rv-view { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.rv-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--rv-line); color: var(--muted); text-transform: none; letter-spacing: .02em; }
+.rv-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); }
+.rv-file-gh { flex: none; text-decoration: none; background: none !important; }
+.rv-file-gh:hover { color: var(--fg); }
+.rv-content { flex: 1; min-height: 0; overflow: auto; outline: none; transition: opacity .2s; }
+.rv-loading .rv-content { opacity: .45; }
+.rv-note { padding: 20px; color: var(--muted) !important; }
+.rv-note a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* README and other Markdown files: compact, like GitHub, in the site's type. */
+.rv-md { padding: 20px 24px 32px; max-width: 88ch; }
+.rv-md > :first-child { margin-top: 0 !important; }
+.rv-md :is(h1, h2, h3, h4, h5, h6) { font-family: var(--font-display) !important; font-weight: 700 !important; font-stretch: 90% !important; text-transform: none !important; letter-spacing: -.02em !important; line-height: 1.15 !important; color: var(--fg) !important; margin: 28px 0 10px !important; }
+.rv-md h1 { font-size: 30px !important; padding-bottom: 8px; border-bottom: 1px solid var(--rv-line); }
+.rv-md h2 { font-size: 23px !important; padding-bottom: 6px; border-bottom: 1px solid var(--rv-line); }
+.rv-md h3 { font-size: 18px !important; }
+.rv-md :is(h4, h5, h6) { font-size: 15px !important; }
+.rv-md p, .rv-md li { color: var(--fg) !important; }
+.rv-md p { margin: 0 0 14px !important; }
+.rv-md ul, .rv-md ol { margin: 0 0 14px; padding-left: 1.4em; }
+.rv-md ul { list-style: square; }
+.rv-md ol { list-style: decimal; }
+.rv-md li { margin: 2px 0; }
+.rv-md a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); background: none !important; }
+.rv-md a:hover { text-decoration-color: var(--accent); }
+.rv-md img { max-width: 100%; height: auto; border-radius: 4px; filter: none !important; margin: 0 !important; display: inline !important; background: none !important; }
+.rv-md blockquote { margin: 0 0 14px; padding: 2px 0 2px 14px; border: 0 !important; border-left: 2px solid var(--rv-line) !important; border-radius: 0; color: var(--muted); }
+.rv-md blockquote p { font: inherit !important; color: var(--muted) !important; }
+.rv-md table { border-collapse: collapse; margin: 0 0 14px; display: block; overflow-x: auto; font-size: 14px; }
+.rv-md th, .rv-md td { border: 1px solid var(--rv-line); padding: 6px 10px; text-align: left; }
+.rv-md hr { border: 0; border-top: 1px solid var(--rv-line); margin: 20px 0; }
+.rv-md :not(pre) > code { background: var(--rv-soft); padding: .12em .4em; border-radius: 4px; font-size: .88em; }
+.rv-md pre { margin: 0 0 14px !important; padding: 14px 16px; border-radius: 6px; overflow-x: auto; font-size: 13px !important; line-height: 1.55; }
+.rv-alt { display: inline-block; padding: 1px 8px; margin: 2px 2px 2px 0; border: 1px solid var(--rv-line); border-radius: 999px; font-size: 12px; color: var(--muted); }
+
+/* Code files: line numbers from a counter, no wrapping, the highlighter's own dark theme. */
+.rv-code pre { margin: 0 !important; padding: 14px 0 !important; border-radius: 0 !important; min-height: 100%; font-size: 13px !important; line-height: 1.6 !important; counter-reset: rvl; overflow: visible !important; }
+.rv-code { min-height: 100%; background: #24292e; }
+.rv-code code { display: block; }
+.rv-code .line { counter-increment: rvl; display: inline-block; padding-right: 20px; }
+.rv-code .line::before { content: counter(rvl); display: inline-block; width: calc(var(--digits, 3) * 1ch + 28px); padding-right: 16px; text-align: right; color: #6a737d; user-select: none; }
+.rv-plain { color: #e1e4e8; padding: 14px 20px !important; white-space: pre-wrap; font-family: var(--font-mono); }
+.rv-image { display: grid; place-items: center; min-height: 100%; padding: 24px; background-color: var(--rv-soft); }
+.rv-image img { max-width: 100%; max-height: 520px; image-rendering: auto; }
+
+.rv-missing { display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1.5px solid var(--line); border-radius: 999px; }
+
+/* Narrow (set by the script when the viewer is under 720px wide): the tree folds away above the file. */
+.rv-narrow .rv-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); height: min(640px, 82svh); }
+.rv-narrow .rv-tree { border-right: 0; border-bottom: 1.5px solid var(--rv-line); }
+.rv-narrow .rv-tree-in { display: none; max-height: 46svh; }
+.rv-narrow.rv-tree-open .rv-tree-in { display: block; }
+.rv-narrow.rv-tree-open .rv-view { display: none; }
+@media (forced-colors: active) { .rv-file[aria-current] { outline: 2px solid Highlight; } }

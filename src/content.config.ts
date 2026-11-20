@@ -33,6 +33,7 @@ const projects = defineCollection({
     featured: z.boolean().default(false),   // featured projects show on the home page first
     order: z.number().default(100),
     links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
+    repo: z.string().optional(),            // a public GitHub repo (owner/name): its files and README in a viewer on the project page
   }),
 });
 

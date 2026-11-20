@@ -6,6 +6,7 @@ import { navigate } from 'astro:transitions/client';
 import { flood, floodClear, floodDraw, floodPrepare } from './flood';
 import { motionOn, setMotion, onMotion } from './motion';
 import { differenceInk } from './gl';
+import './repo'; // GitHub repo viewers in projects and posts
 import { paintArt } from './art';
 import { initCards } from './cards';
 import './extras';

@@ -13,3 +13,7 @@
 # Text and data mining (AI training) rights reserved, per the W3C TDMRep protocol. Search indexing is unaffected.
 /*
   tdm-reservation: 1
+
+# Files shown inside the GitHub repo viewers: fragments of pages, not pages to find in search.
+/repos/*
+  X-Robots-Tag: noindex

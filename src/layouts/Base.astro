@@ -7,6 +7,7 @@ import '@fontsource/dm-mono/500.css';
 import '@fontsource/instrument-serif/400.css';
 import '@fontsource/instrument-serif/400-italic.css';
 import '../styles/global.css';
+import '../styles/repo.css';
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -84,7 +85,7 @@ const canonical = new URL(Astro.props.canonical ?? Astro.url.pathname, Astro.sit
           open the collapsible rows, show the main nav on phones, and hide controls that only work with scripts. */}
       <style is:inline>
         .fit { font-size: clamp(40px, 9vw, 168px) !important; white-space: normal !important; }
-        .hero-line.line-full, .foot-mark .fit { font-size: 15vw !important; }
+        .hero-line.line-full { font-size: 15vw !important; }
         .hero-line.line-word { font-size: 25vw !important; }
         .page-title .fit { font-size: 18vw !important; }
         .row-panel { grid-template-rows: 1fr !important; } .row-btn .pm { display: none !important; }

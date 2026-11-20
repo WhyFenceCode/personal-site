@@ -50,6 +50,20 @@ Put the image next to the post and link it with a relative path. It's resized an
 
 Images in `public/` work too, with a path from the site root: `![Logo](/favicon.svg)`. Images from other websites (`https://…`) stop the build, because loading them would tell that website who is reading: download them instead. Photos are shown in greyscale, as the brand kit asks.
 
+# A GitHub repository
+
+A fenced block in the language `repo`, holding the repository's owner/name, shows its files and README, like opening it on GitHub. It works in project pages too (or set `repo:` in a project's frontmatter):
+
+````markdown
+```repo
+WhyFenceCode/personal-site
+```
+````
+
+```repo
+WhyFenceCode/personal-site
+```
+
 # Links
 
 - Another post, by its file, the same as on GitHub: [Starting a blog](../hello-blog/index.md), or [one of its sections](../hello-blog/index.md#what-to-expect).

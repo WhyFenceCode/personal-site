@@ -10,6 +10,14 @@ const welcome = t(lang, 'loader.welcome', { host: new URL(site.url).host, name: 
 ---
 <div id="loader" aria-hidden="true"></div>
 <div class="ld-hue" aria-hidden="true"></div>
+{/* The console line sits on its own layer, outside the inverting UI, so its cursor can be the real accent; the ink
+    spreads over it from the cursor. */}
+{consoleStyle && (
+  <div class="ld-term wrap" aria-hidden="true">
+    <p class="ld-line" style={`--len:${welcome.length + 3}`}><span class="ld-prompt">&gt;</span><span id="ld-text"></span><span class="ld-caret" id="ld-caret"></span></p>
+    <ol class="ld-steps" id="ld-steps"></ol>
+  </div>
+)}
 {site.interactive.build && (
   <a class="ld-build" href={`/${lang}/build/`} data-ld-build data-astro-reload hidden>
     <span class="ld-build-t">{t(lang, 'build.callout')} <kbd>⇧ B</kbd></span>
@@ -18,12 +26,7 @@ const welcome = t(lang, 'loader.welcome', { host: new URL(site.url).host, name: 
 )}
 <div class:list={['ld-ui wrap', { 'ld-console': consoleStyle }]} id="ld-ui" role="status" aria-label="Loading" data-steps={JSON.stringify(steps)} data-style={site.features.loaderStyle} data-welcome={welcome}>
   <div class="ld-top"><span class="ld-brand">{site.name}</span><button class="ld-skip mono" type="button" id="ld-skip">{t(lang, 'loader.skip')}</button></div>
-  {consoleStyle ? (
-    <div class="ld-term" aria-hidden="true">
-      <p class="ld-line" style={`--len:${welcome.length + 3}`}><span class="ld-prompt">&gt;</span><span id="ld-text"></span><span class="ld-caret" id="ld-caret"></span></p>
-      <ol class="ld-steps" id="ld-steps"></ol>
-    </div>
-  ) : <div></div>}
+  <div></div>
   <div class="ld-bottom">
     {consoleStyle ? <span class="mono" id="ld-pct">0%</span> : <span class="ld-count stat" id="ld-num" aria-hidden="true">0</span>}
     <span class="mono" id="ld-log">{steps[0]}</span>
@@ -54,11 +57,12 @@ const welcome = t(lang, 'loader.welcome', { host: new URL(site.url).host, name: 
   /* It takes the place of the loading-step text in the bottom-right corner. */
   :global(html.ld-callout) #ld-log { visibility: hidden; }
   /* Console style: a terminal line across the middle of the screen with a solid block cursor. */
-  .ld-term { align-self: center; display: grid; gap: 20px; }
+  .ld-term { display: none; }
+  :global(html.intro) .ld-term { display: grid; align-content: center; gap: 20px; position: fixed; inset: 0; z-index: 89; pointer-events: none; color: #0B0B0B; }
   /* One line, sized so the whole welcome (prompt + text + cursor, --len characters) fits across the screen. */
   .ld-line { margin: 0; font-family: var(--font-mono); font-weight: 500; white-space: nowrap; font-size: min(92px, 5.4vw, calc((100vw - var(--gutter) - var(--gutter-r)) / (var(--len, 30) * .68))); line-height: 1.1; letter-spacing: -.02em; }
   .ld-prompt { margin-right: .5em; opacity: .45; }
-  .ld-caret { display: inline-block; width: .58em; height: .95em; margin-left: .06em; vertical-align: -.12em; background: currentColor; }
+  .ld-caret { display: inline-block; width: .58em; height: .95em; margin-left: .06em; vertical-align: -.12em; background: var(--accent); }
   .ld-caret.blink { animation: ld-blink 1s steps(1) infinite; }
   @keyframes ld-blink { 50% { opacity: 0; } }
   .ld-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em; min-height: 6em; }

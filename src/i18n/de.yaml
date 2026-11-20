@@ -67,8 +67,6 @@ banner:
   close: Hinweis ausblenden
 
 footer:
-  resumeTitle: Die ganze Geschichte auf einer Seite.
-  resumeBody: Erfahrung, Ausbildung, Skills und eine Zeitleiste zum Durchscrollen.
   say: Hallo sagen
   site: Seite
   elsewhere: Anderswo
@@ -103,6 +101,7 @@ projects:
     alt: Screenshot von
   modelHint: Ziehen zum Drehen
   scrollCue: Weiterscrollen
+  source: Quellcode
 
 blog:
   meta: Notizen

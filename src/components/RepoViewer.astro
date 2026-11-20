@@ -1,0 +1,8 @@
+---
+/* A GitHub repository's files and README, like opening it on GitHub. Built at build time by src/lib/repos.mjs; the
+   same viewer appears wherever Markdown has a ```repo block. */
+import { viewerHtml } from '../lib/repos.mjs';
+interface Props { repo: string }
+const html = await viewerHtml(Astro.props.repo);
+---
+<Fragment set:html={html} />

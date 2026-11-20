@@ -8,6 +8,7 @@ and, where there is one, how to connect a live source.
 | Education | Markdown files | none | [content-sections.md](content-sections.md) |
 | Projects | Markdown files | none | [content-sections.md](content-sections.md) |
 | Blog | Markdown files | none | [blog.md](blog.md) |
+| Code viewer (GitHub repos) | GitHub public data | yes, at build | [repos.md](repos.md) |
 | Experience | Markdown files | none | [content-sections.md](content-sections.md) |
 | Programming (GitHub) | GitHub public data | yes, automatic | [github.md](github.md) |
 | Reading | `src/data/reading.txt` | none (physical books) | [reading.md](reading.md) |

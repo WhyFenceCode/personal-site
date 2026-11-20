@@ -8,6 +8,7 @@ stack: [Python, JSON, GitHub Actions, GitHub Pages]
 summary: A free JSON API of university clubs, design teams and competitions, refreshed every week.
 art: ledger
 live: "https://whyfencecode.github.io/extracurricular-api/"
+repo: WhyFenceCode/extracurricular-api
 order: 5
 metrics:
   - { value: 409, label: activities at Queen's }

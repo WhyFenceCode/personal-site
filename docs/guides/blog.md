@@ -78,6 +78,18 @@ it next to the post instead.
 | `[see above](#the-hull)` | A section of this post |
 | `[projects](/en/projects/)` | Any page on the site |
 
+### A GitHub repository
+
+A fenced block in the language `repo` shows a repository's files and README in a viewer:
+
+````markdown
+```repo
+WhyFenceCode/personal-site
+```
+````
+
+See [repos.md](repos.md) for what it shows and how.
+
 ## 4. Check it
 
 ```bash
