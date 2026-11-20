@@ -27,12 +27,12 @@ export function readmeHtml({ src, banner = src, theme }: { src: string; banner?:
       : `<picture><source media="(prefers-color-scheme: dark)" srcset="${base}${file}-dark.svg"><img alt="${esc(alt)}" src="${base}${file}-light.svg"${w}></picture>`;
   };
   const tagline = [site.name, gh.intro].filter(Boolean).join('. ');
-  // Everything after the banner sits in one <div> with no blank lines: blank lines make GitHub's Markdown split the
-  // <picture> tags apart, which breaks the light/dark switch and the two-per-row layout.
+  // Everything sits in one <div> with no blank lines: blank lines make GitHub's Markdown split the <picture> tags
+  // apart, which breaks the light/dark switch and the two-per-row layout.
   return [
-    `<a href="${site.url}">${img(banner, 'banner', tagline, '100%')}</a>`,
-    '',
     '<div>',
+    `<a href="${site.url}">${img(banner, 'banner', tagline, '100%')}</a>`,
+    '<br>',
     ...gh.links.map((l) => `<a href="${esc(l.url)}">${img(src, `link-${linkSlug(l.label)}`, l.label)}</a>`),
     ...(gh.intro || gh.heading ? ['<br><br>', img(src, 'intro', [gh.intro, gh.heading].filter(Boolean).join(' '), '100%'), '<br><br>'] : []),
     ...gh.cards.map((c) => `<a href="https://github.com/${repoPath(c.repo)}">${img(src, cardName(c.repo), `${c.title ?? cardName(c.repo)}${c.description ? `: ${c.description}` : ''}`, '49%')}</a>`),
