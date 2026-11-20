@@ -15,6 +15,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { site } from '../../lib/config';
 import { getRepo } from '../../lib/repos.mjs';
+import { repoPath, cardName, linkSlug } from '../../lib/github-profile';
 
 const THEMES = {
   light: { bg: '#E6E6E6', fg: '#0B0B0B', muted: '#555555', line: '#CBCBCB', inv: '#FFFFFF' },
@@ -25,15 +26,14 @@ type Card = (typeof site.github.cards)[number];
 type Link = (typeof site.github.links)[number];
 type Props = { kind: 'card'; card: Card; theme: Theme } | { kind: 'intro'; theme: Theme } | { kind: 'link'; link: Link; first: boolean; theme: Theme };
 
-const slugOf = (label: string) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export function getStaticPaths() {
   const themes: Theme[] = ['light', 'dark'];
   const gh = site.github;
   return themes.flatMap((theme) => [
-    ...gh.cards.map((card) => ({ params: { name: `${card.repo}-${theme}` }, props: { kind: 'card', card, theme } })),
+    ...gh.cards.map((card) => ({ params: { name: `${cardName(card.repo)}-${theme}` }, props: { kind: 'card', card, theme } })),
     ...(gh.intro || gh.heading ? [{ params: { name: `intro-${theme}` }, props: { kind: 'intro', theme } }] : []),
-    ...gh.links.map((link, i) => ({ params: { name: `link-${slugOf(link.label)}-${theme}` }, props: { kind: 'link', link, first: i === 0, theme } })),
+    ...gh.links.map((link, i) => ({ params: { name: `link-${linkSlug(link.label)}-${theme}` }, props: { kind: 'link', link, first: i === 0, theme } })),
   ]);
 }
 
@@ -65,8 +65,8 @@ function lines(text: string, max: number, count = 2) {
 /* ---------- A repo card ---------- */
 async function card(cardCfg: Card, theme: Theme) {
   const c = THEMES[theme], W = 600, H = 210, PAD = 28;
-  const owner = site.github.username;
-  const repo = await getRepo(`${owner}/${cardCfg.repo}`);
+  const [owner, name] = repoPath(cardCfg.repo).split('/');
+  const repo = await getRepo(`${owner}/${name}`);
   const title = cardCfg.title ?? repo?.name ?? cardCfg.repo;
   const description = cardCfg.description ?? repo?.description ?? '';
   const updated = repo?.pushedAt ? new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(repo.pushedAt)) : '';
@@ -86,7 +86,7 @@ ${MOTION}
 <rect x="0.75" y="0.75" width="${W - 1.5}" height="${H - 1.5}" rx="10" fill="${c.bg}" stroke="${c.line}" stroke-width="1.5"/>
 <g class="in">
   <rect x="${PAD}" y="${PAD + 1}" width="8" height="8" fill="${ACCENT}"/>
-  <text class="mono" x="${PAD + 16}" y="${PAD + 9}">${esc(owner)} / ${esc(cardCfg.repo)}</text>
+  <text class="mono" x="${PAD + 16}" y="${PAD + 9}">${esc(owner)} / ${esc(name)}</text>
   <text class="mono fg" x="${W - PAD}" y="${PAD + 9}" text-anchor="end">GitHub ↗</text>
   <text class="title" x="${PAD}" y="${PAD + 62}"${fitTitle ? ` textLength="${titleMax}" lengthAdjust="spacingAndGlyphs"` : ''}>${esc(title)}</text>
   ${lines(description, 58).map((l, i) => `<text class="desc" x="${PAD}" y="${PAD + 96 + i * 22}">${esc(l)}</text>`).join('\n  ')}

@@ -1,0 +1,73 @@
+---
+/* /<lang>/docs/github-preview/: the GitHub profile README as GitHub shows it, in its light and dark themes, built from
+   the same source as the README itself (src/lib/github-profile.ts), so what you see here is what the profile shows
+   once its files are updated. Part of the docs: not indexed, not in the sitemap. */
+import Base from '../../../layouts/Base.astro';
+import PageHead from '../../../components/PageHead.astro';
+import { readmeHtml } from '../../../lib/github-profile';
+import { site } from '../../../lib/config';
+import { langStaticPaths, t, href } from '../../../lib/i18n';
+
+export const getStaticPaths = langStaticPaths;
+const { lang } = Astro.params as { lang: string };
+const profile = `https://github.com/${site.github.username}`;
+const themes = [
+  { id: 'dark', name: 'Dark', html: readmeHtml({ src: '/github/', banner: '/github-', theme: 'dark' }) },
+  { id: 'light', name: 'Light', html: readmeHtml({ src: '/github/', banner: '/github-', theme: 'light' }) },
+] as const;
+---
+<Base lang={lang} page="docs" title="GitHub profile preview" description="The GitHub profile README, as GitHub shows it." noindex>
+  <div class="wrap">
+    <PageHead title="GitHub" metaLeft="Profile preview" metaRight={`@${site.github.username}`} compact>
+      <p class="mono muted gp-note">
+        <a class="link" href={href(lang, 'docs')}>← {t(lang, 'nav.docs')}</a> · The README at
+        <a class="link" href={profile} rel="noopener">{profile.replace('https://', '')}</a>, built from <code>github:</code> in
+        <code>site.yaml</code>. Copy <a class="link" href="/github/README.md">README.md</a> and the images into the profile repo
+        to update it (<a class="link" href={href(lang, 'docs/home-page/programming')}>how</a>).
+      </p>
+    </PageHead>
+    <div class="gp" role="group" aria-label="Preview">
+      <div class="gp-tabs" role="tablist" aria-label="GitHub theme">
+        {themes.map((th, i) => <button type="button" role="tab" class="mono" aria-selected={i === 0 ? 'true' : 'false'} aria-controls={`gp-${th.id}`} data-gp-tab={th.id}>{th.name}</button>)}
+      </div>
+      {themes.map((th, i) => (
+        <section class={`gp-page gp-${th.id}`} id={`gp-${th.id}`} role="tabpanel" aria-label={`${th.name} theme`} hidden={i !== 0}>
+          <div class="gp-readme"><Fragment set:html={th.html} /></div>
+        </section>
+      ))}
+    </div>
+  </div>
+  <div class="section"></div>
+</Base>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-gp-tab]')];
+    tabs.forEach((b) => b.addEventListener('click', () => {
+      tabs.forEach((x) => {
+        const on = x === b;
+        x.setAttribute('aria-selected', String(on));
+        document.getElementById(`gp-${x.dataset.gpTab}`)!.hidden = !on;
+      });
+    }));
+  });
+</script>
+
+<style>
+  .gp-note { margin: 0; text-transform: none; letter-spacing: .04em; font-size: 13px; line-height: 1.6; max-width: 90ch; }
+  .gp { padding-block: 40px 0; display: grid; gap: 16px; }
+  .gp-tabs { display: flex; gap: 8px; }
+  .gp-tabs button { background: none; color: inherit; border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+  .gp-tabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  /* GitHub's own page colours and README width, so the images sit as they will there. */
+  .gp-page { border-radius: 10px; padding: clamp(16px, 3vw, 40px); }
+  .gp-dark { background: #0d1117; }
+  .gp-light { background: #ffffff; border: 1px solid #d0d7de; }
+  .gp-readme { max-width: 1012px; margin: 0 auto; padding: clamp(16px, 2.5vw, 32px); border-radius: 6px; }
+  .gp-dark .gp-readme { border: 1px solid #30363d; }
+  .gp-light .gp-readme { border: 1px solid #d0d7de; }
+  /* GitHub shows images inline (the site's reset makes them blocks), so the pills form a row and the cards pair up. */
+  .gp-readme :global(img) { display: inline; max-width: 100%; height: auto; vertical-align: middle; }
+  .gp-readme :global(picture) { display: inline; }
+  .gp-readme :global(a) { background: none; }
+</style>

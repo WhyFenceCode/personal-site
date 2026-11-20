@@ -60,7 +60,9 @@
 /blog/newest               /en/blog/newest/       302
 /blog/*                    /en/blog/:splat        302
 
-# The site's documentation, next to the brand kit.
+# The site's documentation, next to the brand kit, and the GitHub profile preview in it.
+/github-preview            /en/docs/github-preview/ 302
+/github                    /en/docs/github-preview/ 302
 /docs                      /en/docs/              302
 /docs/*                    /en/docs/:splat        302
 /documentation             /en/docs/              302

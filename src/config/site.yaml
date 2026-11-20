@@ -28,7 +28,8 @@ github:
   # See docs/home-page/programming.md.
   #   links → a row of pills under the banner, one image (and link) each: /github/link-<label>-light.svg
   #   intro + heading → /github/intro-light.svg: the sentence, then the heading over the cards
-  #   cards → one per repo: /github/<repo>-light.svg (the description comes from GitHub unless you give one)
+  #   cards → one per repo: /github/<name>-light.svg (repo: a name of yours, or owner/name for anyone else's;
+  #           the description comes from GitHub unless you give one)
   links:
     - { label: Website, url: "https://torstenyoung.com" }
     - { label: Projects, url: "https://torstenyoung.com/en/projects/" }
@@ -42,6 +43,8 @@ github:
     - { repo: photo-site, title: Photo site, description: "The source of photos.torstenyoung.com, my photography." }
     - { repo: extracurricular-api, title: Extracurricular API }
     - { repo: casthub, title: Cast Hub }
+    - { repo: IrisShaders/docs, title: Iris docs, description: "The documentation site for Iris, the Minecraft shader mod: shaders.properties." }
+    - { repo: ChangingGrid, title: Changing Grid, description: "A grid that keeps changing, live in the browser at whyfencecode.github.io/ChangingGrid." }
 
 resume:
   pdf: "/resume_torstenyoung.pdf"                  # e.g. /resume.pdf (file in /public) or a full URL. Empty hides the download buttons.

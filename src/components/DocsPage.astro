@@ -30,7 +30,7 @@ const groups = folders.map((f) => {
   const pages = all.filter((d) => folderOf(d.id) === f)
     .sort((a, b) => (f === '' ? START_ORDER.indexOf(a.id) - START_ORDER.indexOf(b.id) : titleOf(a).localeCompare(titleOf(b))));
   const items: Item[] = pages.map((d) => ({ label: d.id === 'index' ? 'Docs home' : d.id === 'overview' ? 'Repository readme' : titleOf(d), url: urlOf(d.id), current: d === entry }));
-  if (f === '') items.push({ label: t(lang, 'nav.brand'), url: href(lang, 'brand'), current: false });
+  if (f === '') items.push({ label: t(lang, 'nav.brand'), url: href(lang, 'brand'), current: false }, { label: 'GitHub profile preview', url: href(lang, 'docs/github-preview'), current: false });
   return { name: nameOf(f), items };
 }).filter((g) => g.items.length);
 const source = entry.id === 'overview' ? 'README.md' : entry.id === 'index' ? 'docs/README.md' : `docs/${entry.id}.md`;
@@ -38,7 +38,7 @@ const h2s = headings.filter((h) => h.depth === 2);
 ---
 <Base lang={lang} page="docs" title={`${t(lang, 'nav.docs')}: ${titleOf(entry)}`} description="How this site is put together and how to change it." noindex>
   <div class="wrap">
-    <PageHead title={t(lang, 'nav.docs')} metaLeft="Documentation" metaRight={String(all.length + 1).padStart(2, '0')} compact>
+    <PageHead title={t(lang, 'nav.docs')} metaLeft="Documentation" metaRight={String(all.length + 2).padStart(2, '0')} compact>
       <p class="mono muted docs-note">Every guide for running and editing this site, and the <a class="link" href={href(lang, 'brand')}>brand kit</a> for how it looks.</p>
     </PageHead>
     <div class="docs">

@@ -58,7 +58,10 @@ github:
 | `intro-light.svg` / `-dark.svg` | The intro sentence and the heading |
 | `<repo>-light.svg` / `-dark.svg` | A repo card |
 
-To update the profile: run `pnpm build`, copy `dist/github/` (and `dist/github-banner-*.svg`) into the profile repo's
+**See it first:** `/en/docs/github-preview/` (or just `/github-preview`) shows the README as GitHub will, in light
+and dark. It's built from the same source as `/github/README.md`, the README itself.
+
+To update the profile: run `pnpm build`, copy `dist/github/README.md` over the profile's README, copy `dist/github/` (and `dist/github-banner-*.svg`) into the profile repo's
 `assets/`, and push it. Keep its README's images inside **one `<div>` with no blank lines in it**: GitHub's Markdown
 parser otherwise splits the `<picture>` tags apart, which breaks the light/dark switch and the two-per-row layout.
 

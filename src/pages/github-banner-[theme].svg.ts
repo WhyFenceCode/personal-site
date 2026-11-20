@@ -82,7 +82,7 @@ ${sig.paths.map((_, i) => `.sig path:nth-child(${i + 1}) { animation-delay: ${(1
   .sig path { animation: none; stroke-dashoffset: 0; fill-opacity: 1; stroke-opacity: 0; }
 }
 </style>
-<rect width="${W}" height="${H}" fill="${c.bg}"/>
+<rect width="${W}" height="${H}" rx="14" fill="${c.bg}"/>
 <text class="mono fg" x="${PAD}" y="${PAD + 10}">${site.name}<tspan class="dot" dx="2">.</tspan></text>
 <text class="mono" x="${W - PAD}" y="${PAD + 10}" text-anchor="end">${t('en', 'hero.role')} · ${site.location.city}, ${site.location.region}</text>
 <line class="rule" x1="${PAD}" y1="${PAD + 30}" x2="${W - PAD}" y2="${PAD + 30}" pathLength="1"/>
