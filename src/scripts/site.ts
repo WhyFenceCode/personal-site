@@ -193,9 +193,9 @@ async function runConsoleIntro(ui: HTMLElement) {
   const wait = (ms: number) => new Promise<void>((r) => { const end = performance.now() + ms; const f = () => (skip || performance.now() >= end ? r() : setTimeout(f, Math.min(30, end - performance.now()))); f(); });
   try {
     caret?.classList.add('blink');
-    await wait(260);
+    await wait(600); // the cursor blinks a moment before typing starts
     caret?.classList.remove('blink');
-    const total = welcome.length, perChar = Math.min(55, 900 / Math.max(1, total));
+    const total = welcome.length, perChar = Math.min(110, 1800 / Math.max(1, total)); // about 2 s for the whole line
     for (let i = 1; i <= total && !skip; i++) {
       if (text) text.textContent = welcome.slice(0, i);
       const p = i / total;
@@ -211,7 +211,7 @@ async function runConsoleIntro(ui: HTMLElement) {
     if (pct) pct.textContent = '100%';
     if (log) log.textContent = steps[steps.length - 1] ?? '';
     caret?.classList.add('blink');
-    await wait(380);
+    await wait(650);
     // The ink starts at the cursor block.
     const r = caret?.getBoundingClientRect();
     const cx = r ? r.left + r.width / 2 : innerWidth / 2, cy = r ? r.top + r.height / 2 : innerHeight / 2;

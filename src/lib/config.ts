@@ -24,7 +24,7 @@ const siteSchema = z.object({
   resume: z.object({ pdf: z.string().optional() }).default({}),
   features: z.object({
     loader: z.boolean().default(true),
-    // count: a big number counts to 100. console: shorter; a welcome line types across the screen with a block cursor.
+    // count: a big number counts to 100. console: a welcome line types across the screen with a block cursor.
     loaderStyle: z.enum(['count', 'console']).default('count'),
     pageTransitions: z.boolean().default(true),
     cursorRing: z.boolean().default(true),

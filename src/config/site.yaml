@@ -75,7 +75,7 @@ typography:
 
 features:
   loader: true              # intro animation, on each fresh open of the site
-  loaderStyle: console      # count: a number counts to 100 | console: shorter, a welcome line types out with a block cursor
+  loaderStyle: console      # count: a number counts to 100 | console: a welcome line types out with a block cursor
   pageTransitions: true     # ink flood between pages
   cursorRing: true          # inverting dot cursor (hides the system cursor for mice, except in high-contrast modes)
 
