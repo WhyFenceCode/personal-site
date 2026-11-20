@@ -42,6 +42,11 @@
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
   /* Selected text: a mid-grey wash that shows on both light and dark sections, text keeps its colour. */
   ::selection { background: color-mix(in srgb, var(--accent) 34%, transparent); color: inherit; }
+  /* Parts that invert what's under them (mix-blend-mode: difference) would invert an accent selection to its opposite,
+     green, and no single colour inverts back to the accent over both light and dark sections. There the selection is
+     a neutral grey wash instead, which stays grey either way. */
+  :is(.site-header, .hero-top, .hero-bottom, .ld-ui, [data-ink="footer"]) ::selection,
+  :is(.site-header, .hero-top, .hero-bottom, .ld-ui, [data-ink="footer"])::selection { background: rgb(128 128 128 / .5); color: inherit; }
   [hidden] { display: none !important; }
   code { font-family: var(--font-mono); font-size: .9em; }
 }
