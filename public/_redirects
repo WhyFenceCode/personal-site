@@ -42,3 +42,14 @@
 /:lang/identity            /:lang/brand/ 302
 /:lang/logo                /:lang/brand/ 302
 /:lang/logos               /:lang/brand/ 302
+
+# The work section is now called projects. Old links keep working (permanent, 301).
+/work                      /en/projects/          301
+/work/*                    /en/projects/:splat    301
+/:lang/work                /:lang/projects/       301
+/:lang/work/*              /:lang/projects/:splat 301
+
+# Blog short addresses. /blog/newest always shows the latest post.
+/blog                      /en/blog/              302
+/blog/newest               /en/blog/newest/       302
+/blog/*                    /en/blog/:splat        302

@@ -6,7 +6,9 @@ import tailwindcss from '@tailwindcss/vite';
 import { readFileSync, readdirSync, writeFileSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
+import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import { remarkSiteTokens } from './src/lib/remark-site-tokens.mjs';
+import { remarkBlogLinks, rehypeBlogDemote, rehypeBlogAnchors } from './src/lib/markdown-blog.mjs';
 
 const site = parse(readFileSync(new URL('./src/config/site.yaml', import.meta.url), 'utf8'));
 
@@ -36,9 +38,9 @@ export default defineConfig({
   integrations: [
     react(),
     // /sitemap.xml (merged by singleSitemap below), linked from robots.txt. The root language redirect and the 404 aren't real pages.
-    // The brand kit (/<lang>/brand/) is an internal reference page, so it stays out too.
+    // The brand kit (/<lang>/brand/) is an internal reference page, so it stays out too, and /blog/newest is a copy of the latest post.
     sitemap({
-      filter: (page) => { const p = new URL(page).pathname; return p !== '/' && !p.startsWith('/404') && !/^\/[a-z]{2}\/brand\//.test(p); },
+      filter: (page) => { const p = new URL(page).pathname; return p !== '/' && !p.startsWith('/404') && !/^\/[a-z]{2}\/brand\//.test(p) && !/^\/[a-z]{2}\/blog\/newest\//.test(p); },
       i18n: site.languages.length > 1
         ? { defaultLocale: site.languages[0], locales: Object.fromEntries(site.languages.map((/** @type {string} */ l) => [l, l])) }
         : undefined,
@@ -48,6 +50,11 @@ export default defineConfig({
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   devToolbar: { enabled: false },
   // {{email}}, {{owner}}, {{address}}… in Markdown are filled from site.yaml at build time.
-  markdown: { remarkPlugins: [remarkSiteTokens(site)] },
+  // Blog posts: links between posts' .md files, heading levels, and a "#" link on each heading (src/lib/markdown-blog.mjs).
+  // rehypeHeadingIds is listed so the ids exist before the anchors are added; Astro then doesn't add it again.
+  markdown: {
+    remarkPlugins: [remarkSiteTokens(site), remarkBlogLinks],
+    rehypePlugins: [rehypeBlogDemote, rehypeHeadingIds, rehypeBlogAnchors],
+  },
   vite: { plugins: [tailwindcss()] },
 });

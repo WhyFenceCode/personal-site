@@ -57,7 +57,7 @@ rebuild uses.)
 live-preview check use. If you ever use a different domain, change it there.
 
 ## 4. Check the launch
-- Open https://torstenyoung.com and click through: home, work, a project, resume, about, legal pages.
+- Open https://torstenyoung.com and click through: home, projects, a project, the blog, resume, about, legal pages.
 - The photo-site project page should show the live photo site in the frame. It only does that on
   torstenyoung.com (and www), because that's what photos.torstenyoung.com allows.
 - Response headers come from `public/_headers` (security headers, long caching for `/_astro/*`). Check with:

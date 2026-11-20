@@ -1,0 +1,123 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../../layouts/Base.astro';
+import PageHead from '../../../components/PageHead.astro';
+import { postsFor, slugOf, readingMinutes, postDate } from '../../../lib/content';
+import { t, href, langStaticPaths } from '../../../lib/i18n';
+
+export const getStaticPaths = langStaticPaths;
+const { lang } = Astro.params as { lang: string };
+const posts = await postsFor(lang);
+const [latest, ...rest] = posts;
+const tags = [...new Set(rest.flatMap((p) => p.data.tags))];
+const years = posts.map((p) => p.data.date.getUTCFullYear());
+const span = years.length ? [...new Set([Math.min(...years), Math.max(...years)])].join('–') : '';
+const metaOf = (p: (typeof posts)[number]) => `${postDate(p.data.date, lang)} · ${t(lang, 'blog.minutes', { n: readingMinutes(p.body) })}`;
+---
+<Base lang={lang} page="blog" title={t(lang, 'nav.blog')} description={t(lang, 'blog.lead')}>
+  <div class="wrap">
+    <PageHead title={t(lang, 'nav.blog')} metaLeft={[t(lang, 'blog.meta'), span].filter(Boolean).join(' ')} metaRight={String(posts.length).padStart(2, '0')} compact />
+
+    {!latest && <p class="empty">{t(lang, 'blog.empty')}</p>}
+
+    {latest && (
+      <section class="latest" aria-labelledby="latest-t">
+        <h2 class="eyebrow mono" id="latest-t">{t(lang, 'blog.latest')}</h2>
+        <a class:list={['feature', { 'has-cover': latest.data.cover }]} href={href(lang, `blog/${slugOf(latest.id)}`)}>
+          {latest.data.cover && (
+            <div class="thumb"><Image src={latest.data.cover} alt="" widths={[600, 1000, 1400]} sizes="(max-width: 860px) 100vw, 55vw" loading="eager" /></div>
+          )}
+          <div class="feature-text">
+            <span class="mono muted">{t(lang, 'blog.issue', { n: latest.issue })} · {metaOf(latest)}</span>
+            <span class="feature-title">{latest.data.title}</span>
+            <span class="feature-sum muted">{latest.data.summary}</span>
+            <span class="go mono"><span>{t(lang, 'blog.read')}</span><span class="disc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></span>
+          </div>
+        </a>
+      </section>
+    )}
+
+    {rest.length > 0 && (
+      <section class="recent" aria-labelledby="recent-t">
+        <div class="toolbar">
+          <h2 class="eyebrow mono" id="recent-t">{t(lang, 'blog.recent')}</h2>
+          {tags.length > 1 && (
+            <div class="filters" role="group" aria-label={t(lang, 'blog.recent')} data-filters>
+              {['all', ...tags].map((c) => (
+                <button type="button" data-filter={c} aria-pressed={c === 'all' ? 'true' : 'false'}>{c === 'all' ? t(lang, 'blog.all') : c}</button>
+              ))}
+            </div>
+          )}
+        </div>
+        <ol class="rows" data-rows>
+          {rest.map((p) => (
+            <li data-tags={p.data.tags.join('|')}>
+              <a href={href(lang, `blog/${slugOf(p.id)}`)}>
+                <span class="n num">{String(p.issue).padStart(2, '0')}</span>
+                <span class="t">{p.data.title}</span>
+                <span class="d mono muted">{metaOf(p)}</span>
+                <span class="s muted">{p.data.summary}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <p class="sr-only" aria-live="polite" data-filter-status data-msg={t(lang, 'blog.shown')}></p>
+      </section>
+    )}
+  </div>
+  <div class="section"></div>
+</Base>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const group = document.querySelector('[data-filters]'); if (!group) return;
+    const status = document.querySelector<HTMLElement>('[data-filter-status]')!;
+    group.addEventListener('click', (e) => {
+      const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return;
+      group.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      let n = 0;
+      document.querySelectorAll<HTMLElement>('[data-rows] > li').forEach((r) => {
+        const on = b.dataset.filter === 'all' || (r.dataset.tags ?? '').split('|').includes(b.dataset.filter!);
+        r.hidden = !on; n += +on;
+      });
+      status.textContent = (status.dataset.msg ?? '{n}').replace('{n}', String(n));
+    });
+  });
+</script>
+
+<style>
+  .empty { padding-block: 64px; font-size: clamp(20px, 2vw, 28px); color: var(--muted); }
+  .eyebrow { margin: 0; font-weight: 400; }
+  .latest { padding-block: clamp(32px, 4vw, 56px); display: grid; gap: 20px; }
+  .feature { display: grid; gap: clamp(24px, 4vw, 56px); text-decoration: none; align-items: end; }
+  .feature.has-cover { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+  /* Thumbs are 4:3 like the project cards, rounded 4px, greyscale, with a grey well while loading. */
+  .thumb { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 4px; background: #D6D6D6; }
+  .thumb :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: transform 1.2s var(--ease); }
+  @media (hover: hover) { .feature:hover .thumb :global(img) { transform: scale(1.03); } }
+  .feature-text { display: grid; gap: 18px; align-content: end; }
+  .feature-title { font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: -.02em; line-height: .88; font-size: clamp(44px, 6.5vw, 104px); text-wrap: balance; }
+  .feature.has-cover .feature-title { font-size: clamp(40px, 4.6vw, 80px); }
+  .feature:not(.has-cover) .feature-title { max-width: 16ch; }
+  .feature-sum { font-size: clamp(18px, 1.6vw, 22px); line-height: 1.35; max-width: 42ch; }
+  .go { display: inline-flex; align-items: center; gap: 14px; justify-self: start; padding: 6px 6px 6px 20px; border: 1px solid var(--line); border-radius: 999px; transition: border-color .3s; }
+  .go .disc { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--line); transition: transform .5s var(--ease), background .3s, color .3s; }
+  @media (hover: hover) { .feature:hover .go { border-color: var(--fg); } .feature:hover .disc { background: var(--fg); color: var(--bg); transform: translateX(4px); } }
+  @media (max-width: 860px) { .feature.has-cover { grid-template-columns: minmax(0, 1fr); } }
+
+  .recent { padding-top: clamp(32px, 4vw, 56px); }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-bottom: 20px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filters button { background: none; color: inherit; border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  .filters button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .rows { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--fg); }
+  .rows a { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; grid-template-areas: "n t d" ". s s"; gap: 6px 16px; align-items: baseline; padding: 22px 0 18px; border-bottom: 1px solid var(--line); text-decoration: none; transition: padding .5s var(--ease); }
+  /* Hover effects only where there's a real hover: on touchscreens they'd turn the first tap into a hover. */
+  @media (hover: hover) { .rows a:hover, .rows a:focus-visible { padding-left: 20px; } }
+  .n { grid-area: n; font-size: 18px; } .t { grid-area: t; } .d { grid-area: d; text-align: right; } .s { grid-area: s; max-width: 60ch; font-size: 15px; }
+  .t { font-family: var(--font-display); font-weight: 700; font-stretch: 90%; letter-spacing: -.02em; font-size: clamp(24px, 3vw, 40px); line-height: 1; }
+  @media (max-width: 640px) {
+    .rows a { grid-template-columns: 32px minmax(0, 1fr); grid-template-areas: "n t" ". d" ". s"; }
+    .d { text-align: left; }
+  }
+</style>

@@ -22,14 +22,14 @@ const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
     <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
     {live && <span class="url mono"><i aria-hidden="true"></i>{host}</span>}
     <span class="bar-end">
-      {embed && <span class="mono muted state" data-state data-on={t(lang, 'work.preview.interactive')}><i aria-hidden="true"></i>{t(lang, 'work.preview.on')}</span>}
+      {embed && <span class="mono muted state" data-state data-on={t(lang, 'projects.preview.interactive')}><i aria-hidden="true"></i>{t(lang, 'projects.preview.on')}</span>}
     </span>
   </div>
   <div class="view" data-view>
     {embed ? (
       <>
         {/* src is set by the script below, so this site never loads itself inside its own preview. */}
-        <iframe class="live" data-src={live} data-self={outside ? undefined : ''} title={`${title}: ${t(lang, 'work.preview.live')}`}
+        <iframe class="live" data-src={live} data-self={outside ? undefined : ''} title={`${title}: ${t(lang, 'projects.preview.live')}`}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
           referrerpolicy="strict-origin-when-cross-origin" tabindex="-1" data-live></iframe>
         {devBlocked && (
@@ -40,24 +40,24 @@ const outside = !!live && new URL(live).origin !== new URL(site.url).origin;
             away with no cover; the cover only appears to stop it nesting inside itself. */}
         <div class="shield" data-shield hidden={!outside}>
           {outside && <div class="card" role="group" aria-labelledby="frame-card-title" data-card>
-            <p class="card-title mono" id="frame-card-title">{t(lang, 'work.preview.title')}</p>
-            <p class="card-note">{t(lang, 'work.preview.outside', { host })}</p>
+            <p class="card-title mono" id="frame-card-title">{t(lang, 'projects.preview.title')}</p>
+            <p class="card-note">{t(lang, 'projects.preview.outside', { host })}</p>
             {/* The same split pill as the contact buttons (global .cbtn), in white on the dark card. */}
             <button type="button" class="cbtn card-go" data-go>
-              <span class="cbtn-label"><span>{t(lang, 'work.preview.continue')}</span><span aria-hidden="true">{t(lang, 'work.preview.continue')}</span></span>
+              <span class="cbtn-label"><span>{t(lang, 'projects.preview.continue')}</span><span aria-hidden="true">{t(lang, 'projects.preview.continue')}</span></span>
               <span class="cbtn-disc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
             </button>
           </div>}
           <div class="card" role="note" data-nested hidden>
-            <p class="card-title mono">{t(lang, 'work.preview.nestedTitle')}</p>
-            <p class="card-note">{t(lang, 'work.preview.nested', { host })}</p>
+            <p class="card-title mono">{t(lang, 'projects.preview.nestedTitle')}</p>
+            <p class="card-note">{t(lang, 'projects.preview.nested', { host })}</p>
           </div>
         </div>
       </>
     ) : cover
       ? <picture>
           {tab && <source media="(max-width: 700px)" srcset={tab.src} />}
-          <Image src={cover} alt={live ? `${t(lang, 'work.preview.alt')} ${host}` : ''} widths={[800, 1440, 2000]} sizes="(max-width: 1600px) 100vw, 1600px" class="shot" loading="eager" />
+          <Image src={cover} alt={live ? `${t(lang, 'projects.preview.alt')} ${host}` : ''} widths={[800, 1440, 2000]} sizes="(max-width: 1600px) 100vw, 1600px" class="shot" loading="eager" />
         </picture>
       : <canvas width="1280" height="800" data-art={art} aria-hidden="true"></canvas>}
   </div>

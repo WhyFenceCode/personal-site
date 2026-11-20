@@ -19,7 +19,7 @@ export type Lang = string;
 
 const lookup = (dict: any, key: string) => key.split('.').reduce((o, k) => (o == null ? undefined : o[k]), dict);
 
-/** Translate a dotted key, e.g. t('de', 'nav.work'). `{name}` placeholders are filled from vars. */
+/** Translate a dotted key, e.g. t('de', 'nav.projects'). `{name}` placeholders are filled from vars. */
 export function t(lang: Lang, key: string, vars: Record<string, string | number> = {}): any {
   let value = lookup(dictionaries[lang], key) ?? lookup(dictionaries[defaultLang], key) ?? key;
   if (typeof value === 'string') value = value.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? `{${k}}`));
@@ -29,9 +29,9 @@ export function t(lang: Lang, key: string, vars: Record<string, string | number>
 export const useT = (lang: Lang) => (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
 
 /** Pages that CTAs and nav can point at. */
-const PAGES: Record<string, string> = { home: '', work: 'work/', resume: 'resume/', about: 'about/', contact: '#contact' };
+const PAGES: Record<string, string> = { home: '', projects: 'projects/', blog: 'blog/', resume: 'resume/', about: 'about/', contact: '#contact' };
 
-/** Build a localised URL. `to` is a page key, a page key with a slug ("work/orbit"), or a full URL. */
+/** Build a localised URL. `to` is a page key, a page key with a slug ("projects/orbit"), or a full URL. */
 export function href(lang: Lang, to: string): string {
   if (/^(https?:|mailto:|\/)/.test(to)) return to;
   if (to === 'contact') return `/${lang}/#contact`;

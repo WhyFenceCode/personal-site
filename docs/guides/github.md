@@ -27,7 +27,7 @@ Untick it if you want the calendar to show public work only. Private repo names 
 ```yaml
 - type: github
   weeks: 53                                   # how many weeks of calendar
-  cta: { label: cta.allProjects, to: work }   # the link under the section
+  cta: { label: cta.allProjects, to: projects }   # the link under the section
 ```
 
 ## Freshness

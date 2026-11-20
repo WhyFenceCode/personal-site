@@ -15,7 +15,7 @@ const projects = defineCollection({
     title: z.string(),
     year: z.number(),
     kind: z.string(),                       // shown as a label, e.g. "Web app"
-    category: z.string(),                   // used by the filter on the work page
+    category: z.string(),                   // used by the filter on the projects page
     role: z.string(),
     stack: z.array(z.string()).default([]),
     summary: z.string(),
@@ -23,7 +23,7 @@ const projects = defineCollection({
     live: z.url().optional(),      // the live site: "Visit the site" button, screenshot cover, live preview
     preview: z.boolean().default(true),     // false = never offer the interactive live preview
     model: z.string().optional(),           // a 3D model to spin, e.g. /models/foil.glb (file in public/models/); see docs/guides/3d-models.md
-    // How the model is turned on its work card (and where the project page's viewer starts), in degrees:
+    // How the model is turned on its project card (and where the project page's viewer starts), in degrees:
     // turn = spin around the vertical axis, tilt = tip the top towards you. See docs/guides/3d-models.md
     modelAngle: z.object({ turn: z.number().default(54), tilt: z.number().default(26) }).default({ turn: 54, tilt: 26 }),
     client: z.string().optional(),
@@ -76,4 +76,24 @@ const legal = defineCollection({
   schema: z.object({ title: z.string(), order: z.number().default(0) }),
 });
 
-export const collections = { projects, experience, education, pages, legal };
+// Blog posts: src/content/blog/<lang>/<slug>.md, or a folder per post (<slug>/index.md) with its images beside it.
+// Either way the slug is the file or folder name: /<lang>/blog/<slug>/. "newest" is taken by /blog/newest.
+const blog = defineCollection({
+  loader: glob({
+    pattern: '**/*.md',
+    base: './src/content/blog',
+    generateId: ({ entry }) => entry.replace(/\\/g, '/').replace(/\.md$/, '').replace(/\/index$/, '').toLowerCase(),
+  }),
+  schema: ({ image }) => z.object({
+    title: z.string(),
+    date: z.coerce.date(),                  // publish date, e.g. 2026-11-20; newest first, and /blog/newest shows the latest
+    updated: z.coerce.date().optional(),
+    summary: z.string(),                    // one or two lines, on the blog page and in link previews
+    cover: image().optional(),              // ./cover.jpg next to the Markdown file
+    coverAlt: z.string().default(''),
+    tags: z.array(z.string()).default([]),  // used by the filter on the blog page
+    draft: z.boolean().default(false),      // drafts show in `pnpm dev` only
+  }),
+});
+
+export const collections = { projects, experience, education, pages, legal, blog };

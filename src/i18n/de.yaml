@@ -12,7 +12,8 @@ build:
 
 nav:
   home: Start
-  work: Arbeiten
+  projects: Projekte
+  blog: Blog
   resume: Lebenslauf
   about: Über mich
   brand: Markenkit
@@ -74,7 +75,7 @@ footer:
   cookies: Cookie-Einstellungen
   built: Gebaut mit Astro, React und Three.js
 
-work:
+projects:
   meta: Projekte
   hint: Mit der Maus darüber, um das Bild ganz zu sehen
   all: Alle
@@ -101,6 +102,23 @@ work:
     alt: Screenshot von
   modelHint: Ziehen zum Drehen
   scrollCue: Weiterscrollen
+
+blog:
+  meta: Notizen
+  lead: Kurze Texte darüber, was ich baue, lerne und repariere.
+  latest: Neuester
+  recent: Weitere
+  all: Alle
+  read: Lesen
+  minutes: "{n} Min. Lesezeit"
+  issue: "Nr. {n}"
+  updated: Aktualisiert
+  contents: Auf dieser Seite
+  newer: Neuer
+  older: Älter
+  empty: Noch nichts hier. Der erste Beitrag ist unterwegs.
+  shown: "{n} Beiträge angezeigt"
+  newest: Das ist der neueste Beitrag.
 
 resume:
   lead: Zieh an der Zeitleiste oder nutze die Pfeiltasten, um zu sehen, was ich in jedem Jahr gemacht habe.

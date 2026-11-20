@@ -6,7 +6,8 @@ import { t, href, type Lang } from '../lib/i18n';
 interface Props { lang: Lang; page: string }
 const { lang, page } = Astro.props;
 const nav = [
-  { key: 'work', label: t(lang, 'nav.work') },
+  { key: 'projects', label: t(lang, 'nav.projects') },
+  { key: 'blog', label: t(lang, 'nav.blog') },
   { key: 'resume', label: t(lang, 'nav.resume') },
   { key: 'about', label: t(lang, 'nav.about') },
 ];

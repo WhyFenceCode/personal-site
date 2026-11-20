@@ -1,0 +1,15 @@
+---
+import BlogPost from '../../../components/blog/BlogPost.astro';
+import { postsFor, slugOf } from '../../../lib/content';
+import { languages } from '../../../lib/i18n';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const lang of languages) for (const p of await postsFor(lang)) paths.push({ params: { lang, slug: slugOf(p.id) } });
+  return paths;
+}
+const { lang, slug } = Astro.params as { lang: string; slug: string };
+const posts = await postsFor(lang);
+const post = posts.find((p) => slugOf(p.id) === slug)!;
+---
+<BlogPost lang={lang} post={post} posts={posts} />

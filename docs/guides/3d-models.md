@@ -31,7 +31,7 @@ model: /models/foil.glb
 ```
 
 Run `pnpm dev` and open the project page. The model sits pinned on the right while the story scrolls on the left.
-Drag to spin it (and up/down to tip it). On the work page, the project's card shows a dithered still of the model
+Drag to spin it (and up/down to tip it). On the projects page, the project's card shows a dithered still of the model
 that turns smooth on hover.
 
 ## 4. Point it the right way (optional)

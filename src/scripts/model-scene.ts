@@ -1,5 +1,5 @@
 /**
- * The shared 3D stage for project models (the project page viewer and the hover preview on work cards):
+ * The shared 3D stage for project models (the project page viewer and the hover preview on project cards):
  * lit like the hero's chrome letters, with an accent rim light, and centred whatever units Fusion exported in.
  */
 import * as THREE from 'three';

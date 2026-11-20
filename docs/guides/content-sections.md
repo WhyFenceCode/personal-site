@@ -45,7 +45,7 @@ url: https://www.credly.com/badges/…   # optional: a "Verify" link to the cred
 title: Orbit
 year: 2026
 kind: Web app            # label on the card
-category: web            # used by the filter buttons on the work page
+category: web            # used by the filter buttons on the projects page
 role: Design & build
 stack: [Astro, Three.js]
 summary: One sentence for cards and the page intro.
@@ -64,7 +64,7 @@ links:
 ---
 The case study, in Markdown. Headings, lists, images and tables all work.
 ```
-The file name becomes the URL: `orbit.md` → `/en/work/orbit/`.
+The file name becomes the URL: `orbit.md` → `/en/projects/orbit/`.
 
 ### Live sites: screenshots and the interactive preview
 - Run `pnpm shots` after adding a project with `live:`. It opens the site in a headless browser and saves a

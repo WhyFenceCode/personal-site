@@ -8,7 +8,7 @@ import { createStage } from '../scripts/model-scene';
 import { motionOn } from '../scripts/motion';
 
 /** fill: take the height of the parent (e.g. a pinned side panel) instead of a fixed 16:9-ish box. */
-/** angle: where the model starts, in degrees (the project's `modelAngle`, same as its work card). */
+/** angle: where the model starts, in degrees (the project's `modelAngle`, same as its project card). */
 type Props = { src: string; title: string; hint: string; fill?: boolean; angle?: { turn: number; tilt: number } };
 
 export default function ProjectModel({ src, title, hint, fill = false, angle = { turn: 54, tilt: 26 } }: Props) {

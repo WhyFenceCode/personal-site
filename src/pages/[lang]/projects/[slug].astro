@@ -25,31 +25,31 @@ const cover = coverFor(p), tablet = tabletFor(p);
 const interactive = !!d.live && d.preview && (await canFrame(d.live, site.url));
 const devBlocked = import.meta.env.DEV && interactive && !(await canFrame(d.live!, Astro.url.origin));
 const facts: [string, string][] = [
-  [t(lang, 'work.client'), d.client ?? ''],
-  [t(lang, 'work.year'), String(d.year)],
-  [t(lang, 'work.type'), d.kind],
-  [t(lang, 'work.services'), d.services.join(', ')],
-  [t(lang, 'work.role'), d.role],
+  [t(lang, 'projects.client'), d.client ?? ''],
+  [t(lang, 'projects.year'), String(d.year)],
+  [t(lang, 'projects.type'), d.kind],
+  [t(lang, 'projects.services'), d.services.join(', ')],
+  [t(lang, 'projects.role'), d.role],
 ].filter(([, v]) => v) as [string, string][];
 const firstHeading = headings.find((h) => h.depth === 2)?.text;
 ---
-<Base lang={lang} page="work" title={d.title} description={d.summary}>
+<Base lang={lang} page="projects" title={d.title} description={d.summary}>
   {/* With a 3D model: the story on the left, the model small and pinned on the right while you read. */}
   <article class:list={['wrap case', { split: d.model }]}>
    <div class="case-text">
     <header class="case-head">
-      <div class="crumbs mono muted"><a href={href(lang, 'work')}>← {t(lang, 'nav.work')}</a><span>{d.kind} {d.year}</span></div>
+      <div class="crumbs mono muted"><a href={href(lang, 'projects')}>← {t(lang, 'nav.projects')}</a><span>{d.kind} {d.year}</span></div>
       <h1 class="case-title" id="page-title" tabindex="-1">{d.title}</h1>
       <div class="case-sub">
         <p class="lead">{d.summary}</p>
         {d.live && (
           <a class="visit" href={d.live} rel="noopener">
-            <span>{t(lang, 'work.visit')}</span>
+            <span>{t(lang, 'projects.visit')}</span>
             <span class="disc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 11L11 3M5 3h6v6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
           </a>
         )}
       </div>
-      {d.model && <a class="scroll-cue mono muted" href="#case-body"><span>{t(lang, 'work.scrollCue')}</span><span class="cue-arrow" aria-hidden="true">↓</span></a>}
+      {d.model && <a class="scroll-cue mono muted" href="#case-body"><span>{t(lang, 'projects.scrollCue')}</span><span class="cue-arrow" aria-hidden="true">↓</span></a>}
     </header>
 
     {/* The big window only for a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
@@ -58,8 +58,8 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
       <aside class="facts">
         <dl>
           {facts.map(([k, v]) => <div><dt class="mono muted">{k}</dt><dd>{v}</dd></div>)}
-          {d.stack.length > 0 && <div><dt class="mono muted">{t(lang, 'work.technology')}</dt><dd><ul class="chips">{d.stack.map((s) => <li>{s}</li>)}</ul></dd></div>}
-          {d.links.length > 0 && <div><dt class="mono muted">{t(lang, 'work.links')}</dt><dd><ul class="links">{d.links.map((l) => <li><a class="link" href={l.url} rel="noopener">{l.label} ↗</a></li>)}</ul></dd></div>}
+          {d.stack.length > 0 && <div><dt class="mono muted">{t(lang, 'projects.technology')}</dt><dd><ul class="chips">{d.stack.map((s) => <li>{s}</li>)}</ul></dd></div>}
+          {d.links.length > 0 && <div><dt class="mono muted">{t(lang, 'projects.links')}</dt><dd><ul class="links">{d.links.map((l) => <li><a class="link" href={l.url} rel="noopener">{l.label} ↗</a></li>)}</ul></dd></div>}
         </dl>
       </aside>
       <div class="main">
@@ -68,17 +68,17 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
             {d.metrics.map((m) => <li><span class="stat">{m.value}</span><span class="muted">{m.label}</span></li>)}
           </ul>
         )}
-        {!firstHeading && <h2 class="overview">{t(lang, 'work.overview')}</h2>}
+        {!firstHeading && <h2 class="overview">{t(lang, 'projects.overview')}</h2>}
         <div class="prose-site case-prose"><Content /></div>
       </div>
     </div>
    </div>
-    {d.model && <div class="case-side"><ProjectModel client:visible src={d.model} title={d.title} hint={t(lang, 'work.modelHint')} angle={d.modelAngle} fill /></div>}
+    {d.model && <div class="case-side"><ProjectModel client:visible src={d.model} title={d.title} hint={t(lang, 'projects.modelHint')} angle={d.modelAngle} fill /></div>}
   </article>
 
   <div class="tone-dark">
-    <a class="next wrap" href={href(lang, `work/${slugOf(next.id)}`)}>
-      <span><span class="mono muted" style="display:block;margin-bottom:12px">{t(lang, 'work.next')}</span><span class="display next-title">{next.data.title}</span></span>
+    <a class="next wrap" href={href(lang, `projects/${slugOf(next.id)}`)}>
+      <span><span class="mono muted" style="display:block;margin-bottom:12px">{t(lang, 'projects.next')}</span><span class="display next-title">{next.data.title}</span></span>
       <svg width="48" height="28" viewBox="0 0 48 28" aria-hidden="true"><path d="M0 14h45M33 2l12 12-12 12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
     </a>
   </div>

@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import Base from '../../../layouts/Base.astro';
 import PageHead from '../../../components/PageHead.astro';
 import { projectsFor, slugOf } from '../../../lib/content';
-import { coverFor } from '../../../lib/projects';
+import { cardCoverFor as coverFor } from '../../../lib/projects';
 import { t, href, langStaticPaths } from '../../../lib/i18n';
 
 export const getStaticPaths = langStaticPaths;
@@ -12,22 +12,22 @@ const projects = await projectsFor(lang);
 const cats = ['all', ...new Set(projects.map((p) => p.data.category))];
 const years = projects.map((p) => p.data.year);
 ---
-<Base lang={lang} page="work" title={t(lang, 'nav.work')}>
+<Base lang={lang} page="projects" title={t(lang, 'nav.projects')}>
   <div class="wrap">
-    <PageHead title={t(lang, 'nav.work')} metaLeft={`${t(lang, 'work.meta')} ${Math.min(...years)} – ${Math.max(...years)}`} metaRight={String(projects.length).padStart(2, '0')} compact />
+    <PageHead title={t(lang, 'nav.projects')} metaLeft={`${t(lang, 'projects.meta')} ${Math.min(...years)} – ${Math.max(...years)}`} metaRight={String(projects.length).padStart(2, '0')} compact />
     <div class="toolbar">
       <div class="filters" role="group" aria-label="Filter projects" data-filters>
         {cats.map((c) => (
           <button type="button" data-filter={c} aria-pressed={c === 'all' ? 'true' : 'false'}>
-            {c === 'all' ? t(lang, 'work.all') : c}<sup class="num">{c === 'all' ? projects.length : projects.filter((p) => p.data.category === c).length}</sup>
+            {c === 'all' ? t(lang, 'projects.all') : c}<sup class="num">{c === 'all' ? projects.length : projects.filter((p) => p.data.category === c).length}</sup>
           </button>
         ))}
       </div>
-      <span class="mono muted">{t(lang, 'work.hint')}</span>
+      <span class="mono muted">{t(lang, 'projects.hint')}</span>
     </div>
     <div class="grid" data-grid>
       {projects.map((p) => (
-        <a class="card" href={href(lang, `work/${slugOf(p.id)}`)} data-cat={p.data.category}>
+        <a class="card" href={href(lang, `projects/${slugOf(p.id)}`)} data-cat={p.data.category}>
           <div class="thumb" data-model-card={!coverFor(p) && p.data.model ? p.data.model : undefined} data-model-turn={p.data.modelAngle.turn} data-model-tilt={p.data.modelAngle.tilt}>
             {coverFor(p)
               ? <Image src={coverFor(p)!} alt="" widths={[480, 800, 1200]} sizes="(max-width: 720px) 100vw, 50vw" class="cover" />

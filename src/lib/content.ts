@@ -56,6 +56,21 @@ export const yearLabel = (v?: string, now = 'Now') => (v ? v.split('-')[0] : now
 export async function projectsFor(lang: Lang) {
   return (await localized('projects', lang)).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.order - b.data.order || b.data.year - a.data.year);
 }
+/** Blog posts, newest first. Drafts only in dev. Each gets its issue number (1 = the first post ever). */
+export async function postsFor(lang: Lang) {
+  const posts = (await localized('blog', lang))
+    .filter((p) => import.meta.env.DEV || !p.data.draft)
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime() || slugOf(a.id).localeCompare(slugOf(b.id)));
+  const reserved = posts.find((p) => slugOf(p.id) === 'newest');
+  if (reserved) throw new Error(`[blog] ${reserved.id}: "newest" is reserved for /blog/newest. Rename the post.`);
+  return posts.map((p, i) => ({ ...p, issue: posts.length - i }));
+}
+/** Minutes to read, at about 230 words a minute, from the Markdown source. */
+export const readingMinutes = (body = '') =>
+  Math.max(1, Math.round(body.replace(/```[\s\S]*?```/g, ' ').replace(/!\[[^\]]*\]\([^)]*\)/g, ' ').split(/\s+/).filter(Boolean).length / 230));
+/** "20 Nov 2026". Dates in frontmatter are calendar days, so they're shown in UTC to stay on the right day. */
+export const postDate = (d: Date, lang: string) => new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d);
+
 export async function experienceFor(lang: Lang) {
   return (await localized('experience', lang)).sort((a, b) => yearValue(b.data.start) - yearValue(a.data.start));
 }

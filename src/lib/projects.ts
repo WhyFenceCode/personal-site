@@ -15,6 +15,10 @@ const byslug = new Map(Object.entries(shots).map(([path, mod]) => [path.split('/
 export function coverFor(p: CollectionEntry<'projects'>): ImageMetadata | undefined {
   return p.data.cover ?? byslug.get(slugOf(p.id));
 }
+/** The 4:3 card screenshot (<slug>-card.jpg), rendered at the cards' shape; falls back to the desktop cover. */
+export function cardCoverFor(p: CollectionEntry<'projects'>): ImageMetadata | undefined {
+  return p.data.cover ?? byslug.get(`${slugOf(p.id)}-card`) ?? byslug.get(slugOf(p.id));
+}
 /** The portrait tablet screenshot (<slug>-tablet.jpg), used in the project window on phones. */
 export function tabletFor(p: CollectionEntry<'projects'>): ImageMetadata | undefined {
   return p.data.cover ? undefined : byslug.get(`${slugOf(p.id)}-tablet`);

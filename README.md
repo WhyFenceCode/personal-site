@@ -22,7 +22,8 @@ pnpm check       # type check
 | Places visited (plain text, one per line) | `src/data/places.txt` |
 | Resume timeline range and skills | `src/config/resume.yaml` |
 | Interface text per language | `src/i18n/<lang>.yaml` |
-| Projects | `src/content/projects/<lang>/<slug>.md` |
+| Projects (`/<lang>/projects/`) | `src/content/projects/<lang>/<slug>.md` |
+| Blog posts (`/<lang>/blog/`, latest at `/blog/newest`) | `src/content/blog/<lang>/<slug>.md` or `<slug>/index.md`; see the draft post `writing-posts` in `pnpm dev` |
 | Roles | `src/content/experience/<lang>/<slug>.md` |
 | Education (set `featured: true` for the home page) | `src/content/education/<lang>/<slug>.md` |
 | About page | `src/content/pages/<lang>/about.md` |
@@ -40,6 +41,10 @@ set `tone: light|dark` to pin one. Each section takes an optional `cta: { label,
 ### Adding a language
 Add the code to `languages` in `site.yaml` and create `src/i18n/<code>.yaml`. Missing strings and
 untranslated Markdown fall back to the first language. Two languages show a toggle, three or more a dropdown.
+
+### Project screenshots
+`pnpm shots` captures each `live:` project three ways: 16:10 for the project page, 4:3 (the cards' shape) for the
+project cards, and a portrait tablet view for phones.
 
 ### Adding a project image
 Put the image next to the Markdown file and set `cover: ./cover.jpg` in its frontmatter. Without a cover,

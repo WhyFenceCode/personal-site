@@ -1,0 +1,150 @@
+---
+/* One blog post, as a whole page. Used by /<lang>/blog/<slug>/ and by /<lang>/blog/newest/, which shows the latest
+   post at its own address (its canonical link points at the post's real one). */
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { postsFor, slugOf, readingMinutes, postDate } from '../../lib/content';
+import { t, href, type Lang } from '../../lib/i18n';
+
+type Post = Awaited<ReturnType<typeof postsFor>>[number];
+interface Props { lang: Lang; post: Post; posts: Post[]; newest?: boolean }
+const { lang, post, posts, newest = false } = Astro.props;
+const d = post.data;
+const slug = slugOf(post.id);
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const i = posts.findIndex((p) => p.id === post.id);
+const newer = posts[i - 1], older = posts[i + 1];
+const meta = [t(lang, 'blog.issue', { n: post.issue }), postDate(d.date, lang), t(lang, 'blog.minutes', { n: readingMinutes(post.body) })];
+---
+<Base lang={lang} page="blog" title={d.title} description={d.summary} canonical={href(lang, `blog/${slug}`)} ogType="article">
+  <article class="wrap post">
+    <header class="post-head">
+      <div class="crumbs mono muted">
+        <a href={href(lang, 'blog')}>← {t(lang, 'nav.blog')}</a>
+        <span>{meta.join(' · ')}</span>
+      </div>
+      <h1 class="post-title" id="page-title" tabindex="-1">{d.title}</h1>
+      <p class="lead">{d.summary}</p>
+      <div class="post-meta mono muted">
+        <time datetime={d.date.toISOString().slice(0, 10)}>{postDate(d.date, lang)}</time>
+        {d.updated && <span>{t(lang, 'blog.updated')} <time datetime={d.updated.toISOString().slice(0, 10)}>{postDate(d.updated, lang)}</time></span>}
+        {d.tags.length > 0 && <ul class="tags">{d.tags.map((tag) => <li>{tag}</li>)}</ul>}
+        {newest && <a class="newest" href={href(lang, `blog/${slug}`)}><i aria-hidden="true"></i>{t(lang, 'blog.newest')}</a>}
+      </div>
+    </header>
+
+    {d.cover && (
+      <figure class="post-cover">
+        <Image src={d.cover} alt={d.coverAlt} widths={[800, 1440, 2000]} sizes="(max-width: 1600px) 100vw, 1600px" loading="eager" />
+      </figure>
+    )}
+
+    <div class:list={['post-body', { 'no-toc': toc.length < 2 }]}>
+      {toc.length >= 2 && (
+        <nav class="toc" aria-label={t(lang, 'blog.contents')}>
+          <p class="mono muted">{t(lang, 'blog.contents')}</p>
+          <ol>{toc.map((h) => <li class={`d${h.depth}`}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+        </nav>
+      )}
+      <div class="prose-site post-prose"><Content /></div>
+    </div>
+  </article>
+
+  {(newer || older) && (
+    <nav class="tone-dark pager" aria-label={t(lang, 'nav.blog')}>
+      <div class="wrap pager-in">
+        {older ? (
+          <a class="pg older" href={href(lang, `blog/${slugOf(older.id)}`)}>
+            <span class="mono muted">← {t(lang, 'blog.older')} · {t(lang, 'blog.issue', { n: older.issue })}</span>
+            <span class="pg-title">{older.data.title}</span>
+          </a>
+        ) : <span></span>}
+        {newer && (
+          <a class="pg newer" href={href(lang, `blog/${slugOf(newer.id)}`)}>
+            <span class="mono muted">{t(lang, 'blog.newer')} · {t(lang, 'blog.issue', { n: newer.issue })} →</span>
+            <span class="pg-title">{newer.data.title}</span>
+          </a>
+        )}
+      </div>
+    </nav>
+  )}
+</Base>
+
+<style>
+  .post { padding-bottom: clamp(64px, 8vw, 120px); }
+  .post-head { padding-top: clamp(24px, 5vw, 72px); padding-bottom: 40px; display: grid; gap: 20px; border-bottom: 1.5px solid var(--fg); }
+  .crumbs { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .crumbs a { text-decoration: none; }
+  .post-title { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 85%; letter-spacing: -.035em; line-height: .92; font-size: clamp(44px, 7vw, 120px); text-wrap: balance; max-width: 18ch; }
+  .lead { margin: 0; font-size: clamp(20px, 2vw, 28px); line-height: 1.3; letter-spacing: -.01em; color: var(--muted); max-width: 40ch; }
+  .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+  .tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tags li { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--fg); }
+  .newest { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--fg); }
+  .newest i { width: 8px; height: 8px; background: var(--accent); }
+
+  /* Covers follow the brand ratios: 16:10, rounded 4px, greyscale, a grey well while loading. */
+  .post-cover { margin: clamp(32px, 4vw, 56px) 0 0; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 4px; background: #D6D6D6; }
+  .post-cover :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1); }
+
+  .post-body { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 9fr); gap: 32px 64px; margin-top: clamp(40px, 5vw, 80px); }
+  .post-body.no-toc { grid-template-columns: minmax(0, 1fr); }
+  .post-body.no-toc .post-prose { margin-inline: auto; }
+  .toc { align-self: start; position: sticky; top: calc(var(--header-h) + 24px); }
+  .toc p { margin: 0 0 8px; }
+  .toc ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .toc li a { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); text-decoration: none; font-size: 15px; line-height: 1.35; color: var(--muted); transition: color .2s, padding .4s var(--ease); }
+  .toc li.d3 a { padding-left: 16px; font-size: 14px; }
+  .toc li a:hover, .toc li a[aria-current="true"] { color: var(--fg); }
+  .toc li a[aria-current="true"]::before { content: "■ "; color: var(--accent); }
+  @media (max-width: 860px) { .post-body { grid-template-columns: minmax(0, 1fr); } .toc { position: static; } }
+
+  /* Markdown. Headings follow the project pages: h2 display, h3 a step down, h4 a label. */
+  .post-prose { max-width: 66ch; min-width: 0; }
+  .post-prose :global(:is(h2, h3, h4)) { scroll-margin-top: calc(var(--header-h) + 24px); position: relative; text-wrap: balance; color: var(--fg); }
+  .post-prose :global(h2) { font-family: var(--font-display); font-weight: 800; font-stretch: 85%; text-transform: none; letter-spacing: -.03em; font-size: clamp(34px, 3.6vw, 52px); line-height: .98; margin: 56px 0 18px; }
+  .post-prose :global(h3) { font-family: var(--font-display); font-weight: 700; font-stretch: 90%; letter-spacing: -.02em; font-size: clamp(22px, 1.8vw, 27px); line-height: 1.1; margin: 36px 0 10px; }
+  .post-prose :global(h4) { font-family: var(--font-mono); font-weight: 400; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; margin: 28px 0 8px; }
+  .post-prose :global(> :first-child) { margin-top: 0; }
+  .post-prose :global(.h-anchor) { margin-left: .3em; text-decoration: none; background: none; color: var(--accent); opacity: 0; transition: opacity .2s; font-weight: 400; }
+  .post-prose :global(.has-anchor:hover .h-anchor), .post-prose :global(.has-anchor:target .h-anchor) { opacity: 1; }
+  .post-prose :global(p), .post-prose :global(li) { font-size: 18px; line-height: 1.65; color: var(--fg); }
+  .post-prose :global(ol) { padding-left: 1.4em; }
+  .post-prose :global(ul) { list-style: none; padding-left: 1.2em; }
+  .post-prose :global(ul > li) { position: relative; }
+  .post-prose :global(ul > li::before) { content: ""; position: absolute; left: -1.1em; top: .68em; width: 6px; height: 6px; background: currentColor; }
+  .post-prose :global(hr) { border: 0; border-top: 1.5px solid var(--fg); margin: 48px 0; }
+  .post-prose :global(img) { display: block; max-width: 100%; height: auto; margin: 32px 0 8px; border-radius: 4px; background: #D6D6D6; filter: grayscale(1); }
+  .post-prose :global(p:has(> img:only-child)) { margin: 0; }
+  .post-prose :global(img[title]), .post-prose :global(figcaption) { font-size: 14px; color: var(--muted); }
+  .post-prose :global(:not(pre) > code) { background: color-mix(in srgb, var(--fg) 8%, transparent); padding: .12em .4em; border-radius: 4px; }
+  .post-prose :global(pre) { margin: 24px 0; padding: 18px 20px; border-radius: 6px; overflow-x: auto; font-size: 14px; line-height: 1.6; }
+  .post-prose :global(blockquote) { margin: 32px 0; border: 0; border-left: 1.5px solid var(--accent); border-radius: 0; padding: 0 0 0 20px; }
+  .post-prose :global(blockquote p) { font-family: var(--font-display); font-weight: 500; font-size: clamp(22px, 2vw, 28px); letter-spacing: -.02em; line-height: 1.2; }
+
+  .pager-in { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-block: 56px; }
+  .pg { display: grid; gap: 12px; text-decoration: none; align-content: start; }
+  .pg.newer { text-align: right; justify-items: end; }
+  .pg-title { font-family: var(--font-display); font-weight: 800; font-stretch: 85%; letter-spacing: -.03em; line-height: .95; font-size: clamp(28px, 4vw, 56px); text-wrap: balance; transition: transform .5s var(--ease); }
+  @media (hover: hover) { .pg.older:hover .pg-title { transform: translateX(-8px); } .pg.newer:hover .pg-title { transform: translateX(8px); } }
+  @media (max-width: 640px) { .pager-in { grid-template-columns: 1fr; } .pg.newer { text-align: left; justify-items: start; } }
+</style>
+
+<script>
+  // Highlight the section being read in the contents list.
+  document.addEventListener('astro:page-load', () => {
+    const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')]; if (!links.length) return;
+    const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean) as HTMLElement[];
+    const set = () => {
+      const y = window.innerHeight * 0.3;
+      let cur = targets[0];
+      for (const h of targets) if (h.getBoundingClientRect().top < y) cur = h;
+      links.forEach((a) => a.setAttribute('aria-current', String(a.hash.slice(1) === cur?.id)));
+    };
+    set();
+    window.addEventListener('scroll', set, { passive: true });
+    document.addEventListener('astro:before-swap', () => window.removeEventListener('scroll', set), { once: true });
+  });
+</script>

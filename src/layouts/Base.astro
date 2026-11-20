@@ -18,15 +18,16 @@ import { site } from '../lib/config';
 import { analyticsScript } from '../lib/analytics';
 import { languages, t, switchPath, type Lang } from '../lib/i18n';
 
-interface Props { lang: Lang; title?: string; description?: string; page?: string; noindex?: boolean }
-const { lang, title, description, page = '', noindex = false } = Astro.props;
+/* canonical: the page's real address when it's shown at another one too (/blog/newest shows the latest post). */
+interface Props { lang: Lang; title?: string; description?: string; page?: string; noindex?: boolean; canonical?: string; ogType?: 'website' | 'article' }
+const { lang, title, description, page = '', noindex = false, ogType = 'website' } = Astro.props;
 const fullTitle = `${site.name} | ${title ?? t(lang, 'nav.home')}`;
 const desc = description ?? t(lang, 'meta.description');
 const analytics = analyticsScript();
 const needsConsent = !!analytics && site.analytics.consent;
 const showBanner = site.banner.enabled && (site.banner.pages === 'all' || page === 'home');
 const portraitOk = site.portrait.enabled && existsSync(`public${site.portrait.src}`);
-const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
+const canonical = new URL(Astro.props.canonical ?? Astro.url.pathname, Astro.site ?? site.url).href;
 ---
 <!doctype html>
 <html lang={lang} data-page={page} data-numbers={site.typography.numbers} data-headings={site.typography.headings} data-echo={String(site.theme.headingEcho)}>
@@ -44,7 +45,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
     {languages.map((l) => <link rel="alternate" hreflang={l} href={new URL(switchPath(Astro.url.pathname, l), Astro.site ?? site.url).href} />)}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={desc} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
     {portraitOk && <meta property="og:image" content={new URL(site.portrait.src, Astro.site ?? site.url).href} />}
     <meta name="theme-color" content="#161616" />
     <style is:inline set:html={`:root{--accent:${site.theme.accent}}`} />

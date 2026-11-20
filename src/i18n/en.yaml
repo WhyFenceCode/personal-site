@@ -12,7 +12,8 @@ build:
 
 nav:
   home: Home
-  work: Work
+  projects: Projects
+  blog: Blog
   resume: Resume
   about: About
   brand: Brand kit
@@ -74,7 +75,7 @@ footer:
   cookies: Cookie settings
   built: Built with Astro, React and Three.js
 
-work:
+projects:
   meta: Projects
   hint: Hover a project to see its image in full
   all: All
@@ -101,6 +102,23 @@ work:
     alt: Screenshot of
   modelHint: Drag to spin
   scrollCue: Scroll for the story
+
+blog:
+  meta: Notes
+  lead: Short write-ups on what I'm building, learning and fixing.
+  latest: Latest
+  recent: Recent
+  all: All
+  read: Read it
+  minutes: "{n} min read"
+  issue: "No. {n}"
+  updated: Updated
+  contents: On this page
+  newer: Newer
+  older: Older
+  empty: Nothing here yet. The first post is on its way.
+  shown: "{n} posts shown"
+  newest: You're reading the newest post.
 
 resume:
   lead: Drag the timeline, or use the arrow keys, to see what I was doing each year.

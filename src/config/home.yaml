@@ -3,7 +3,7 @@
 #
 # Every section accepts:
 #   tone: light | dark      (optional; when left out, sections alternate starting with dark)
-#   cta:  { label: <i18n key>, to: <page> }   pages: home, work, resume, about, contact, or a full URL
+#   cta:  { label: <i18n key>, to: <page> }   pages: home, projects, blog, resume, about, contact, or a full URL
 #   hidden: true            (keeps the entry here but doesn't render it)
 
 sections:
@@ -17,14 +17,14 @@ sections:
 
   - type: github
     weeks: 53
-    cta: { label: cta.allProjects, to: work }
+    cta: { label: cta.allProjects, to: projects }
 
   - type: certifications   # hidden until you add an education entry with kind: certificate
     cta: { label: cta.fullResume, to: resume }
 
   - type: projects
     limit: 4
-    cta: { label: cta.allProjects, to: work }
+    cta: { label: cta.allProjects, to: projects }
 
   - type: experience
     cta: { label: cta.fullResume, to: resume }

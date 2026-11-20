@@ -1,0 +1,16 @@
+---
+/* /<lang>/blog/newest/: always the latest post, so the address can be shared and stays current. It's rebuilt with
+   the site, so a new post shows here as soon as it's published. Search engines are pointed at the post's own page. */
+import BlogPost from '../../../components/blog/BlogPost.astro';
+import { postsFor } from '../../../lib/content';
+import { languages } from '../../../lib/i18n';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const lang of languages) if ((await postsFor(lang)).length) paths.push({ params: { lang } });
+  return paths;
+}
+const { lang } = Astro.params as { lang: string };
+const posts = await postsFor(lang);
+---
+<BlogPost lang={lang} post={posts[0]} posts={posts} newest />
