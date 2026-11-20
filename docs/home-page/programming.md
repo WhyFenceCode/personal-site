@@ -38,33 +38,35 @@ GitHub's unauthenticated API allows 60 requests an hour per IP. This block uses 
 ## Not to be confused with
 The **code viewer** shows one repository's files on a project page or in a post: [embeds.md](../writing/embeds.md).
 
-## Repo cards for your GitHub profile
-The site also draws link cards for your key repositories, in its own style, for the profile README
-(github.com/WhyFenceCode/WhyFenceCode). Pick the repos in `site.yaml`:
+## Images for your GitHub profile
+The site also draws the pieces of the profile README (github.com/WhyFenceCode/WhyFenceCode) in its own style, each in
+a light and a dark version. Set them in `site.yaml`:
 
 ```yaml
 github:
-  cards:
+  links:                       # a row of pills under the banner, one image (and one link) each
+    - { label: Website, url: "https://torstenyoung.com" }   # the first is filled, like the site's Contact button
+  intro: Engineering student at Queen's University…         # a sentence under the links
+  heading: Featured work       # the section heading over the cards, with the count
+  cards:                       # one card per repo: language, stars and last update come from GitHub
     - { repo: personal-site, title: Personal site, description: "…" }   # title and description are optional
-    - { repo: extracurricular-api, title: Extracurricular API }
 ```
 
-Each becomes `/github/<repo>-light.svg` and `/github/<repo>-dark.svg`, with the language, stars and last update taken
-from GitHub when the site builds. Like the banner, GitHub needs the files in the profile repo itself:
+| File (in `dist/github/` after a build) | What |
+| --- | --- |
+| `link-<label>-light.svg` / `-dark.svg` | One pill per link. Separate images, because GitHub can only make a whole image a link |
+| `intro-light.svg` / `-dark.svg` | The intro sentence and the heading |
+| `<repo>-light.svg` / `-dark.svg` | A repo card |
 
-1. Run `pnpm build` (or `pnpm dev`) and save each card from `dist/github/` (or `http://localhost:4321/github/…`) into
-   the profile repo's `assets/` folder.
-2. In its README, two cards per row, each a link to its repo:
+To update the profile: run `pnpm build`, copy `dist/github/` (and `dist/github-banner-*.svg`) into the profile repo's
+`assets/`, and push it. Keep its README's images inside **one `<div>` with no blank lines in it**: GitHub's Markdown
+parser otherwise splits the `<picture>` tags apart, which breaks the light/dark switch and the two-per-row layout.
 
 ```html
-<a href="https://github.com/WhyFenceCode/personal-site"><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/personal-site-dark.svg">
-  <img alt="Personal site" src="assets/personal-site-light.svg" width="49%">
-</picture></a>
-<a href="https://github.com/WhyFenceCode/extracurricular-api"><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/extracurricular-api-dark.svg">
-  <img alt="Extracurricular API" src="assets/extracurricular-api-light.svg" width="49%">
-</picture></a>
+<div>
+<a href="https://torstenyoung.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/link-website-dark.svg"><img alt="Website" src="assets/link-website-light.svg"></picture></a>
+<a href="https://github.com/WhyFenceCode/personal-site"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/personal-site-dark.svg"><img alt="Personal site" src="assets/personal-site-light.svg" width="49%"></picture></a>
+</div>
 ```
 
 Re-copy them now and then so the stars and dates stay current.

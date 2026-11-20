@@ -24,7 +24,12 @@ const siteSchema = z.object({
     username: z.string().default(''),
     // Link cards for the GitHub profile README: /github/<repo>-light.svg and -dark.svg (pages/github/).
     cards: z.array(z.object({ repo: z.string(), title: z.string().optional(), description: z.string().optional() })).default([]),
-  }).default({ username: '', cards: [] }),
+    // The profile README's intro and the heading over the cards (/github/intro-*.svg), and its row of link pills
+    // (/github/link-<label>-*.svg), each pill its own image so each stays a link.
+    intro: z.string().default(''),
+    heading: z.string().default('Featured work'),
+    links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
+  }).default({ username: '', cards: [], intro: '', heading: 'Featured work', links: [] }),
   resume: z.object({ pdf: z.string().optional() }).default({}),
   features: z.object({
     loader: z.boolean().default(true),

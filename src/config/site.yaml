@@ -24,8 +24,19 @@ socials:
 
 github:
   username: "WhyFenceCode"              # your GitHub handle. Public contributions only. Empty = sample data.
-  # Link cards for your GitHub profile README, one per repo: /github/<repo>-light.svg and /github/<repo>-dark.svg.
-  # The description comes from GitHub unless you give one here. See docs/home-page/programming.md.
+  # Images for your GitHub profile README (github.com/WhyFenceCode/WhyFenceCode), each in -light and -dark versions.
+  # See docs/home-page/programming.md.
+  #   links → a row of pills under the banner, one image (and link) each: /github/link-<label>-light.svg
+  #   intro + heading → /github/intro-light.svg: the sentence, then the heading over the cards
+  #   cards → one per repo: /github/<repo>-light.svg (the description comes from GitHub unless you give one)
+  links:
+    - { label: Website, url: "https://torstenyoung.com" }
+    - { label: Projects, url: "https://torstenyoung.com/en/projects/" }
+    - { label: Blog, url: "https://torstenyoung.com/en/blog/" }
+    - { label: Photos, url: "https://photos.torstenyoung.com" }
+    - { label: LinkedIn, url: "https://www.linkedin.com/in/torsten-young/" }
+  intro: Engineering student at Queen's University in Kingston, Ontario. I do whatever I like with code.
+  heading: Featured work
   cards:
     - { repo: personal-site, title: Personal site, description: "The source of torstenyoung.com: Astro, React and Three.js, with ink and a 3D name." }
     - { repo: photo-site, title: Photo site, description: "The source of photos.torstenyoung.com, my photography." }
