@@ -20,8 +20,7 @@ const themes = [
   <div class="wrap">
     <PageHead title="GitHub" metaLeft="Profile preview" metaRight={`@${site.github.username}`} compact>
       <p class="mono muted gp-note">
-        <a class="link" href={href(lang, 'docs')}>← {t(lang, 'nav.docs')}</a> · The README at
-        <a class="link" href={profile} rel="noopener">{profile.replace('https://', '')}</a>, built from <code>github:</code> in
+        <a class="link" href={href(lang, 'docs')}>← {t(lang, 'nav.docs')}</a> · The README at <a class="link" href={profile} rel="noopener">{profile.replace('https://', '')}</a>, built from <code>github:</code> in
         <code>site.yaml</code>. Copy <a class="link" href="/github/README.md">README.md</a> and the images into the profile repo
         to update it (<a class="link" href={href(lang, 'docs/home-page/programming')}>how</a>).
       </p>
