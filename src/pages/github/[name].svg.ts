@@ -64,7 +64,9 @@ function lines(text: string, max: number, count = 2) {
 
 /* ---------- A repo card ---------- */
 async function card(cardCfg: Card, theme: Theme) {
-  const c = THEMES[theme], W = 600, H = 210, PAD = 28;
+  // M: a transparent margin around the card, so cards placed side by side and in rows (as images in a README,
+  // with nothing between them) get an even gap all round.
+  const c = THEMES[theme], W = 600, H = 210, PAD = 28, M = 10;
   const [owner, name] = repoPath(cardCfg.repo).split('/');
   const repo = await getRepo(`${owner}/${name}`);
   const title = cardCfg.title ?? repo?.name ?? cardCfg.repo;
@@ -74,7 +76,7 @@ async function card(cardCfg: Card, theme: Theme) {
   // The title fills the width when it's long, keeping its condensed look; short titles keep their natural size.
   const titleSize = 46, titleMax = W - PAD * 2;
   const fitTitle = title.length * titleSize * 0.5 > titleMax;
-  return `${svgOpen(W, H, `${title}: ${description}`)}
+  return `${svgOpen(W + 2 * M, H + 2 * M, `${title}: ${description}`)}
 <style>
 ${FONTS}
 .mono { font-family: "DM Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; fill: ${c.muted}; }
@@ -83,6 +85,7 @@ ${FONTS}
 .desc { font-family: "Bricolage", sans-serif; font-weight: 500; font-size: 17px; fill: ${c.muted}; }
 ${MOTION}
 </style>
+<g transform="translate(${M} ${M})">
 <rect x="0.75" y="0.75" width="${W - 1.5}" height="${H - 1.5}" rx="10" fill="${c.bg}" stroke="${c.line}" stroke-width="1.5"/>
 <g class="in">
   <rect x="${PAD}" y="${PAD + 1}" width="8" height="8" fill="${ACCENT}"/>
@@ -92,6 +95,7 @@ ${MOTION}
   ${lines(description, 58).map((l, i) => `<text class="desc" x="${PAD}" y="${PAD + 96 + i * 22}">${esc(l)}</text>`).join('\n  ')}
   <line x1="${PAD}" y1="${H - PAD - 18}" x2="${W - PAD}" y2="${H - PAD - 18}" stroke="${c.line}" stroke-width="1"/>
   <text class="mono" x="${PAD}" y="${H - PAD + 2}">${meta.map(esc).join('  ·  ')}</text>
+</g>
 </g>
 </svg>`;
 }

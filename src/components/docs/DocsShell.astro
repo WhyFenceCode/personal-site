@@ -1,0 +1,25 @@
+---
+/* The docs layout under a page's title: the docs sidebar on the left, the page on the right. Used by every docs page,
+   the brand kit and the GitHub profile preview, so they all share one sidebar.
+   bleed: the right column runs to the screen's edge (for pages made of full-width bands, like the brand kit). */
+import DocsNav from './DocsNav.astro';
+import type { Lang } from '../../lib/i18n';
+
+interface Props { lang: Lang; current: string; bleed?: boolean }
+const { lang, current, bleed = false } = Astro.props;
+---
+<div class:list={['docs-shell', { bleed }]}>
+  <DocsNav lang={lang} current={current} />
+  <div class="docs-main"><slot /></div>
+</div>
+
+<style>
+  .docs-shell { display: grid; grid-template-columns: minmax(0, 250px) minmax(0, 1fr); gap: 48px; padding: 48px var(--gutter-r) 112px var(--gutter); }
+  .docs-main { min-width: 0; }
+  .docs-shell.bleed { padding-right: 0; padding-bottom: 0; gap: 40px; }
+  @media (max-width: 760px) {
+    .docs-shell { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .docs-shell.bleed { padding-left: 0; }
+    .docs-shell.bleed > :global(.docs-nav) { padding-inline: var(--gutter) var(--gutter-r); }
+  }
+</style>

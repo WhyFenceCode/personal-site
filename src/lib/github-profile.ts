@@ -32,7 +32,7 @@ export function readmeHtml({ src, banner = src, theme }: { src: string; banner?:
   return [
     '<div>',
     `<a href="${site.url}">${img(banner, 'banner', tagline, '100%')}</a>`,
-    '<br>',
+    '<br><br>', // a line of space between the banner and the pills
     ...gh.links.map((l) => `<a href="${esc(l.url)}">${img(src, `link-${linkSlug(l.label)}`, l.label)}</a>`),
     ...(gh.intro || gh.heading ? ['<br><br>', img(src, 'intro', [gh.intro, gh.heading].filter(Boolean).join(' '), '100%'), '<br><br>'] : []),
     ...gh.cards.map((c) => `<a href="https://github.com/${repoPath(c.repo)}">${img(src, cardName(c.repo), `${c.title ?? cardName(c.repo)}${c.description ? `: ${c.description}` : ''}`, '49%')}</a>`),

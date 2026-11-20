@@ -8,6 +8,7 @@ import ContactButton from '../../../components/ui/ContactButton.astro';
 import HeadingText from '../../../components/ui/HeadingText.astro';
 import Signature from '../../../components/ui/Signature.astro';
 import DoDont from '../../../components/brand/DoDont.astro';
+import DocsShell from '../../../components/docs/DocsShell.astro';
 import { site } from '../../../lib/config';
 import { langStaticPaths, t, href } from '../../../lib/i18n';
 // The script face is normally only baked into SVG; here it's shown as live text in the specimens.
@@ -105,6 +106,9 @@ const motion = [
       <p class="mono muted bk-docs"><a class="link" href={href(lang, 'docs')}>← {t(lang, 'nav.docs')}</a> · how to run and edit the site</p>
     </PageHead>
   </div>
+
+  {/* The docs sidebar on the left; the brand kit's bands fill the column beside it, out to the screen's edge. */}
+  <DocsShell lang={lang} current={href(lang, 'brand')} bleed>
 
   {/* Contents */}
   <nav class="wrap bk-toc" aria-label="Brand kit contents">
@@ -866,11 +870,15 @@ body     { font: 400 17px/1.55 var(--font-sans); }`}</code></pre>
       </div>
     </div>
   </section>
+  </DocsShell>
 </Base>
 
 <style>
   /* Contents */
-  .bk-toc { padding-block: 28px 56px; }
+  .bk-toc { padding-block: 0 40px; }
+  /* Beside the docs sidebar, each band is a block with rounded inner corners. */
+  .bk-sec { border-radius: 10px 0 0 10px; }
+  @media (max-width: 760px) { .bk-sec { border-radius: 0; } }
   .bk-toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 24px; }
   .bk-toc a { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; font-family: var(--font-display); font-weight: 700; font-stretch: 85%; text-transform: uppercase; font-size: 20px; letter-spacing: -.01em; transition: padding .4s var(--ease); }
   .bk-toc a:hover { padding-left: 8px; }

@@ -4,6 +4,7 @@
    once its files are updated. Part of the docs: not indexed, not in the sitemap. */
 import Base from '../../../layouts/Base.astro';
 import PageHead from '../../../components/PageHead.astro';
+import DocsShell from '../../../components/docs/DocsShell.astro';
 import { readmeHtml } from '../../../lib/github-profile';
 import { site } from '../../../lib/config';
 import { langStaticPaths, t, href } from '../../../lib/i18n';
@@ -25,18 +26,19 @@ const themes = [
         to update it (<a class="link" href={href(lang, 'docs/home-page/programming')}>how</a>).
       </p>
     </PageHead>
+  </div>
+  <DocsShell lang={lang} current={href(lang, 'docs/github-preview')}>
     <div class="gp" role="group" aria-label="Preview">
       <div class="gp-tabs" role="tablist" aria-label="GitHub theme">
         {themes.map((th, i) => <button type="button" role="tab" class="mono" aria-selected={i === 0 ? 'true' : 'false'} aria-controls={`gp-${th.id}`} data-gp-tab={th.id}>{th.name}</button>)}
       </div>
       {themes.map((th, i) => (
-        <section class={`gp-page gp-${th.id}`} id={`gp-${th.id}`} role="tabpanel" aria-label={`${th.name} theme`} hidden={i !== 0}>
+        <section class={`gp-page gp-${th.id} tone-${th.id}`} id={`gp-${th.id}`} role="tabpanel" aria-label={`${th.name} theme`} hidden={i !== 0}>
           <div class="gp-readme"><Fragment set:html={th.html} /></div>
         </section>
       ))}
     </div>
-  </div>
-  <div class="section"></div>
+  </DocsShell>
 </Base>
 
 <script>
@@ -54,17 +56,14 @@ const themes = [
 
 <style>
   .gp-note { margin: 0; text-transform: none; letter-spacing: .04em; font-size: 13px; line-height: 1.6; max-width: 90ch; }
-  .gp { padding-block: 40px 0; display: grid; gap: 16px; }
+  .gp { display: grid; gap: 16px; }
   .gp-tabs { display: flex; gap: 8px; }
   .gp-tabs button { background: none; color: inherit; border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
   .gp-tabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-  /* GitHub's own page colours and README width, so the images sit as they will there. */
-  .gp-page { border-radius: 10px; padding: clamp(16px, 3vw, 40px); }
-  .gp-dark { background: #0d1117; }
-  .gp-light { background: #ffffff; border: 1px solid #d0d7de; }
-  .gp-readme { max-width: 1012px; margin: 0 auto; padding: clamp(16px, 2.5vw, 32px); border-radius: 6px; }
-  .gp-dark .gp-readme { border: 1px solid #30363d; }
-  .gp-light .gp-readme { border: 1px solid #d0d7de; }
+  /* The site's own dark and light tones, at GitHub's README width, so the images sit at the size they'll have there. */
+  .gp-page { border-radius: 10px; padding: clamp(20px, 3.5vw, 48px); background: var(--bg); }
+  .gp-light { border: 1.5px solid var(--line); }
+  .gp-readme { max-width: 980px; margin: 0 auto; }
   /* GitHub shows images inline (the site's reset makes them blocks), so the pills form a row and the cards pair up. */
   .gp-readme :global(img) { display: inline; max-width: 100%; height: auto; vertical-align: middle; }
   .gp-readme :global(picture) { display: inline; }
