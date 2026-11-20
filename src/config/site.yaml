@@ -24,6 +24,13 @@ socials:
 
 github:
   username: "WhyFenceCode"              # your GitHub handle. Public contributions only. Empty = sample data.
+  # Link cards for your GitHub profile README, one per repo: /github/<repo>-light.svg and /github/<repo>-dark.svg.
+  # The description comes from GitHub unless you give one here. See docs/home-page/programming.md.
+  cards:
+    - { repo: personal-site, title: Personal site, description: "The source of torstenyoung.com: Astro, React and Three.js, with ink and a 3D name." }
+    - { repo: photo-site, title: Photo site, description: "The source of photos.torstenyoung.com, my photography." }
+    - { repo: extracurricular-api, title: Extracurricular API }
+    - { repo: casthub, title: Cast Hub }
 
 resume:
   pdf: "/resume_torstenyoung.pdf"                  # e.g. /resume.pdf (file in /public) or a full URL. Empty hides the download buttons.

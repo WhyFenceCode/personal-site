@@ -62,7 +62,7 @@ function setup(rv: HTMLElement) {
   // Narrow: the tree folds behind a button. Wide: always shown.
   const setOpen = (on: boolean) => { toggle.setAttribute('aria-expanded', String(on)); rv.classList.toggle('rv-tree-open', on); };
   toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
-  const fit = () => { const narrow = rv.clientWidth < 720; rv.classList.toggle('rv-narrow', narrow); toggle.hidden = !narrow; if (!narrow) setOpen(false); };
+  const fit = () => { const narrow = rv.clientWidth < 600; rv.classList.toggle('rv-narrow', narrow); toggle.hidden = !narrow; if (!narrow) setOpen(false); };
   new ResizeObserver(fit).observe(rv); fit();
 }
 

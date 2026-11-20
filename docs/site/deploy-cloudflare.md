@@ -43,7 +43,12 @@ rebuild uses.)
    record. Repeat for `www.torstenyoung.com`.
 3. Send `www` to the bare domain: **Rules → Redirect Rules → Create rule → template "Redirect from WWW to root"**,
    status 301.
-4. **SSL/TLS → Edge Certificates**: turn on **Always Use HTTPS**. Turn on **HSTS** only once everything works
+4. **Turn off Email Address Obfuscation**: the domain → **Security → Settings** (on older dashboards **Scrape
+   Shield**) → **Email Address Obfuscation** → Off. It rewrites every address to "[email protected]" and relies on a
+   Cloudflare script to restore it, which doesn't run when this site changes pages without reloading. The pages also
+   carry `<!--email_off-->` markers that tell it to stay away, but switching it off is the reliable fix (and it's one
+   less script Cloudflare adds to the site).
+5. **SSL/TLS → Edge Certificates**: turn on **Always Use HTTPS**. Turn on **HSTS** only once everything works
    over HTTPS (it's hard to undo), with max-age 6 months and no preload.
 
 `site.yaml` already has `url: https://torstenyoung.com`, which the canonical links, legal pages and the
@@ -78,4 +83,5 @@ live-preview check use. If you ever use a different domain, change it there.
 | Build fails on Node version | Set `NODE_VERSION` to `24` |
 | `[check-secrets]` fails | A secret value ended up in the output. Find it in the log message, remove it, rotate that secret |
 | Photo-site frame says "refused to connect" | You're on a `*.pages.dev` address. Use torstenyoung.com, or add the pages.dev address to the photo site's `frame-ancestors` |
+| Addresses show as "[email protected]" | Email Address Obfuscation is on (step 3.4). Turn it off; it clears on the next visit |
 | Old content after a push | Wait for the deploy to finish; hard-refresh. The `/_astro/` files are cached, but their names change with each build |

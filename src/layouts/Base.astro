@@ -113,6 +113,10 @@ const canonical = new URL(Astro.props.canonical ?? Astro.url.pathname, Astro.sit
     data-loader={String(site.features.loader)}
     data-ink={site.theme.ink}
   >
+    {/* Cloudflare's Email Address Obfuscation rewrites addresses to "[email protected]" and needs its own script to
+        put them back, which never runs after this site's in-page navigation. These markers tell it to leave the page
+        alone (also switch it off in the dashboard: docs/site/deploy-cloudflare.md). */}
+    <Fragment set:html="<!--email_off-->" />
     <a class="skip-link" href="#main">{t(lang, 'nav.skip')}</a>
     {site.features.loader && <Loader lang={lang} />}
     <canvas id="flood" aria-hidden="true" transition:persist></canvas>
@@ -148,6 +152,7 @@ const canonical = new URL(Astro.props.canonical ?? Astro.url.pathname, Astro.sit
     <script>
       import '../scripts/site';
     </script>
+    <Fragment set:html="<!--/email_off-->" />
   </body>
 </html>
 

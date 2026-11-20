@@ -37,3 +37,34 @@ GitHub's unauthenticated API allows 60 requests an hour per IP. This block uses 
 
 ## Not to be confused with
 The **code viewer** shows one repository's files on a project page or in a post: [embeds.md](../writing/embeds.md).
+
+## Repo cards for your GitHub profile
+The site also draws link cards for your key repositories, in its own style, for the profile README
+(github.com/WhyFenceCode/WhyFenceCode). Pick the repos in `site.yaml`:
+
+```yaml
+github:
+  cards:
+    - { repo: personal-site, title: Personal site, description: "…" }   # title and description are optional
+    - { repo: extracurricular-api, title: Extracurricular API }
+```
+
+Each becomes `/github/<repo>-light.svg` and `/github/<repo>-dark.svg`, with the language, stars and last update taken
+from GitHub when the site builds. Like the banner, GitHub needs the files in the profile repo itself:
+
+1. Run `pnpm build` (or `pnpm dev`) and save each card from `dist/github/` (or `http://localhost:4321/github/…`) into
+   the profile repo's `assets/` folder.
+2. In its README, two cards per row, each a link to its repo:
+
+```html
+<a href="https://github.com/WhyFenceCode/personal-site"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/personal-site-dark.svg">
+  <img alt="Personal site" src="assets/personal-site-light.svg" width="49%">
+</picture></a>
+<a href="https://github.com/WhyFenceCode/extracurricular-api"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/extracurricular-api-dark.svg">
+  <img alt="Extracurricular API" src="assets/extracurricular-api-light.svg" width="49%">
+</picture></a>
+```
+
+Re-copy them now and then so the stars and dates stay current.

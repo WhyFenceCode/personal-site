@@ -8,16 +8,24 @@ const lang = defaultLang;
   {/* An address without a language (/build, /resume…) is sent on to the visitor's language before this shows. */}
   <LangRedirect inline />
   <div class="wrap nf">
-    <p class="stat code">404</p>
-    <h1 class="display"><span class="fit">{t(lang, 'notFound.title')}</span></h1>
+    {/* The number is the headline, fitted to the width with the accent ring like the other page titles; "Lost." under it. */}
+    <h1 class="nf-title display" id="page-title" tabindex="-1">
+      <span class="fit" data-text="404">404</span>
+      <span class="sr-only"> {t(lang, 'notFound.title')}</span>
+    </h1>
+    <p class="nf-sub" aria-hidden="true">{t(lang, 'notFound.title')}</p>
     <p class="lead">{t(lang, 'notFound.body')}</p>
     <a class="btn" href={href(lang, 'home')}>{t(lang, 'notFound.back')}</a>
   </div>
 </Base>
 
 <style>
-  .nf { padding-block: 64px 120px; display: grid; gap: 24px; justify-items: start; }
-  .code { font-size: 32px; margin: 0; }
-  h1 { margin: 0; width: 100%; }
-  .lead { font-size: 22px; margin: 0; }
+  .nf { padding-block: clamp(24px, 5vw, 64px) 120px; display: grid; gap: 24px; justify-items: start; }
+  .nf-title { margin: 0; width: 100%; --ring-gap: clamp(3px, .03em, 7px); --ring-w: clamp(1.5px, .012em, 3px); }
+  .nf-title .fit { position: relative; isolation: isolate; }
+  .nf-title .fit::before, .nf-title .fit::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; }
+  .nf-title .fit::before { z-index: -2; color: var(--accent); -webkit-text-stroke: calc(2 * (var(--ring-gap) + var(--ring-w))) var(--accent); }
+  .nf-title .fit::after { z-index: -1; color: var(--bg); -webkit-text-stroke: calc(2 * var(--ring-gap)) var(--bg); }
+  .nf-sub { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: -.02em; line-height: .9; font-size: clamp(44px, 7vw, 112px); }
+  .lead { font-size: 22px; margin: 0; max-width: 34ch; }
 </style>

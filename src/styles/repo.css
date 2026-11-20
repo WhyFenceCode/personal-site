@@ -93,7 +93,7 @@
 
 .rv-missing { display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1.5px solid var(--line); border-radius: 999px; }
 
-/* Narrow (set by the script when the viewer is under 720px wide): the tree folds away above the file. */
+/* Narrow (set by the script when the viewer is under 600px wide): the tree folds away above the file. */
 .rv-narrow .rv-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); height: min(640px, 82svh); }
 .rv-narrow .rv-tree { border-right: 0; border-bottom: 1.5px solid var(--rv-line); }
 .rv-narrow .rv-tree-in { display: none; max-height: 46svh; }

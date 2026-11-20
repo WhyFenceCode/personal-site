@@ -57,10 +57,10 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
     </header>
 
     {/* The big window only for a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
-    {/* The wide window under the title (showcase in the frontmatter): the site, its repository, or nothing. The site
-        frame needs a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
+    {/* What's under the title (showcase in the frontmatter): the site in a wide frame, its repository (in the right
+        column, beside the facts), or nothing. The site frame needs a real screenshot/cover or the live site;
+        placeholder art alone isn't worth the space. */}
     {showcase === 'site' && (cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} tablet={tablet} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
-    {showcase === 'repo' && <div class="case-showcase"><RepoViewer repo={d.repo} /></div>}
     <div class="case-body" id="case-body">
       <aside class="facts">
         <dl>
@@ -70,6 +70,8 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
         </dl>
       </aside>
       <div class="main">
+        {/* Shorter than the screen, so the story starts just above the fold. */}
+        {showcase === 'repo' && <div class="case-showcase"><RepoViewer repo={d.repo!} /></div>}
         {d.metrics.length > 0 && (
           <ul class="metrics">
             {d.metrics.map((m) => <li><span class="stat">{m.value}</span><span class="muted">{m.label}</span></li>)}
@@ -146,7 +148,11 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
   /* Sub-sections (### in Markdown): clearly a step below the h2, but still above the body text. */
   .case-prose :global(h3) { font-family: var(--font-display); font-weight: 700; font-stretch: 90%; letter-spacing: -.02em; font-size: clamp(22px, 1.8vw, 27px); line-height: 1.1; margin: 36px 0 10px; }
   .case-prose { max-width: 62ch; }
+  .case-showcase { margin-bottom: clamp(40px, 5vw, 64px); }
   .case-showcase :global(.rv) { margin: 0; }
+  /* The file area takes what's left of the screen after the header, the viewer's own header and a margin, so the whole
+     viewer ends above the fold and the story peeks out under it. */
+  .case-showcase :global(.rv-body), .case-showcase :global(.rv-narrow .rv-body) { height: clamp(280px, calc(100svh - var(--header-h) - 360px), 520px); }
   /* Images and embeds placed in the case study get the full text width. */
   .case-prose :global(img) { max-width: 100%; height: auto; border-radius: 4px; }
   .case-prose :global(h2) { margin-top: 56px; }

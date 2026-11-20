@@ -20,7 +20,11 @@ const siteSchema = z.object({
   location: z.object({ city: z.string(), previous: z.string().default(''), region: z.string().default(''), country: z.string().default(''), timezone: z.string().default('auto') }),
   languages: z.array(z.string()).min(1),
   socials: z.array(link).default([]),
-  github: z.object({ username: z.string().default('') }).default({ username: '' }),
+  github: z.object({
+    username: z.string().default(''),
+    // Link cards for the GitHub profile README: /github/<repo>-light.svg and -dark.svg (pages/github/).
+    cards: z.array(z.object({ repo: z.string(), title: z.string().optional(), description: z.string().optional() })).default([]),
+  }).default({ username: '', cards: [] }),
   resume: z.object({ pdf: z.string().optional() }).default({}),
   features: z.object({
     loader: z.boolean().default(true),
