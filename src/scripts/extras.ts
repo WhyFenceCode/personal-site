@@ -11,6 +11,7 @@
  *   wind       marquee words lean with scroll speed
  */
 import { motionOn, onMotion } from './motion';
+import { isSmallJump, wasSmallJump } from './jumps';
 
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
 const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll<T>(s)];
@@ -86,13 +87,14 @@ addEventListener('pointermove', (e) => {
 
 /* ---------- 3D page tilt ---------- */
 const transitionsOn = () => document.body.dataset.transitions === 'true' && motionOn() && on('pageTilt');
-document.addEventListener('astro:before-preparation', () => {
-  if (!transitionsOn()) return;
+// No tilt between pages of the same section (docs, legal): those swap straight away (scripts/jumps.ts).
+document.addEventListener('astro:before-preparation', (ev: any) => {
+  if (!transitionsOn() || isSmallJump(ev.from, ev.to)) return;
   $('#main')?.animate([{ transform: 'none' }, { transform: 'perspective(1400px) rotateX(-5deg) translateY(-30px) scale(.97)', opacity: 0.6 }],
     { duration: 420, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
 });
 document.addEventListener('astro:after-swap', () => {
-  if (!transitionsOn()) return;
+  if (!transitionsOn() || wasSmallJump()) return;
   $('#main')?.animate([{ transform: 'perspective(1400px) rotateX(7deg) translateY(60px) scale(.97)', opacity: 0.4, transformOrigin: '50% 0' }, { transform: 'none', opacity: 1, transformOrigin: '50% 0' }],
     { duration: 950, easing: 'cubic-bezier(.2,.7,.1,1)' });
 });

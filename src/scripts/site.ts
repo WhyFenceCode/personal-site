@@ -8,6 +8,7 @@ import { motionOn, setMotion, onMotion } from './motion';
 import { differenceInk } from './gl';
 import './repo'; // GitHub repo viewers in projects and posts
 import './frame'; // browser frames around websites, in projects and posts
+import { isSmallJump } from './jumps';
 import { paintArt } from './art';
 import { initCards } from './cards';
 import './extras';
@@ -144,7 +145,8 @@ addEventListener('pointerdown', (e) => (lastClick = [e.clientX, e.clientY]), tru
 const transitionsOn = () => document.body.dataset.transitions === 'true' && motionOn();
 document.addEventListener('astro:before-preparation', (ev: any) => {
   closeMenu(false);
-  if (!transitionsOn()) return;
+  // Between pages of the same section (docs, legal) the page just swaps: no ink (scripts/jumps.ts).
+  if (isSmallJump(ev.from, ev.to) || !transitionsOn()) return;
   const load = ev.loader;
   ev.loader = async () => { covered = true; await Promise.all([flood('cover', lastClick[0], lastClick[1], 560), load()]); };
 });
