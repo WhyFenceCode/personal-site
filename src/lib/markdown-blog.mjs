@@ -13,8 +13,8 @@
  *   Every h2–h4 gets a small "#" link to itself, so any section can be linked to.
  *   Ids come from Astro's rehypeHeadingIds, which runs between the two steps (see astro.config.mjs).
  *
- * Images need nothing special: ![alt](./photo.jpg) next to the post is optimised by Astro, /photo.jpg comes from
- * public/, and full https:// addresses are used as they are.
+ * Images: ![alt](./photo.jpg) next to the post is optimised by Astro and /photo.jpg comes from public/. Images from other
+ * websites stop the build (remarkSiteLinks), so reading a post never contacts another company.
  */
 import { posix, relative } from 'node:path';
 
@@ -45,6 +45,11 @@ export function remarkSiteLinks({ lang = 'en', repo = '' } = {}) {
     const blog = blogFile(file), doc = blog ? null : docsFile(file);
     if (!blog && !doc) return;
     visit(tree, (node) => {
+      // The privacy policy promises that reading a page contacts no other company, so posts can't load images from
+      // other sites. Save the image next to the post instead.
+      if (blog && (node.type === 'image' || node.type === 'html') && /(^|src=["'])(https?:)?\/\//i.test(node.url ?? node.value ?? '')) {
+        throw new Error(`[blog] ${blog}: images from other websites aren't allowed (${(node.url ?? '').slice(0, 80) || 'an <img> tag'}). Download the image, put it next to the post and use ./name.jpg. See docs/guides/blog.md.`);
+      }
       if (node.type !== 'link' || typeof node.url !== 'string') return;
       if (/^([a-z]+:|#|\/)/i.test(node.url)) return; // absolute, mailto, in-page or site-root links stay
       const [path, hash = ''] = node.url.split(/(?=#)/);

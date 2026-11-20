@@ -29,9 +29,10 @@ Postal address: {{address}}
 **Statistics.** {{analytics}}
 
 ## 3. What this site does not do
-No accounts, no forms, no advertising, no tracking cookies, and no selling, renting or sharing of personal
-information. All fonts, scripts and 3D graphics are served from this website itself, so loading a page does not
-contact any other company, unless you choose to load another website's live preview on a project page (see section 4).
+No accounts, no forms, no comments, no newsletter, no advertising, no tracking cookies, and no selling, renting or
+sharing of personal information. All fonts, scripts, images and 3D graphics are served from this website itself,
+including the images in blog posts, so loading a page does not contact any other company, unless you choose to load
+another website's live preview on a project page (see section 4).
 
 ## 4. Other parties
 - **Hosting.** The site is served by {{hosting}}, which processes server logs on the site's behalf. Its servers
@@ -41,6 +42,10 @@ contact any other company, unless you choose to load another website's live prev
   connects to it directly: it receives your IP address, browser type and the fact that you viewed it (with this
   site as the referring address), and it may set its own cookies or storage. That website's own privacy and
   cookie policies apply. Websites that can be shown this way: **{{embeds}}**.
+- **Blog and documentation.** Blog posts and the documentation pages are ordinary pages of this site. Reading them
+  is logged like any other page (section 2), and nothing else is recorded: there is no read tracking, no comments
+  and no sign-up. Links from the documentation to the site's source code go to GitHub, whose own policy applies
+  once you follow one.
 - **Links.** Links to other websites open in a new tab. Their own privacy policies apply.
 - **Content shown on this site** (GitHub activity, map locations) is fetched by the build
   server when the site is published, not by your browser. No information about visitors is sent to those services.

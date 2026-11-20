@@ -19,7 +19,8 @@ function ensure() {
           // Smooth: the bulge depends only on the direction from the centre, so the edge is one clean rolling curve
           // that can't fold back on itself into notches.
           float n = inkWob(normalize(frag - uO + vec2(1e-4)) * .95, uT);
-          float edge = uR * (1. + .4 * (n - .5)) + (n - .5) * 56.;
+          // The fixed part of the wobble grows in with the radius, so a small blob is never cut by straight lines.
+          float edge = uR * (1. + .4 * (n - .5)) + (n - .5) * 56. * smoothstep(0., 160., uR);
         #endif
           float a = 1. - smoothstep(edge - 1.5, edge + 1.5, d); if (uMode > .5) a = 1. - a;
           // A thin accent rim along the ink's edge as it spreads.
@@ -35,7 +36,11 @@ function ensure() {
 function size() {
   if (!cv) return;
   const d = Math.min(devicePixelRatio || 1, 1.5);
-  cv.width = Math.max(1, Math.round(innerWidth * d)); cv.height = Math.max(1, Math.round(innerHeight * d));
+  const w = Math.max(1, Math.round(innerWidth * d)), h = Math.max(1, Math.round(innerHeight * d));
+  // Setting a canvas's size wipes it, even to the size it already has. Between a cover and the reveal that follows
+  // it, that left one blank frame: the page flashed through, and the reveal then looked like it played twice.
+  if (cv.width !== w) cv.width = w;
+  if (cv.height !== h) cv.height = h;
 }
 
 let accent: [number, number, number] | null = null;
@@ -53,7 +58,8 @@ export function floodDraw(mode: 'cover' | 'reveal', r: number, ox: number, oy: n
   if (cv.width < 2) size();
   const d = cv.width / Math.max(1, innerWidth);
   G.set2('uRes', cv.width, cv.height); G.set2('uO', ox * d, (innerHeight - oy) * d);
-  G.set1('uR', r * d); G.set1('uT', (performance.now() / 1000) % 600); // kept small: big numbers lose precision on the GPU G.set1('uMode', mode === 'reveal' ? 1 : 0);
+  // The clock is kept small (wrapped every 10 minutes): big numbers lose precision on the GPU and tear the edge.
+  G.set1('uR', r * d); G.set1('uT', (performance.now() / 1000) % 600); G.set1('uMode', mode === 'reveal' ? 1 : 0);
   G.set3('uAccent', ...accentRGB()); G.set1('uRim', document.documentElement.dataset.page === 'build' ? 0 : 1); G.draw();
 }
 

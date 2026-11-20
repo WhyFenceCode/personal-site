@@ -62,9 +62,12 @@ every heading moves down one level automatically. Each section:
 | --- | --- |
 | `![The hull](./hull.jpg)` | Next to the post (use the folder layout). Resized and converted automatically. |
 | `![Logo](/logo.svg)` | In `public/` |
-| `![Chart](https://example.com/chart.png)` | Anywhere on the web, used as it is |
 
 Always write the alt text (the part in square brackets). Photos show in greyscale, per the brand kit.
+
+Images from other websites (`https://…`) aren't allowed: the build stops and says which one. Loading them would
+send visitors' details to that website, which the privacy policy promises never happens. Download the image and put
+it next to the post instead.
 
 ### Links
 

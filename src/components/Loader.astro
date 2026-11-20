@@ -56,7 +56,7 @@ const welcome = t(lang, 'loader.welcome', { host: new URL(site.url).host, name: 
   /* Console style: a terminal line across the middle of the screen with a solid block cursor. */
   .ld-term { align-self: center; display: grid; gap: 20px; }
   /* One line, sized so the whole welcome (prompt + text + cursor, --len characters) fits across the screen. */
-  .ld-line { margin: 0; font-family: var(--font-mono); font-weight: 500; white-space: nowrap; font-size: min(92px, 5.4vw, calc((100vw - var(--gutter) - var(--gutter-r)) / (var(--len, 30) * .62))); line-height: 1.1; letter-spacing: -.02em; }
+  .ld-line { margin: 0; font-family: var(--font-mono); font-weight: 500; white-space: nowrap; font-size: min(92px, 5.4vw, calc((100vw - var(--gutter) - var(--gutter-r)) / (var(--len, 30) * .68))); line-height: 1.1; letter-spacing: -.02em; }
   .ld-prompt { margin-right: .5em; opacity: .45; }
   .ld-caret { display: inline-block; width: .58em; height: .95em; margin-left: .06em; vertical-align: -.12em; background: currentColor; }
   .ld-caret.blink { animation: ld-blink 1s steps(1) infinite; }

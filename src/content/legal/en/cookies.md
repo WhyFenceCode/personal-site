@@ -10,7 +10,8 @@ This site sets no cookies. A few preferences are kept in your browser's local st
 | `site.motion` | Whether you turned motion off | Until you clear it |
 | `site.consent` | Your statistics choice (only if consent is asked for) | Until you clear it |
 
-None of these are sent anywhere.
+None of these are sent anywhere. The intro animation, the blog and the documentation pages store nothing at all;
+the intro plays again on each fresh visit because it remembers nothing between visits.
 
 ## Embedded project websites
 Some project pages can show the project's real website inside a frame on the page ({{embeds}}). Nothing

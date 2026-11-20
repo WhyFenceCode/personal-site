@@ -48,7 +48,7 @@ Put the image next to the post and link it with a relative path. It's resized an
 
 ![This site on a tablet](./phone.jpg)
 
-Images in `public/` work too, with a path from the site root: `![Logo](/favicon.svg)`. Full `https://` addresses are used as they are. Photos are shown in greyscale, as the brand kit asks.
+Images in `public/` work too, with a path from the site root: `![Logo](/favicon.svg)`. Images from other websites (`https://…`) stop the build, because loading them would tell that website who is reading: download them instead. Photos are shown in greyscale, as the brand kit asks.
 
 # Links
 
