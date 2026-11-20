@@ -20,6 +20,9 @@ const i = all.findIndex((p) => slugOf(p.id) === slug);
 const p = all[i], next = all[(i + 1) % all.length];
 const { Content, headings } = await render(p);
 const d = p.data;
+// What fills the window under the title. Anything unrecognised (or missing, e.g. data cached by an older dev server)
+// means the site frame, so a project never silently loses its preview.
+const showcase = d.showcase === 'repo' && d.repo ? 'repo' : d.showcase === 'none' ? 'none' : 'site';
 const cover = coverFor(p), tablet = tabletFor(p);
 // Embed whenever the real domain is allowed to frame the site. In dev the page runs on localhost, which the
 // other site may not allow; then a note says so instead of leaving an unexplained "refused to connect".
@@ -56,8 +59,8 @@ const firstHeading = headings.find((h) => h.depth === 2)?.text;
     {/* The big window only for a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
     {/* The wide window under the title (showcase in the frontmatter): the site, its repository, or nothing. The site
         frame needs a real screenshot/cover or the live site; placeholder art alone isn't worth the space. */}
-    {d.showcase === 'site' && (cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} tablet={tablet} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
-    {d.showcase === 'repo' && d.repo && <div class="case-showcase"><RepoViewer repo={d.repo} /></div>}
+    {showcase === 'site' && (cover || interactive) && <BrowserFrame lang={lang} title={d.title} live={d.live} cover={cover} tablet={tablet} art={d.art} interactive={interactive} devBlocked={devBlocked} />}
+    {showcase === 'repo' && <div class="case-showcase"><RepoViewer repo={d.repo} /></div>}
     <div class="case-body" id="case-body">
       <aside class="facts">
         <dl>
